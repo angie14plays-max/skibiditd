@@ -1,38 +1,42 @@
-const units = Object.keys(unitDatabase).map(key => {
-  const u = unitDatabase[key];
-  return { name: u.name, value: parseInt(u.baseStats.value) };
-});
-
-const yourSelect = document.getElementById("yourUnit");
-const theirSelect = document.getElementById("theirUnit");
+const giveSelect = document.getElementById("give");
+const getSelect = document.getElementById("get");
 const result = document.getElementById("result");
 
-units.forEach(u => {
-  const opt1 = new Option(`${u.name} (${u.value})`, u.value);
-  const opt2 = new Option(`${u.name} (${u.value})`, u.value);
-  yourSelect.add(opt1);
-  theirSelect.add(opt2);
+// Load units from your existing data file
+Object.values(unitDatabase).forEach(unit => {
+  const value = Number(unit.baseStats.value);
+  if (!value) return;
+
+  const option1 = document.createElement("option");
+  option1.value = value;
+  option1.textContent = `${unit.name} (${value})`;
+
+  const option2 = option1.cloneNode(true);
+
+  giveSelect.appendChild(option1);
+  getSelect.appendChild(option2);
 });
 
-function calculateTrade() {
-  const yours = Number(yourSelect.value);
-  const theirs = Number(theirSelect.value);
+function checkTrade() {
+  const giveValue = Number(giveSelect.value);
+  const getValue = Number(getSelect.value);
 
-  if (!yours || !theirs) {
-    result.textContent = "Select both units first.";
-    result.style.color = "#fff";
+  if (!giveValue || !getValue) {
+    result.textContent = "Select both units";
+    result.style.color = "white";
     return;
   }
 
-  const diff = yours - theirs;
+  const diff = getValue - giveValue;
+
   if (diff === 0) {
-    result.textContent = "⚖️ Fair Trade";
+    result.textContent = "⚖️ FAIR TRADE";
     result.style.color = "#facc15";
   } else if (diff > 0) {
-    result.textContent = "✅ Overpay (+ " + diff + ")";
+    result.textContent = `✅ OVERPAY (+${diff})`;
     result.style.color = "#22c55e";
   } else {
-    result.textContent = "❌ Underpay (" + diff + ")";
+    result.textContent = `❌ UNDERPAY (${diff})`;
     result.style.color = "#ef4444";
   }
 }
