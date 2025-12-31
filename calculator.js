@@ -1,18 +1,38 @@
-function calculate() {
-  const gems = Number(document.getElementById("gems").value);
-  const minutes = Number(document.getElementById("minutes").value);
-  const target = Number(document.getElementById("target").value);
+const units = Object.keys(unitDatabase).map(key => {
+  const u = unitDatabase[key];
+  return { name: u.name, value: parseInt(u.baseStats.value) };
+});
 
-  if (!gems || !minutes || !target) {
-    document.getElementById("result").innerText = "Fill all fields";
+const yourSelect = document.getElementById("yourUnit");
+const theirSelect = document.getElementById("theirUnit");
+const result = document.getElementById("result");
+
+units.forEach(u => {
+  const opt1 = new Option(`${u.name} (${u.value})`, u.value);
+  const opt2 = new Option(`${u.name} (${u.value})`, u.value);
+  yourSelect.add(opt1);
+  theirSelect.add(opt2);
+});
+
+function calculateTrade() {
+  const yours = Number(yourSelect.value);
+  const theirs = Number(theirSelect.value);
+
+  if (!yours || !theirs) {
+    result.textContent = "Select both units first.";
+    result.style.color = "#fff";
     return;
   }
 
-  const runs = Math.ceil(target / gems);
-  const totalMinutes = runs * minutes;
-  const hours = Math.floor(totalMinutes / 60);
-  const mins = totalMinutes % 60;
-
-  document.getElementById("result").innerText =
-    `Runs needed: ${runs}\nTime: ${hours}h ${mins}m`;
+  const diff = yours - theirs;
+  if (diff === 0) {
+    result.textContent = "⚖️ Fair Trade";
+    result.style.color = "#facc15";
+  } else if (diff > 0) {
+    result.textContent = "✅ Overpay (+ " + diff + ")";
+    result.style.color = "#22c55e";
+  } else {
+    result.textContent = "❌ Underpay (" + diff + ")";
+    result.style.color = "#ef4444";
+  }
 }
