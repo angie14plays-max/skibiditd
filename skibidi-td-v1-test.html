@@ -15,9 +15,7 @@
       --border:#1f1f1f;
     }
 
-    * {
-      box-sizing:border-box;
-    }
+    * { box-sizing:border-box; }
 
     body {
       margin:0;
@@ -61,6 +59,7 @@
       border:1px solid #222;
       color:white;
       font-weight:700;
+      cursor:pointer;
     }
 
     .filters button.active {
@@ -112,6 +111,7 @@
       font-weight:900;
       font-size:16px;
       color:white;
+      cursor:pointer;
     }
   </style>
 </head>
@@ -122,14 +122,14 @@
 <input class="search" placeholder="Search unit..." id="search"/>
 
 <div class="filters">
-  <button class="active" onclick="filterRarity('ALL')">ALL</button>
-  <button onclick="filterRarity('ASTRAL')">ASTRAL</button>
-  <button onclick="filterRarity('COSMIC')">COSMIC</button>
-  <button onclick="filterRarity('DIVINE')">DIVINE</button>
-  <button onclick="filterRarity('GODLY')">GODLY</button>
-  <button onclick="filterRarity('EXCLUSIVE')">EXCLUSIVE</button>
-  <button onclick="filterRarity('MYTHIC')">MYTHIC</button>
-  <button onclick="filterRarity('LEGENDARY')">LEGENDARY</button>
+  <button class="active" onclick="filterRarity('ALL', this)">ALL</button>
+  <button onclick="filterRarity('ASTRAL', this)">ASTRAL</button>
+  <button onclick="filterRarity('COSMIC', this)">COSMIC</button>
+  <button onclick="filterRarity('DIVINE', this)">DIVINE</button>
+  <button onclick="filterRarity('GODLY', this)">GODLY</button>
+  <button onclick="filterRarity('EXCLUSIVE', this)">EXCLUSIVE</button>
+  <button onclick="filterRarity('MYTHIC', this)">MYTHIC</button>
+  <button onclick="filterRarity('LEGENDARY', this)">LEGENDARY</button>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -147,10 +147,10 @@ function openTradeCalculator() {
   window.location.href = "calculator.html";
 }
 
-function filterRarity(r) {
+function filterRarity(r, btn) {
   currentRarity = r;
-  document.querySelectorAll(".filters button").forEach(b=>b.classList.remove("active"));
-  event.target.classList.add("active");
+  document.querySelectorAll(".filters button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
   render();
 }
 
@@ -159,14 +159,14 @@ function render() {
   const search = document.getElementById("search").value.toLowerCase();
   grid.innerHTML = "";
 
-  Object.values(unitDatabase).forEach(u=>{
+  Object.values(unitDatabase).forEach(u => {
     if (currentRarity !== "ALL" && u.rarity !== currentRarity) return;
     if (!u.name.toLowerCase().includes(search)) return;
 
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
-      <img src="${u.image}">
+      <img src="${u.image}" alt="${u.name}">
       <div class="name">${u.name}</div>
       <div class="value">${u.baseStats.value}</div>
     `;
@@ -174,12 +174,9 @@ function render() {
   });
 }
 
-document.getElementById("search").addEventListener("input",render);
+document.getElementById("search").addEventListener("input", render);
 render();
 </script>
-<button class="wfl-btn" onclick="openTradeCalculator()">Trade Calculator</button>
-function openTradeCalculator() {
-  window.location.href = "calculator.html";
-}
+
 </body>
 </html>
