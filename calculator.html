@@ -2,26 +2,72 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Skibidi TD Calculator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trade Calculator - Skibidi TD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background:#000;
+      color:#fff;
+      font-family:'Montserrat',sans-serif;
+      text-align:center;
+      padding:20px;
+    }
+    h1 {
+      font-weight:900;
+      margin-bottom:20px;
+    }
+    select, button {
+      background:#111;
+      color:white;
+      border:1px solid #333;
+      border-radius:10px;
+      font-size:16px;
+      padding:12px;
+      margin:10px 0;
+      width:80%;
+      max-width:400px;
+    }
+    button {
+      background:var(--purple,#a855f7);
+      font-weight:bold;
+      cursor:pointer;
+    }
+    .result {
+      font-size:22px;
+      font-weight:900;
+      margin-top:20px;
+    }
+    a.back {
+      display:inline-block;
+      margin-top:30px;
+      color:#aaa;
+      text-decoration:none;
+      font-size:14px;
+    }
+  </style>
 </head>
-<body style="background:#111;color:white;font-family:Arial;padding:20px">
+<body>
 
-  <h2>Gem Calculator</h2>
+  <h1>Trade Calculator</h1>
 
-  <label>Gems per run:</label><br>
-  <input id="gems" type="number" placeholder="750"><br><br>
+  <p>Select the units below to check if a trade is fair.</p>
 
-  <label>Minutes per run:</label><br>
-  <input id="minutes" type="number" placeholder="14"><br><br>
+  <select id="yourUnit">
+    <option value="">You Give...</option>
+  </select>
 
-  <label>Target gems:</label><br>
-  <input id="target" type="number" placeholder="33700"><br><br>
+  <select id="theirUnit">
+    <option value="">You Get...</option>
+  </select>
 
-  <button onclick="calculate()">Calculate</button>
+  <button onclick="calculateTrade()">Check Trade</button>
 
-  <h3 id="result"></h3>
+  <div id="result" class="result">Select both units</div>
 
+  <a href="skibidi-td-v1-test.html" class="back">← Back to Value List</a>
+
+  <script src="skibidi-td-data.js"></script>
   <script src="calculator.js"></script>
 </body>
 </html>
