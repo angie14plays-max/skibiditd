@@ -1,98 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trade Calculator - Skibidi TD</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trade Calculator</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 
-<style>
-:root {
-  --purple:#a855f7;
-  --bg:#000;
-  --card:#0b0b0b;
-  --border:#1f1f1f;
-}
+  <style>
+    body {
+      margin:0;
+      background:#000;
+      color:white;
+      font-family:'Montserrat',sans-serif;
+      text-align:center;
+      padding:20px;
+    }
 
-body {
-  margin:0;
-  background:var(--bg);
-  color:white;
-  font-family:'Montserrat',sans-serif;
-}
+    h1 {
+      font-weight:900;
+      margin-bottom:15px;
+    }
 
-header {
-  text-align:center;
-  padding:25px;
-  font-size:28px;
-  font-weight:900;
-}
+    select, button {
+      width:100%;
+      max-width:420px;
+      padding:12px;
+      margin:10px auto;
+      display:block;
+      border-radius:12px;
+      border:none;
+      font-size:16px;
+    }
 
-.container {
-  max-width:500px;
-  margin:0 auto;
-  padding:15px;
-}
+    select {
+      background:#111;
+      color:white;
+    }
 
-select, button {
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  background:#111;
-  border:1px solid var(--border);
-  color:white;
-  font-size:16px;
-  margin-bottom:15px;
-}
+    button {
+      background:#a855f7;
+      color:white;
+      font-weight:900;
+      cursor:pointer;
+    }
 
-button {
-  background:var(--purple);
-  font-weight:900;
-  cursor:pointer;
-}
+    .result {
+      margin-top:20px;
+      font-size:20px;
+      font-weight:900;
+    }
 
-.result {
-  text-align:center;
-  font-size:22px;
-  font-weight:900;
-  margin-top:20px;
-}
-
-.back {
-  display:block;
-  text-align:center;
-  margin-top:25px;
-  color:#aaa;
-  text-decoration:none;
-  font-size:14px;
-}
-</style>
+    .back {
+      background:#222;
+      margin-top:25px;
+    }
+  </style>
 </head>
-
 <body>
 
-<header>Trade Calculator</header>
+<h1>Trade Calculator</h1>
 
-<div class="container">
+<select id="yourItem"></select>
+<select id="theirItem"></select>
 
-  <label>You give:</label>
-  <select id="give">
-    <option value="">Select unit</option>
-  </select>
+<button onclick="calculateTrade()">Check Trade</button>
 
-  <label>You get:</label>
-  <select id="get">
-    <option value="">Select unit</option>
-  </select>
+<div class="result" id="result"></div>
 
-  <button onclick="checkTrade()">Check Trade</button>
-
-  <div id="result" class="result">Select both units</div>
-
-  <a class="back" href="skibidi-td-v1-test.html">← Back to Value List</a>
-
-</div>
+<button class="back" onclick="goBack()">← Back to Value List</button>
 
 <script src="skibidi-td-data.js"></script>
 <script src="calculator.js"></script>
