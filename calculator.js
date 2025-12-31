@@ -1,42 +1,36 @@
-const giveSelect = document.getElementById("give");
-const getSelect = document.getElementById("get");
-const result = document.getElementById("result");
+const yourSelect = document.getElementById("yourItem");
+const theirSelect = document.getElementById("theirItem");
+const resultBox = document.getElementById("result");
 
-// Load units from your existing data file
+// fill dropdowns
 Object.values(unitDatabase).forEach(unit => {
-  const value = Number(unit.baseStats.value);
-  if (!value) return;
+  const opt1 = document.createElement("option");
+  opt1.value = unit.baseStats.value;
+  opt1.textContent = `${unit.name} (${unit.baseStats.value})`;
+  yourSelect.appendChild(opt1);
 
-  const option1 = document.createElement("option");
-  option1.value = value;
-  option1.textContent = `${unit.name} (${value})`;
-
-  const option2 = option1.cloneNode(true);
-
-  giveSelect.appendChild(option1);
-  getSelect.appendChild(option2);
+  const opt2 = document.createElement("option");
+  opt2.value = unit.baseStats.value;
+  opt2.textContent = `${unit.name} (${unit.baseStats.value})`;
+  theirSelect.appendChild(opt2);
 });
 
-function checkTrade() {
-  const giveValue = Number(giveSelect.value);
-  const getValue = Number(getSelect.value);
+function calculateTrade() {
+  const yourValue = Number(yourSelect.value);
+  const theirValue = Number(theirSelect.value);
 
-  if (!giveValue || !getValue) {
-    result.textContent = "Select both units";
-    result.style.color = "white";
-    return;
-  }
-
-  const diff = getValue - giveValue;
-
-  if (diff === 0) {
-    result.textContent = "⚖️ FAIR TRADE";
-    result.style.color = "#facc15";
-  } else if (diff > 0) {
-    result.textContent = `✅ OVERPAY (+${diff})`;
-    result.style.color = "#22c55e";
+  if (yourValue === theirValue) {
+    resultBox.textContent = "🤝 Fair Trade";
+    resultBox.style.color = "#a855f7";
+  } else if (theirValue > yourValue) {
+    resultBox.textContent = "✅ Overpay (Good for you)";
+    resultBox.style.color = "#22c55e";
   } else {
-    result.textContent = `❌ UNDERPAY (${diff})`;
-    result.style.color = "#ef4444";
+    resultBox.textContent = "❌ Underpay (Bad for you)";
+    resultBox.style.color = "#ef4444";
   }
+}
+
+function goBack() {
+  window.location.href = "skibidi-td-v1-test.html";
 }
