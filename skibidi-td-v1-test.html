@@ -377,9 +377,16 @@
                 </div>`;
             // added: value sort bridge (highest → lowest)
 function getSortedKeys() {
-    return sortUnitsHighestToLowest().map(unit =>
-        Object.keys(unitDatabase).find(k => unitDatabase[k] === unit)
-    );
+    const sortedUnits = sortUnitsHighestToLowest();
+
+    const keys = sortedUnits
+        .map(unit =>
+            Object.keys(unitDatabase).find(k => unitDatabase[k] === unit)
+        )
+        .filter(Boolean); // <-- IMPORTANT
+
+    // fallback if something goes wrong
+    return keys.length ? keys : Object.keys(unitDatabase);
 }
         
 
@@ -499,3 +506,4 @@ function getSortedKeys() {
 </body>
 
 </html>
+
