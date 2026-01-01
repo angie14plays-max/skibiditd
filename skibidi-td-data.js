@@ -574,12 +574,12 @@ const unitDatabase = {
         name: "Executioner Speakerman",
         rarity: "cosmic",
         unitId: "1kQcE-r3V8nnudGSDu4rJedP_faKzIxlh",
-        baseStats: { value: "10,500", status: "Stable", demand: "6/10" },
+        baseStats: { value: "700,000", status: "Stable", demand: "6/10" },
         traits: {
-            grandmaster: { value: "15,500", status: "Rising", demand: "7/10" },
-            master: { value: "13,000", status: "Stable", demand: "6/10" },
-            superPayday: { value: "18,500", status: "Rising", demand: "8/10" },
-            sniper: { value: "12,000", status: "Stable", demand: "6/10" }
+            grandmaster: { value: "1,300,000", status: "Rising", demand: "7/10" },
+            master: { value: "900,000", status: "Stable", demand: "6/10" },
+            superPayday: { value: "750,000", status: "Rising", demand: "8/10" },
+            sniper: { value: "700,000", status: "Stable", demand: "6/10" }
         }
     },
     upgradedTitanCloverman: {
@@ -1542,6 +1542,7 @@ Sniper: {
         }
 }
 };
+
 
 
 
