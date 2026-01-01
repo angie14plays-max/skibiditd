@@ -1515,5 +1515,17 @@ const unitDatabase = {
             superPayday: { value: "18,500", status: "Rising", demand: "8/10" },
             sniper: { value: "12,000", status: "Stable", demand: "6/10" }
         }
-    }
+    },
+GoldenChiefDrillman: {
+        name: "Golden Chief Drillman",
+        rarity: "Exclusive",
+        unitId: "1miuept1yP4wqJsV-fHETfo6AdxJ7rpUL",
+        baseStats: { value: "500,000,000", status: "Stable", demand: "10/10" },
+        traits: {
+            grandmaster: { value: "O/C", status: "Rising", demand: "10/10" },
+            master: { value: "O/C", status: "Stable", demand: "10/10" },
+            superPayday: { value: "O/C", status: "Stable", demand: "10/10" },
+            sniper: { value: "O/C", status: "Stable", demand: "10/10" }
+        }
+}
 };
