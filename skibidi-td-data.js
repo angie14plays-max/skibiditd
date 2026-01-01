@@ -1527,7 +1527,9 @@ GoldenChiefDrillman: {
             superPayday: { value: "O/C", status: "Stable", demand: "10/10" },
             sniper: { value: "O/C", status: "Stable", demand: "10/10" }
         }
+}
 };
+
 
 
 
