@@ -1518,7 +1518,7 @@ const unitDatabase = {
     },
 GoldenChiefDrillman: {
         name: "Golden Chief Drillman",
-        rarity: "Exclusive",
+        rarity: "rxclusive",
         unitId: "1miuept1yP4wqJsV-fHETfo6AdxJ7rpUL",
         baseStats: { value: "500,000,000", status: "Stable", demand: "10/10" },
         traits: {
@@ -1529,3 +1529,4 @@ GoldenChiefDrillman: {
         }
 }
 };
+
