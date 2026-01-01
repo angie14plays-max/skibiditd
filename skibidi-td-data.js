@@ -3,7 +3,7 @@ const unitDatabase = {
         name: "Fighter G-Toilet 5.0",
         rarity: "astral",
         unitId: "1706FBIP2tTidyUorO3M_jNfTAWsdjwDW",
-        baseStats: { value: "8,500", status: "Stable", demand: "5/10" },
+        baseStats: { value: "2M", status: "Stable", demand: "5/10" },
         traits: {
             grandmaster: { value: "12,000", status: "Rising", demand: "8/10" },
             master: { value: "10,500", status: "Recovering", demand: "5/10" },
@@ -1542,6 +1542,7 @@ Sniper: {
         }
 }
 };
+
 
 
 
