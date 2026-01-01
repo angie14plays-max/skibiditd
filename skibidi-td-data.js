@@ -1527,19 +1527,8 @@ GoldenChiefDrillman: {
             superPayday: { value: "O/C", status: "Stable", demand: "10/10" },
             sniper: { value: "O/C", status: "Stable", demand: "10/10" }
         }
-    },
-    Sniper: {
-        name: "Sniper",
-        rarity: "exclusive",
-        unitId: "1_b5_HyInrJI5AyBiSBnmyAKa1Eso4wyZ",
-        baseStats: { value: "10,000,000", status: "Stable", demand: "6/10" },
-        traits: {
-            grandmaster: { value: "O/C", status: "Stable", demand: "8/10" },
-            master: { value: "O/C", status: "Stable", demand: "7/10" },
-            superPayday: { value: "O/C", status: "Stable", demand: "5/10" },
-            sniper: { value: "O/C", status: "Stable", demand: "5/10" }
-        }
 };
+
 
 
 
