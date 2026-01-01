@@ -323,6 +323,7 @@
     </div>
 
     <script src="skibidi-td-data.js"></script>
+    <script src="sort-high-to-low.js"></script>
 
     <script>
         const imageProvider = "https://corsproxy.io/?https://drive.google.com/thumbnail?id=";
@@ -374,13 +375,19 @@
                     <div class="icon-img" style="--asset-path: ${imgPath}"></div>
                     <div class="effect-overlay" style="--asset-path: ${imgPath}"></div>
                 </div>`;
-        }
+            // added: value sort bridge (highest → lowest)
+function getSortedKeys() {
+    return sortUnitsHighestToLowest().map(unit =>
+        Object.keys(unitDatabase).find(k => unitDatabase[k] === unit)
+    );
+}
+        
 
         function renderValueList() {
             const root = document.getElementById('list-root');
             if(!root || typeof unitDatabase === 'undefined') return;
 
-            const filteredKeys = Object.keys(unitDatabase)
+            const filteredKeys = getSortedKeys()
                 .filter(key => {
                     const unit = unitDatabase[key];
                     const matchesRarity = currentFilter === 'all' || unit.rarity === currentFilter;
@@ -490,4 +497,5 @@
         window.onload = renderValueList;
     </script>
 </body>
+
 </html>
