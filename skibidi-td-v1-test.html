@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>Skibidi TD Value List</title>
+    <style>
+        :root {
+            --bg-page: #000000;
+            --card-bg: #111111;
+            --box-bg: #1a1a1a;
+            --border-solid: #333333;
+            --text-main: #ffffff;
+            --text-dim: #777777;
+            --gold: #facc15;
+            --purple: #a855f7;
+
+            --rising: #22c55e;
+            --stable: #f97316;
+            --dropping: #ec4899;
+            --overpaid: #facc15;
+            --underpaid: #ef4444;
+            --hyped: #3b82f6;
+            --recovering: #555555;
+            --unstable: #9d174d;
+
+            --grad-astral: linear-gradient(60deg, #640081, #7e00a5, #154af0, #00cd82, #11ff46);
+            --grad-cosmic: linear-gradient(80deg, #b800e6, #6cedf0);
+            --grad-divine: linear-gradient(180deg, #c400cf, #2248ff);
+            --grad-godly: linear-gradient(180deg, #7b00e6, #6367ff);
+            --grad-exclusive: linear-gradient(180deg, #2e7dff, #2be7f6);
+            --grad-mythic: linear-gradient(180deg, #ff6d68, #cc1d1b);
+            --grad-legendary: linear-gradient(180deg, #f5a623, #d48c00);
+        }
+
+        * {
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.5px;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0; 
+            padding: 20px;
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .status-rising { color: var(--rising); }
+        .status-stable { color: var(--stable); }
+        .status-dropping { color: var(--dropping); }
+        .status-overpaid { color: var(--overpaid); }
+        .status-underpaid { color: var(--underpaid); }
+        .status-hyped { color: var(--hyped); }
+        .status-recovering { color: var(--recovering); }
+        .status-unstable { color: var(--unstable); }
+
+        .rarity-astral { --theme: var(--grad-astral); }
+        .rarity-cosmic { --theme: var(--grad-cosmic); }
+        .rarity-divine { --theme: var(--grad-divine); }
+        .rarity-godly { --theme: var(--grad-godly); }
+        .rarity-exclusive { --theme: var(--grad-exclusive); }
+        .rarity-mythic { --theme: var(--grad-mythic); }
+        .rarity-legendary { --theme: var(--grad-legendary); }
+
+        .controls-container {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #search-bar {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--card-bg);
+            border: 2px solid var(--border-solid);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #search-bar:focus { border-color: var(--gold); }
+
+        .tabs-wrapper {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            background: var(--card-bg);
+            border: none;
+            border-bottom: 4px solid transparent;
+            color: var(--text-dim);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+
+        .tab-btn:hover, .tab-btn.active { color: white; }
+        
+        .tab-btn.active[data-rarity="all"] { border-image: linear-gradient(to right, #555, #fff) 1; }
+        .tab-btn.active[data-rarity="astral"] { border-image: var(--grad-astral) 1; }
+        .tab-btn.active[data-rarity="cosmic"] { border-image: var(--grad-cosmic) 1; }
+        .tab-btn.active[data-rarity="divine"] { border-image: var(--grad-divine) 1; }
+        .tab-btn.active[data-rarity="godly"] { border-image: var(--grad-godly) 1; }
+        .tab-btn.active[data-rarity="exclusive"] { border-image: var(--grad-exclusive) 1; }
+        .tab-btn.active[data-rarity="mythic"] { border-image: var(--grad-mythic) 1; }
+        .tab-btn.active[data-rarity="legendary"] { border-image: var(--grad-legendary) 1; }
+
+        .list-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px; 
+            max-width: 1200px; 
+            width: 100%;
+        }
+
+        .unit-card {
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-solid);
+            border-radius: 16px; 
+            padding: 20px;
+            text-align: center; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-section {
+            min-height: 60px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .unit-title {
+            font-size: 16px; 
+            font-weight: 900; 
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .second-edition-tag {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-top: 4px;
+            letter-spacing: 1px;
+        }
+
+        .card-body { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            margin-bottom: 25px;
+            gap: 10px;
+        }
+
+        .buff-column { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
+
+        .icon-slot {
+            width: 42px; height: 42px;
+            background-color: var(--box-bg);
+            border: 2px solid var(--border-solid);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; position: relative;
+            cursor: pointer; transition: 0.3s;
+            filter: grayscale(1); opacity: 0.2;
+        }
+
+        .icon-slot:hover { opacity: 0.6; }
+        
+        .icon-slot.active {
+            filter: grayscale(0); opacity: 1;
+            border-color: var(--gold);
+        }
+
+        .icon-img {
+            width: 75%; height: 75%;
+            background-image: var(--asset-path);
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+        }
+
+        .effect-overlay {
+            position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(90deg, #ff000080, #ffff0080, #00ff0080, #0000ff80, #ff000080);
+            background-size: 200% auto;
+            display: none;
+            -webkit-mask: var(--asset-path) center/75% no-repeat;
+            mask: var(--asset-path) center/75% no-repeat;
+        }
+
+        .icon-slot.active .effect-overlay {
+            display: block;
+            animation: move-overlay 3s linear infinite;
+        }
+
+        @keyframes move-overlay { to { background-position: -200% 50%; } }
+
+        .portrait-frame {
+            width: 120px; height: 120px; border-radius: 50%;
+            background: var(--theme); border: 3px solid #000;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; flex-shrink: 0;
+        }
+
+        .unit-image {
+            width: 130px; height: 130px;
+            background-image: var(--unit-img);
+            background-size: cover; background-position: center;
+        }
+
+        .data-table { 
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; 
+        }
+        
+        .data-cell { 
+            background-color: var(--box-bg); border: 1px solid var(--border-solid); 
+            padding: 10px 2px; border-radius: 8px; 
+        }
+
+        .label { 
+            display: block; color: var(--text-dim); 
+            font-size: 9px; font-weight: bold; 
+            text-transform: uppercase; margin-bottom: 2px; 
+        }
+
+        .val { font-size: 12px; font-weight: bold; transition: 0.3s; }
+        .highlight-gold { color: var(--gold); }
+        .highlight-purple { color: var(--purple); }
+
+        .pagination-container {
+            margin-top: 40px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 40px;
+        }
+
+        .pagination-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-solid);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            border-color: var(--gold);
+            background: var(--box-bg);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        @media (max-width: 1024px) {
+            .list-container { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 600px) {
+            .list-container { grid-template-columns: 1fr; }
+            .portrait-frame { width: 90px; height: 90px; }
+            .unit-image { width: 100px; height: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls-container">
+        <input type="text" id="search-bar" placeholder="Search unit...">
+        <div class="tabs-wrapper" id="tabs-container">
+            <button class="tab-btn active" data-rarity="all">All</button>
+            <button class="tab-btn" data-rarity="astral">Astral</button>
+            <button class="tab-btn" data-rarity="cosmic">Cosmic</button>
+            <button class="tab-btn" data-rarity="divine">Divine</button>
+            <button class="tab-btn" data-rarity="godly">Godly</button>
+            <button class="tab-btn" data-rarity="exclusive">Exclusive</button>
+            <button class="tab-btn" data-rarity="mythic">Mythic</button>
+            <button class="tab-btn" data-rarity="legendary">Legendary</button>
+        </div>
+    </div>
+
+    <div id="list-root" class="list-container"></div>
+
+    <div class="pagination-container">
+        <button class="pagination-btn" id="prev-btn">Previous</button>
+        <span class="page-info" id="page-info">Page 1 of 1</span>
+        <button class="pagination-btn" id="next-btn">Next</button>
+    </div>
+
+    <script src="skibidi-td-data.js"></script>
+
+    <script>
+        const imageProvider = "https://corsproxy.io/?https://drive.google.com/thumbnail?id=";
+
+        let currentFilter = 'all';
+        let searchQuery = '';
+        let currentPage = 1;
+        const itemsPerPage = 15;
+        
+        const rarityOrder = {
+            'astral': 1, 'cosmic': 2, 'divine': 3, 'godly': 4,
+            'exclusive': 5, 'mythic': 6, 'legendary': 7
+        };
+
+        const traitsMeta = {
+            grandmaster: { id: "1C1TJwQXNqvM0r9g32fq5_j3r6g-B01DF", label: "Grandmaster" },
+            master: { id: "1oaTPE4cr2UyiHDX_nDo41efOyUboWoMV", label: "Master" },
+            superPayday: { id: "1T1DtpHB_cf4xx1ynNjjzOWXzCeC_bAbk", label: "Super Payday" },
+            sniper: { id: "1Y4AdKn1XXEKxVMRgzZYANJLbjRuuHobJ", label: "Sniper" }
+        };
+
+        const formatStatusClass = (status) => status.toLowerCase().replace(/\s+/g, '-');
+
+        function updateUnitStats(unitKey, traitKey) {
+            const unit = unitDatabase[unitKey];
+            const card = document.querySelector(`[data-unit="${unitKey}"]`);
+            if(!unit || !card) return;
+
+            const stats = traitKey ? unit.traits[traitKey] : unit.baseStats;
+            
+            card.querySelector('.val-value').innerText = stats.value;
+            card.querySelector('.val-demand').innerText = stats.demand;
+            
+            const statusEl = card.querySelector('.val-status');
+            statusEl.innerText = stats.status;
+            statusEl.className = `val val-status status-${formatStatusClass(stats.status)}`;
+
+            card.querySelectorAll('.icon-slot').forEach(slot => {
+                slot.classList.remove('active');
+                if(slot.getAttribute('data-trait') === traitKey) slot.classList.add('active');
+            });
+        }
+
+        function buildTraitIcon(traitKey, unitKey) {
+            const meta = traitsMeta[traitKey];
+            const imgPath = `url('${imageProvider}${meta.id}')`;
+            return `
+                <div class="icon-slot" data-trait="${traitKey}" title="${meta.label}" onclick="updateUnitStats('${unitKey}', '${traitKey}')">
+                    <div class="icon-img" style="--asset-path: ${imgPath}"></div>
+                    <div class="effect-overlay" style="--asset-path: ${imgPath}"></div>
+                </div>`;
+        }
+
+        function renderValueList() {
+            const root = document.getElementById('list-root');
+            if(!root || typeof unitDatabase === 'undefined') return;
+
+            const filteredKeys = Object.keys(unitDatabase)
+                .filter(key => {
+                    const unit = unitDatabase[key];
+                    const matchesRarity = currentFilter === 'all' || unit.rarity === currentFilter;
+                    const matchesSearch = unit.name.toLowerCase().includes(searchQuery.toLowerCase());
+                    return matchesRarity && matchesSearch;
+                })
+                .sort((a, b) => {
+                    const weightA = rarityOrder[unitDatabase[a].rarity] || 99;
+                    const weightB = rarityOrder[unitDatabase[b].rarity] || 99;
+                    if (weightA !== weightB) return weightA - weightB;
+                    return unitDatabase[a].name.localeCompare(unitDatabase[b].name);
+                });
+
+            const totalPages = Math.ceil(filteredKeys.length / itemsPerPage) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const paginatedKeys = filteredKeys.slice(startIndex, startIndex + itemsPerPage);
+
+            document.getElementById('page-info').innerText = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('prev-btn').disabled = currentPage === 1;
+            document.getElementById('next-btn').disabled = currentPage === totalPages;
+
+            root.innerHTML = paginatedKeys.map(key => {
+                const unit = unitDatabase[key];
+                const portraitUrl = `url('${imageProvider}${unit.unitId}')`;
+                const statusClass = formatStatusClass(unit.baseStats.status);
+                
+                const isSecondEdition = unit.secondEdition && unit.secondEdition.toLowerCase() === "yes";
+                const editionSub = isSecondEdition ? `<div class="second-edition-tag">2nd Edition</div>` : '';
+
+                return `
+                    <div class="unit-card rarity-${unit.rarity}" data-unit="${key}">
+                        <div class="header-section">
+                            <div class="unit-title">${unit.name}</div>
+                            ${editionSub}
+                        </div>
+                        <div class="card-body">
+                            <div class="buff-column">
+                                ${buildTraitIcon('grandmaster', key)}
+                                ${buildTraitIcon('master', key)}
+                            </div>
+                            <div class="portrait-frame" onclick="updateUnitStats('${key}', null)" title="Reset to Base Stats">
+                                <div class="unit-image" style="--unit-img: ${portraitUrl}"></div>
+                            </div>
+                            <div class="buff-column">
+                                ${buildTraitIcon('superPayday', key)}
+                                ${buildTraitIcon('sniper', key)}
+                            </div>
+                        </div>
+                        <div class="data-table">
+                            <div class="data-cell">
+                                <span class="label">Value</span>
+                                <span class="val val-value highlight-gold">${unit.baseStats.value}</span>
+                            </div>
+                            <div class="data-cell">
+                                <span class="label">Status</span>
+                                <span class="val val-status status-${statusClass}">${unit.baseStats.status}</span>
+                            </div>
+                            <div class="data-cell">
+                                <span class="label">Demand</span>
+                                <span class="val val-demand highlight-purple">${unit.baseStats.demand}</span>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        document.getElementById('search-bar').addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            currentPage = 1;
+            renderValueList();
+        });
+
+        document.getElementById('tabs-container').addEventListener('click', (e) => {
+            if (e.target.classList.contains('tab-btn')) {
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                currentFilter = e.target.getAttribute('data-rarity');
+                currentPage = 1;
+                renderValueList();
+            }
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderValueList();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            const filteredTotal = Object.keys(unitDatabase).filter(key => {
+                const u = unitDatabase[key];
+                return (currentFilter === 'all' || u.rarity === currentFilter) && 
+                       u.name.toLowerCase().includes(searchQuery.toLowerCase());
+            }).length;
+            const maxPage = Math.ceil(filteredTotal / itemsPerPage);
+            if (currentPage < maxPage) {
+                currentPage++;
+                renderValueList();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        window.onload = renderValueList;
+    </script>
+</body>
+</html>
