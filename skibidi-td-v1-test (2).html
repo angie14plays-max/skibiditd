@@ -333,9 +333,17 @@
         let currentPage = 1;
         const itemsPerPage = 15;
         
+        // Rarity order set exactly as requested:
+        // astral, cosmic, godly, divine, mythic, legendary
+        // any other rarities (e.g., exclusive) will be ranked after these
         const rarityOrder = {
-            'astral': 1, 'cosmic': 2, 'divine': 3, 'godly': 4,
-            'exclusive': 5, 'mythic': 6, 'legendary': 7
+            'astral': 1,
+            'cosmic': 2,
+            'godly': 3,
+            'divine': 4,
+            'mythic': 5,
+            'legendary': 6,
+            'exclusive': 99 // put exclusive after the main ordered rarities
         };
 
         const traitsMeta = {
@@ -391,7 +399,8 @@
 
             let filteredKeys = Object.keys(unitDatabase).filter(key => {
                 const unit = unitDatabase[key];
-                const matchesRarity = currentFilter === 'all' || unit.rarity === currentFilter;
+                const uRarity = (unit.rarity || '').toLowerCase();
+                const matchesRarity = currentFilter === 'all' || uRarity === currentFilter;
                 const matchesSearch = unit.name.toLowerCase().includes(searchQuery.toLowerCase());
                 return matchesRarity && matchesSearch;
             });
@@ -403,8 +412,8 @@
                 if (currentSort === 'value-desc') {
                     return parseValue(unitB.baseStats.value) - parseValue(unitA.baseStats.value);
                 } else {
-                    const weightA = rarityOrder[unitA.rarity] || 99;
-                    const weightB = rarityOrder[unitB.rarity] || 99;
+                    const weightA = rarityOrder[(unitA.rarity || '').toLowerCase()] || 999;
+                    const weightB = rarityOrder[(unitB.rarity || '').toLowerCase()] || 999;
                     if (weightA !== weightB) return weightA - weightB;
                     return unitA.name.localeCompare(unitB.name);
                 }
@@ -428,8 +437,10 @@
                 const isSecondEdition = unit.secondEdition && unit.secondEdition.toLowerCase() === "yes";
                 const editionSub = isSecondEdition ? `<div class="second-edition-tag">2nd Edition</div>` : '';
 
+                const raritySlug = (unit.rarity || '').toLowerCase();
+
                 return `
-                    <div class="unit-card rarity-${unit.rarity}" data-unit="${key}">
+                    <div class="unit-card rarity-${raritySlug}" data-unit="${key}">
                         <div class="header-section">
                             <div class="unit-title">${unit.name}</div>
                             ${editionSub}
@@ -502,7 +513,7 @@
         document.getElementById('next-btn').addEventListener('click', () => {
             const filteredTotal = Object.keys(unitDatabase).filter(key => {
                 const u = unitDatabase[key];
-                return (currentFilter === 'all' || u.rarity === currentFilter) && 
+                return (currentFilter === 'all' || (u.rarity || '').toLowerCase() === currentFilter) && 
                        u.name.toLowerCase().includes(searchQuery.toLowerCase());
             }).length;
             const maxPage = Math.ceil(filteredTotal / itemsPerPage);
