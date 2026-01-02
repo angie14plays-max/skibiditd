@@ -3,72 +3,72 @@ const unitDatabase = {
         name: "Fighter G-Toilet 5.0",
         rarity: "astral",
         unitId: "1706FBIP2tTidyUorO3M_jNfTAWsdjwDW",
-        baseStats: { value: "8,500", status: "Stable", demand: "5/10" },
+        baseStats: { value: "1.9M", status: "Stable", demand: "5/10" },
         traits: {
-            grandmaster: { value: "12,000", status: "Rising", demand: "8/10" },
-            master: { value: "10,500", status: "Recovering", demand: "5/10" },
-            superPayday: { value: "9,000", status: "Unstable", demand: "8/10" },
-            sniper: { value: "9,500", status: "Underpaid", demand: "5/10" }
+            grandmaster: { value: "2.5M", status: "Rising", demand: "8/10" },
+            master: { value: "2.0M", status: "Recovering", demand: "5/10" },
+            superPayday: { value: "N/A", status: "Unstable", demand: "8/10" },
+            sniper: { value: "N/A", status: "Underpaid", demand: "5/10" }
         }
     },
     upgradeTitanSantaClockman: {
         name: "Upgrade Titan Santa Clockman",
         rarity: "cosmic",
         unitId: "1ditjWN5jPUT7VUR--OpTO_Bpb5O1PKnT",
-        baseStats: { value: "15,000", status: "Hyped", demand: "8/10" },
+        baseStats: { value: "400K", status: "Dropping", demand: "8/10" },
         traits: {
-            grandmaster: { value: "20,000", status: "Overpaid", demand: "10/10" },
-            master: { value: "18,000", status: "Dropping", demand: "8/10" },
-            superPayday: { value: "25,000", status: "Hyped", demand: "10/10" },
-            sniper: { value: "17,000", status: "Rising", demand: "8/10" }
+            grandmaster: { value: "1.1M", status: "Unstable", demand: "7/10" },
+            master: { value: "500K", status: "Dropping", demand: "5/10" },
+            superPayday: { value: "N/A", status: "Dropping", demand: "3/10" },
+            sniper: { value: "N/A", status: "Dropping", demand: "4/10" }
         }
     },
     gToilet50Divine: {
         name: "G-Toilet 5.0",
         rarity: "divine",
         unitId: "1FVroibeJL0DHg7_7Lv4Wwqm58hgeJkwv",
-        baseStats: { value: "120,000", status: "Unstable", demand: "10/10" },
+        baseStats: { value: "N/A", status: "Stable", demand: "10/10" },
         traits: {
-            grandmaster: { value: "150,000", status: "Hyped", demand: "10/10" },
-            master: { value: "135,000", status: "Recovering", demand: "9/10" },
-            superPayday: { value: "140,000", status: "Rising", demand: "10/10" },
-            sniper: { value: "125,000", status: "Stable", demand: "8/10" }
+            grandmaster: { value: "N/A", status: "Stable", demand: "10/10" },
+            master: { value: "N/A", status: "Stable", demand: "9/10" },
+            superPayday: { value: "N/A", status: "Stable", demand: "10/10" },
+            sniper: { value: "N/A", status: "Stable", demand: "8/10" }
         }
     },
     candyDrillTitan: {
         name: "Candy Drill Titan",
         rarity: "godly",
         unitId: "1MP-9GM2Qksat4npDc2pBkzi69G5TCWhX",
-        baseStats: { value: "65,000", status: "Underpaid", demand: "8/10" },
+        baseStats: { value: "N/A", status: "Underpaid", demand: "1/10" },
         traits: {
-            grandmaster: { value: "85,000", status: "Overpaid", demand: "9/10" },
-            master: { value: "75,000", status: "Stable", demand: "8/10" },
-            superPayday: { value: "90,000", status: "Dropping", demand: "9/10" },
-            sniper: { value: "70,000", status: "Rising", demand: "8/10" }
+            grandmaster: { value: "N/A", status: "Overpaid", demand: "1/10" },
+            master: { value: "N/A", status: "Stable", demand: "1/10" },
+            superPayday: { value: "N/A", status: "Dropping", demand: "1/10" },
+            sniper: { value: "N/A", status: "Rising", demand: "1/10" }
         }
     },
     bemmyblox: {
         name: "Bemmyblox",
         rarity: "exclusive",
         unitId: "1fXNj8GMMVUOJqdWZRsswAL3nQdGG-1wh",
-        baseStats: { value: "40,000", status: "Recovering", demand: "5/10" },
+        baseStats: { value: "N/A", status: "Recovering", demand: "3/10" },
         traits: {
-            grandmaster: { value: "55,000", status: "Hyped", demand: "8/10" },
-            master: { value: "48,000", status: "Underpaid", demand: "5/10" },
-            superPayday: { value: "60,000", status: "Unstable", demand: "8/10" },
-            sniper: { value: "45,000", status: "Stable", demand: "5/10" }
+            grandmaster: { value: "N/A", status: "Hyped", demand: "3/10" },
+            master: { value: "N/A", status: "Underpaid", demand: "3/10" },
+            superPayday: { value: "N/A", status: "Unstable", demand: "3/10" },
+            sniper: { value: "N/A", status: "Stable", demand: "3/10" }
         }
     },
     astroTitanCameraman: {
         name: "Astro Titan Cameraman",
         rarity: "mythic",
         unitId: "1HZRD4bj2M067SBJJz5q48oo25um8iLeu",
-        baseStats: { value: "25,000", status: "Dropping", demand: "2/10" },
+        baseStats: { value: "450K", status: "Dropping", demand: "8/10" },
         traits: {
-            grandmaster: { value: "35,000", status: "Stable", demand: "5/10" },
-            master: { value: "30,000", status: "Unstable", demand: "2/10" },
-            superPayday: { value: "40,000", status: "Overpaid", demand: "5/10" },
-            sniper: { value: "28,000", status: "Recovering", demand: "2/10" }
+            grandmaster: { value: "1.8M+", status: "Stable", demand: "10/10" },
+            master: { value: "550K", status: "Unstable", demand: "9/10" },
+            superPayday: { value: "N/A", status: "Overpaid", demand: "7/10" },
+            sniper: { value: "N/A", status: "Recovering", demand: "7/10" }
         }
     },
     acidGunner: {
