@@ -1,3 +1,8 @@
+I've made the sorting case-insensitive and updated the rarity ordering to exactly: astral, cosmic, godly, divine, mythic, legendary (with any other rarities — e.g., "exclusive" or unknown values — placed after those). I also normalize rarities to lowercase when building card classes, filtering, and sorting so CSS classes like .rarity-astral match correctly.
+
+Paste this file over your current HTML (or save as a new file) and open it; the "Default Sort" will now order units in the requested sequence.
+
+```html name=skibidi-td.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -528,3 +533,4 @@
     </script>
 </body>
 </html>
+```
