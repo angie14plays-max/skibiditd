@@ -1541,3 +1541,14 @@ const unitDatabase = {
         }
     }
 };
+
+// Expose for browsers and CommonJS/AMD environments
+if (typeof window !== 'undefined') {
+    window.unitDatabase = unitDatabase;
+}
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    module.exports = unitDatabase;
+} else if (typeof define === 'function' && define.amd) {
+    define(function () { return unitDatabase; });
+}
