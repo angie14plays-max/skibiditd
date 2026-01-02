@@ -65,7 +65,7 @@ const unitDatabase = {
         unitId: "1HZRD4bj2M067SBJJz5q48oo25um8iLeu",
         baseStats: { value: "450K", status: "Dropping", demand: "8/10" },
         traits: {
-            grandmaster: { value: "1.8M+", status: "Stable", demand: "10/10" },
+            grandmaster: { value: "1.8M", status: "Stable", demand: "10/10" },
             master: { value: "550K", status: "Unstable", demand: "9/10" },
             superPayday: { value: "N/A", status: "Overpaid", demand: "7/10" },
             sniper: { value: "N/A", status: "Recovering", demand: "7/10" }
