@@ -90,17 +90,16 @@
 
         #search-bar:focus { border-color: var(--gold); }
 
-        .tabs-wrapper {
+        .tabs-wrapper, .sort-wrapper {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
         }
 
-        .tab-btn {
+        .tab-btn, .sort-btn {
             background: var(--card-bg);
-            border: none;
-            border-bottom: 4px solid transparent;
+            border: 2px solid var(--border-solid);
             color: var(--text-dim);
             padding: 10px 20px;
             cursor: pointer;
@@ -108,18 +107,13 @@
             text-transform: uppercase;
             font-size: 12px;
             transition: 0.3s;
+            border-radius: 8px;
         }
 
-        .tab-btn:hover, .tab-btn.active { color: white; }
-        
-        .tab-btn.active[data-rarity="all"] { border-image: linear-gradient(to right, #555, #fff) 1; }
-        .tab-btn.active[data-rarity="astral"] { border-image: var(--grad-astral) 1; }
-        .tab-btn.active[data-rarity="cosmic"] { border-image: var(--grad-cosmic) 1; }
-        .tab-btn.active[data-rarity="divine"] { border-image: var(--grad-divine) 1; }
-        .tab-btn.active[data-rarity="godly"] { border-image: var(--grad-godly) 1; }
-        .tab-btn.active[data-rarity="exclusive"] { border-image: var(--grad-exclusive) 1; }
-        .tab-btn.active[data-rarity="mythic"] { border-image: var(--grad-mythic) 1; }
-        .tab-btn.active[data-rarity="legendary"] { border-image: var(--grad-legendary) 1; }
+        .tab-btn:hover, .tab-btn.active, .sort-btn:hover, .sort-btn.active { 
+            color: white; 
+            border-color: var(--gold);
+        }
 
         .list-container {
             display: grid;
@@ -302,6 +296,7 @@
 
     <div class="controls-container">
         <input type="text" id="search-bar" placeholder="Search unit...">
+        
         <div class="tabs-wrapper" id="tabs-container">
             <button class="tab-btn active" data-rarity="all">All</button>
             <button class="tab-btn" data-rarity="astral">Astral</button>
@@ -311,6 +306,11 @@
             <button class="tab-btn" data-rarity="exclusive">Exclusive</button>
             <button class="tab-btn" data-rarity="mythic">Mythic</button>
             <button class="tab-btn" data-rarity="legendary">Legendary</button>
+        </div>
+
+        <div class="sort-wrapper" id="sort-container">
+            <button class="sort-btn active" data-sort="default">Default Sort</button>
+            <button class="sort-btn" data-sort="value-desc">High Value</button>
         </div>
     </div>
 
@@ -329,6 +329,7 @@
 
         let currentFilter = 'all';
         let searchQuery = '';
+        let currentSort = 'default';
         let currentPage = 1;
         const itemsPerPage = 15;
         
@@ -343,6 +344,14 @@
             superPayday: { id: "1T1DtpHB_cf4xx1ynNjjzOWXzCeC_bAbk", label: "Super Payday" },
             sniper: { id: "1Y4AdKn1XXEKxVMRgzZYANJLbjRuuHobJ", label: "Sniper" }
         };
+
+        function parseValue(valString) {
+            if (!valString) return 0;
+            let val = valString.toString().replace(/,/g, '');
+            let numericMatch = val.match(/[\d.]+/);
+            
+            return numericMatch ? parseFloat(numericMatch[0]) : 0;
+        }
 
         const formatStatusClass = (status) => status.toLowerCase().replace(/\s+/g, '-');
 
@@ -380,19 +389,26 @@
             const root = document.getElementById('list-root');
             if(!root || typeof unitDatabase === 'undefined') return;
 
-            const filteredKeys = Object.keys(unitDatabase)
-                .filter(key => {
-                    const unit = unitDatabase[key];
-                    const matchesRarity = currentFilter === 'all' || unit.rarity === currentFilter;
-                    const matchesSearch = unit.name.toLowerCase().includes(searchQuery.toLowerCase());
-                    return matchesRarity && matchesSearch;
-                })
-                .sort((a, b) => {
-                    const weightA = rarityOrder[unitDatabase[a].rarity] || 99;
-                    const weightB = rarityOrder[unitDatabase[b].rarity] || 99;
+            let filteredKeys = Object.keys(unitDatabase).filter(key => {
+                const unit = unitDatabase[key];
+                const matchesRarity = currentFilter === 'all' || unit.rarity === currentFilter;
+                const matchesSearch = unit.name.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchesRarity && matchesSearch;
+            });
+
+            filteredKeys.sort((a, b) => {
+                const unitA = unitDatabase[a];
+                const unitB = unitDatabase[b];
+
+                if (currentSort === 'value-desc') {
+                    return parseValue(unitB.baseStats.value) - parseValue(unitA.baseStats.value);
+                } else {
+                    const weightA = rarityOrder[unitA.rarity] || 99;
+                    const weightB = rarityOrder[unitB.rarity] || 99;
                     if (weightA !== weightB) return weightA - weightB;
-                    return unitDatabase[a].name.localeCompare(unitDatabase[b].name);
-                });
+                    return unitA.name.localeCompare(unitB.name);
+                }
+            });
 
             const totalPages = Math.ceil(filteredKeys.length / itemsPerPage) || 1;
             if (currentPage > totalPages) currentPage = totalPages;
@@ -460,6 +476,16 @@
                 document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
                 e.target.classList.add('active');
                 currentFilter = e.target.getAttribute('data-rarity');
+                currentPage = 1;
+                renderValueList();
+            }
+        });
+
+        document.getElementById('sort-container').addEventListener('click', (e) => {
+            if (e.target.classList.contains('sort-btn')) {
+                document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                currentSort = e.target.getAttribute('data-sort');
                 currentPage = 1;
                 renderValueList();
             }
