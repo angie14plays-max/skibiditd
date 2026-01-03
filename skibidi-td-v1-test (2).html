@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Skibidi TD — Improved Calculator (Trait Labels + Demand + Stacking)</title>
+  <title>Skibidi TD — Final Calculator (Traits + Icons + Demand)</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -15,14 +15,11 @@
       --muted: #909090;
       --text: #fff;
 
-      /* Rarity Colors */
-      --clean: #4b7aff; /* BLUE */
-      --gm: #f9a825;    /* GOLD */
-      --ms: #02c39a;   /* GREEN */
-      --sp: #9c27b0;    /* PURPLE */
-      --spd: #e91e63;   /* PINK */
-
+      /* Gradient helpers */
       --accent: linear-gradient(90deg, #8b4bff, #ff4b4b);
+
+      /* Badge sizes for traits */
+      --badge-size: 20px;
     }
 
     * {
@@ -116,6 +113,7 @@
       margin-bottom: 15px;
     }
 
+    /* Unit areas */
     .calc-area {
       display: grid;
       grid-template-columns: repeat(auto-fill, 76px);
@@ -159,38 +157,23 @@
       font-size: 12px;
     }
 
-    .calc-thumb .badge {
+    .calc-thumb .trait-icon {
       position: absolute;
       top: 4px;
       left: 6px;
-      padding: 2px 6px;
-      border-radius: 8px;
-      color: #fff;
+      width: var(--badge-size);
+      height: var(--badge-size);
+    }
+
+    .calc-thumb .demand {
+      position: absolute;
+      top: 40px;
+      left: 4px;
+      font-size: 12px;
       font-weight: 700;
-      font-size: 10px;
+      color: var(--text);
     }
 
-    .badge.clean {
-      background: var(--clean);
-    }
-
-    .badge.gm {
-      background: var(--gm);
-    }
-
-    .badge.ms {
-      background: var(--ms);
-    }
-
-    .badge.sp {
-      background: var(--sp);
-    }
-
-    .badge.spd {
-      background: var(--spd);
-    }
-
-    /* Total + Verdict */
     .calc-total {
       margin-top: 10px;
       text-align: center;
@@ -245,40 +228,27 @@
       cursor: pointer;
       font-weight: 700;
       color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
     }
 
-    .trait-btn.clean {
-      background: var(--clean);
-    }
-
-    .trait-btn.gm {
-      background: var(--gm);
-    }
-
-    .trait-btn.ms {
-      background: var(--ms);
-    }
-
-    .trait-btn.sp {
-      background: var(--sp);
-    }
-
-    .trait-btn.spd {
-      background: var(--spd);
-    }
-
-    .trait-btn:hover {
-      opacity: 0.8;
+    .trait-btn img {
+      width: var(--badge-size);
+      height: var(--badge-size);
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Top Row -->
     <div class="top-row">
       <input id="search-bar" placeholder="Search unit..." />
       <div class="menu-btn"><div class="dots"></div></div>
     </div>
 
+    <!-- Calculator Panels -->
     <div class="calc-container">
       <!-- Left Panel -->
       <div class="calc-panel">
@@ -305,11 +275,11 @@
     <div class="modal-box">
       <div class="modal-title">SELECT TRAIT</div>
       <div class="trait-grid">
-        <div class="trait-btn clean" data-trait="clean">Clean</div>
-        <div class="trait-btn gm" data-trait="gm">GM</div>
-        <div class="trait-btn ms" data-trait="ms">Ms</div>
-        <div class="trait-btn sp" data-trait="sp">Sp</div>
-        <div class="trait-btn spd" data-trait="spd">Spd</div>
+        <div class="trait-btn clean" data-trait="clean"><img src="soap-icon.png" alt="Clean Icon" /> Clean</div>
+        <div class="trait-btn gm" data-trait="gm"><img src="gold-icon.png" alt="GM Icon" /> GM</div>
+        <div class="trait-btn ms" data-trait="ms"><img src="green-icon.png" alt="MS Icon" /> Ms</div>
+        <div class="trait-btn sp" data-trait="sp"><img src="purple-icon.png" alt="SP Icon" /> Sp</div>
+        <div class="trait-btn spd" data-trait="spd"><img src="pink-icon.png" alt="SPD Icon" /> Spd</div>
       </div>
     </div>
   </div>
@@ -337,7 +307,7 @@
           thumb.style.backgroundImage = `url('placeholder.jpg')`;
           thumb.innerHTML = `
             <div class="img"></div>
-            <div class="badge ${trait}">${trait.toUpperCase()}</div>
+            <img class="trait-icon" src="${trait}-icon.png" alt="${trait} Icon" />
             <div class="quantity">x${quantity}</div>
             <div class="demand">Demand: ${demand}</div>`;
           areas[side].appendChild(thumb);
@@ -345,7 +315,6 @@
       });
     };
 
-    // Add Item
     const addItem = (side, trait) => {
       const item = unitData["fighter_g_toilet"];
       const existing = (side === "left" ? leftItems : rightItems).find(x => x.trait === trait);
