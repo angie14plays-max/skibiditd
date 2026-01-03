@@ -134,20 +134,23 @@
     /* Calculator */
     .calculator-root { width:100%; max-width:1200px; margin:0 auto 12px; display:none; }
     .calc-row { display:flex; gap:18px; align-items:flex-start; justify-content:center; }
-    .trade-panel { width:46%; min-height:300px; border-radius:12px; padding:18px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.01)); border:1px solid var(--border); }
+    .trade-panel { width:46%; min-height:420px; border-radius:12px; padding:18px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.01)); border:1px solid var(--border); }
     .trade-title { text-align:center; font-weight:900; text-transform:uppercase; margin-bottom:12px; }
     .plus-wrap { display:flex; justify-content:center; margin-bottom:8px; }
     .plus-btn { width:64px; height:64px; border-radius:16px; font-size:28px; font-weight:900; cursor:pointer; display:grid; place-items:center; background:var(--accent-grad); border:3px solid rgba(255,255,255,0.06); }
 
-    .items-list { border-radius:12px; padding:10px; min-height:160px; border:1px solid rgba(255,255,255,0.04); display:grid; grid-template-columns:repeat(auto-fill,76px); gap:8px; background:rgba(0,0,0,0.01); }
-    .calc-thumb { width:76px; height:76px; border-radius:10px; background:var(--box); border:3px solid rgba(255,255,255,0.04); position:relative; display:flex; align-items:center; justify-content:center; }
-    .calc-thumb .img { width:100%; height:100%; background-size:cover; background-position:center; }
+    .items-list { border-radius:12px; padding:16px; min-height:260px; border:1px solid rgba(255,255,255,0.04); display:grid; grid-template-columns:repeat(auto-fill,86px); gap:12px; background:rgba(0,0,0,0.01); align-items:start; }
+    .calc-thumb { width:86px; height:86px; border-radius:12px; background:var(--box); border:3px solid rgba(255,255,255,0.04); position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+    .calc-thumb .img { width:86%; height:86%; background-size:cover; background-position:center; border-radius:8px; }
     .calc-thumb .thumb-remove { position:absolute; left:6px; top:6px; background:rgba(0,0,0,0.6); color:#fff; border-radius:8px; padding:3px 6px; cursor:pointer; font-weight:900; font-size:12px; display:inline-block; }
 
     /* qty badge and trait label on calc thumb */
-    .calc-thumb .qty-badge { position:absolute; right:6px; top:6px; background:rgba(0,0,0,0.6); color:#fff; font-weight:900; padding:4px 6px; border-radius:6px; font-size:11px; }
-    .calc-thumb .trait-label { position:absolute; left:6px; bottom:6px; background:linear-gradient(90deg,#00000080,#00000030); color:#fff; font-weight:900; padding:4px 6px; border-radius:6px; font-size:10px; text-transform:uppercase; }
-    .calc-thumb .demand-pill-mini { position:absolute; left:6px; top:6px; transform:translateY(28px); padding:4px 6px; border-radius:6px; font-weight:900; font-size:10px; background:linear-gradient(90deg,#f59e0b,#ffd54a); color:#070; }
+    .calc-thumb .qty-badge { position:absolute; left:6px; top:6px; background:linear-gradient(90deg,#ffffff20,#00000060); color:#fff; font-weight:900; padding:4px 6px; border-radius:6px; font-size:11px; }
+    .calc-thumb .trait-label { position:absolute; left:6px; bottom:6px; background:linear-gradient(90deg,#000000cc,#00000088); color:#fff; font-weight:900; padding:6px 8px; border-radius:6px; font-size:11px; text-transform:uppercase; }
+    .calc-thumb .demand-pill-mini { position:absolute; right:6px; bottom:6px; padding:6px 8px; border-radius:6px; font-weight:900; font-size:11px; background:linear-gradient(90deg,#ffd54a,#ffb86b); color:#070; border:2px solid rgba(0,0,0,0.3); }
+
+    /* when small, show unit name under the thumb in list (for accessibility) */
+    .items-list .calc-thumb .name-vis { position:absolute; left:50%; transform:translateX(-50%); bottom:-18px; font-size:11px; color:var(--muted); font-weight:800; }
 
     /* square colored frame behind calc thumb */
     .calc-thumb.rarity-astral::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-astral); z-index:-1; opacity:0.95; }
@@ -533,24 +536,36 @@
     const traitApplyBtn = document.getElementById('trait-apply');
     const traitCloseBtn = document.getElementById('trait-close');
 
+    // traitIcons map lets you associate a trait name with a drive thumbnail id (test mapping included)
+    const traitIcons = {
+      // example mapping from user: Superpayday -> drive id snippet
+      'Superpayday': '1fskkP2TO22EJ9PVhr8f7IKqzvN6DD0c-'
+    };
+
     function showTraitModal(key){
       const u = unitDatabase[key];
       if (!u) return;
       _currentTraitKey = key;
-      traitTitle.textContent = 'ENTER QUANTITY';
+      // title shows unit name for clarity
+      traitTitle.textContent = (u.name || 'Unit').toUpperCase();
       traitOptions.innerHTML = '';
-      // base option
+      // base option (icon if traitIcons provides one keyed by 'base' or use unit image)
       const baseVal = esc(u.baseStats && u.baseStats.value ? u.baseStats.value : '0');
+      const baseIconId = u.unitId || traitIcons['Base'] || null;
+      const baseIcon = baseIconId ? `<div class="trait-icon" style="background-image:url('${imageProvider}${baseIconId}')"></div>` : '';
       const baseRow = document.createElement('div'); baseRow.className = 'trait-row';
-      baseRow.innerHTML = `<div style="flex:1">Base — ${baseVal}</div><input type=\"radio\" name=\"trait-choice\" value=\"base\" checked />`;
+      baseRow.innerHTML = `${baseIcon}<div style="flex:1">BASE — ${baseVal}</div><input type=\"radio\" name=\"trait-choice\" value=\"base\" checked />`;
       traitOptions.appendChild(baseRow);
-      // trait options if available
+
+      // trait options if available: add icon for each trait when mapping exists
       if (u.traits && typeof u.traits === 'object'){
         Object.keys(u.traits).forEach(tk => {
           const t = u.traits[tk];
-          const tv = esc(t && t.value ? t.value : '0');
+          const tv = esc(t && t.value ? t.value : 'N/A');
+          const iconId = traitIcons[tk] || t.icon || null;
+          const iconHtml = iconId ? `<div class="trait-icon" style="background-image:url('${imageProvider}${iconId}')"></div>` : '';
           const r = document.createElement('div'); r.className = 'trait-row';
-          r.innerHTML = `<div style="flex:1">${esc(tk)} — ${tv}</div><input type=\"radio\" name=\"trait-choice\" value=\"${esc(tk)}\" />`;
+          r.innerHTML = `${iconHtml}<div style="flex:1">${esc(tk)} — ${tv}</div><input type=\"radio\" name=\"trait-choice\" value=\"${esc(tk)}\" />`;
           traitOptions.appendChild(r);
         });
       }
@@ -586,7 +601,9 @@
       const traitLabel = (it.trait && it.trait !== 'base') ? `<div class="trait-label">${esc(String(it.trait).toUpperCase())}</div>` : '';
       const demandText = u.baseStats && u.baseStats.demand ? `DEMAND: ${esc(u.baseStats.demand)}` : '';
       const demandHtml = demandText ? `<div class="demand-pill-mini">${demandText}</div>` : '';
-      return `<div class="calc-thumb rarity-${rcls}" data-id="${it.id}" title="${esc(u.name)}"><div class="img" style="background-image:${p}"></div><div class="thumb-remove" data-id="${it.id}">×</div>${qtyHtml}${traitLabel}${demandHtml}</div>`;
+      // add optional visible name under thumb when placed in list (for clarity)
+      const nameVis = `<div class="name-vis">${esc(u.name)}</div>`;
+      return `<div class="calc-thumb rarity-${rcls}" data-id="${it.id}" title="${esc(u.name)}"><div class="img" style="background-image:${p}"></div><div class="thumb-remove" data-id="${it.id}">×</div>${qtyHtml}${traitLabel}${demandHtml}${nameVis}</div>`;
     }
 
     function renderThumbs(){
@@ -597,6 +614,8 @@
         btn.removeEventListener('click', onThumbRemove);
         btn.addEventListener('click', onThumbRemove);
       });
+      // ensure totals update after rendering
+      updateTotalsAndVerdict();
     }
 
     function onThumbRemove(e){
