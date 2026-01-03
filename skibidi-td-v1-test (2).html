@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Skibidi TD — Centered UI, Frames, 3-dot Menu</title>
+  <title>Skibidi TD — Final (3-dot menu categories + colored badges)</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     :root{
@@ -23,31 +23,32 @@
       --g-exclusive: linear-gradient(90deg,#00d1ff,#4fe0a3);
       --g-mythic: linear-gradient(90deg,#ff6d68,#ffb86b);
       --g-legendary: linear-gradient(90deg,#ffd54a,#ff7a00);
+
+      --accent: linear-gradient(90deg,#8b4bff,#ff2d6f);
     }
 
-    *{box-sizing:border-box;font-family:"Montserrat",sans-serif}
+    *{box-sizing:border-box;font-family:'Montserrat',sans-serif}
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text)}
-    body{padding:20px;display:flex;flex-direction:column;align-items:center;gap:18px}
+    body{padding:22px;display:flex;flex-direction:column;align-items:center;gap:18px}
 
     .container{width:100%;max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:12px;align-items:center}
 
-    /* search + menu row */
-    .top-row{width:100%;display:flex;align-items:center;gap:12px;justify-content:space-between}
+    /* Search + 3-dot menu */
+    .top-row{width:100%;display:flex;align-items:center;gap:12px;justify-content:space-between;position:relative}
     #search-bar{flex:1;padding:12px 16px;border-radius:22px;background:var(--card);border:1px solid var(--border);color:var(--text);outline:none}
     .menu-btn{width:44px;height:44px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer}
     .menu-btn .dots{width:6px;height:6px;background:var(--muted);border-radius:50%;box-shadow:0 -10px 0 0 var(--muted),0 10px 0 0 var(--muted)}
 
-    /* menu panel (chrome-like) */
-    .menu-panel{position:absolute;right:22px;top:78px;min-width:260px;background:#fff;color:#000;border-radius:10px;box-shadow:0 24px 60px rgba(0,0,0,0.6);border:1px solid rgba(0,0,0,0.06);display:none;z-index:9999;overflow:hidden}
+    /* Chrome-like menu panel (white interior) */
+    .menu-panel{position:absolute;right:22px;top:78px;min-width:300px;background:#fff;color:#000;border-radius:10px;box-shadow:0 30px 80px rgba(0,0,0,0.6);border:1px solid rgba(0,0,0,0.06);display:none;z-index:9999;overflow:hidden}
     .menu-section{padding:8px;border-bottom:1px solid rgba(0,0,0,0.04)}
     .menu-item{display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;cursor:pointer}
     .menu-item:hover{background:rgba(0,0,0,0.04)}
     .menu-label{font-weight:700;text-transform:uppercase}
 
-    /* controls row (visible chips) */
-    .controls-row { width:100%; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-    /* unified button size */
-    .chip, .sort-btn {
+    /* Controls - sort only (kept visible as requested) */
+    .sort-row { display:flex; gap:12px; justify-content:center; width:100%; }
+    .sort-btn{
       padding:12px 20px;
       border-radius:14px;
       font-weight:900;
@@ -55,27 +56,25 @@
       background:var(--card);
       color:var(--text);
       border:1px solid var(--border);
-      min-width:120px;
-      text-align:center;
+      min-width:140px;
       cursor:pointer;
     }
-    .chip.active{border-color:#ffd54a;box-shadow:0 10px 40px rgba(0,0,0,0.6);}
+    .sort-btn.active{border-color:#ffd54a; box-shadow:0 10px 40px rgba(0,0,0,0.6);}
 
-    /* layout: centered list */
+    /* list grid centered */
     .list-root{width:100%;max-width:1200px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:12px}
 
-    /* unit card */
+    /* card structure with fixed header height to align cards */
     .unit-card{position:relative;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));border-radius:var(--radius);padding:18px;border:1px solid var(--border);min-height:360px;display:flex;flex-direction:column;justify-content:space-between;overflow:visible}
-    /* header area fixed to align cards */
-    .card-header{height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+    .card-header{height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
     .unit-title{font-weight:900;text-transform:uppercase;font-size:16px;letter-spacing:0.6px;text-align:center}
 
-    /* portrait frame (rounded square behind circle) */
+    /* portrait frame + circular portrait inside */
     .portrait-frame{width:132px;height:132px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.03));display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.03);position:relative}
     .portrait-circle{width:110px;height:110px;border-radius:50%;background:var(--box);display:flex;align-items:center;justify-content:center;border:3px solid rgba(0,0,0,0.6)}
     .portrait-circle .img{width:98px;height:98px;border-radius:50%;background-size:cover;background-position:center}
 
-    /* rarity halo behind frame */
+    /* rarity halo behind the frame */
     .unit-card.rarity-astral .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-astral);z-index:-1;opacity:0.95;filter:blur(8px)}
     .unit-card.rarity-cosmic .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-cosmic);z-index:-1;opacity:0.95;filter:blur(8px)}
     .unit-card.rarity-divine .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-divine);z-index:-1;opacity:0.95;filter:blur(8px)}
@@ -84,14 +83,33 @@
     .unit-card.rarity-mythic .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-mythic);z-index:-1;opacity:0.95;filter:blur(8px)}
     .unit-card.rarity-legendary .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-legendary);z-index:-1;opacity:0.95;filter:blur(8px)}
 
-    /* info row */
+    .unit-card.rarity-astral::after{content:'';position:absolute;inset:0;background:var(--g-astral);opacity:0.06;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-cosmic::after{content:'';position:absolute;inset:0;background:var(--g-cosmic);opacity:0.06;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-divine::after{content:'';position:absolute;inset:0;background:var(--g-divine);opacity:0.06;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-godly::after{content:'';position:absolute;inset:0;background:var(--g-godly);opacity:0.06;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-exclusive::after{content:'';position:absolute;inset:0;background:var(--g-exclusive);opacity:0.06;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-mythic::after{content:'';position:absolute;inset:0;background:var(--g-mythic);opacity:0.06;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-legendary::after{content:'';position:absolute;inset:0;background:var(--g-legendary);opacity:0.06;border-radius:var(--radius);pointer-events:none}
+
     .info-row{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:12px}
     .info-box{min-width:120px;background:var(--panel);border-radius:10px;padding:12px 14px;text-align:center;border:1px solid var(--border)}
     .info-box .label{display:block;color:var(--muted);font-weight:800;font-size:11px;text-transform:uppercase}
     .info-box .value{display:block;font-weight:900;margin-top:6px}
 
-    /* neutral badges kept (no colored gradients) */
-    .status-badge,.demand-pill{background:var(--panel);color:var(--muted);padding:6px 10px;border-radius:8px;font-weight:900;text-transform:uppercase;border:1px solid var(--border)}
+    /* restore colored status and demand as user asked */
+    .status-badge{padding:6px 10px;border-radius:8px;font-weight:900;text-transform:uppercase;font-size:12px;display:inline-block}
+    .status-stable{background:linear-gradient(90deg,#f97316,#ffb86b);color:#2a1000}
+    .status-high-demand{background:linear-gradient(90deg,#7c3aed,#a78bfa);color:#fff}
+    .status-hyped{background:linear-gradient(90deg,#06b6d4,#7ef0f7);color:#021}
+    .status-dropping{background:linear-gradient(90deg,#ef4444,#ff8a8a);color:#200}
+    .status-unstable{background:linear-gradient(90deg,#9d174d,#ff95c9);color:#23020a}
+    .status-recovering{background:linear-gradient(90deg,#65a30d,#bef264);color:#032}
+    .status-default{background:linear-gradient(90deg,#6b7280,#9ca3af);color:#fff}
+
+    .demand-pill{padding:6px 8px;border-radius:8px;font-weight:900;color:#fff}
+    .demand-low{background:linear-gradient(90deg,#6b7280,#9ca3af)}
+    .demand-mid{background:linear-gradient(90deg,#f97316,#ffb86b);color:#120}
+    .demand-high{background:linear-gradient(90deg,#16a34a,#6fe89a);color:#012}
 
     /* calculator thumbnails */
     .calc-thumb{width:76px;height:76px;border-radius:10px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,0.04);background:var(--panel)}
@@ -107,7 +125,7 @@
 
     .soap-badge{position:absolute;right:6px;top:6px;padding:4px 6px;border-radius:8px;background:linear-gradient(90deg,#fff7cc,#fff1a8);color:#3b2f00;font-weight:900;font-size:11px;z-index:4}
 
-    /* picker (scrollable on mobile) */
+    /* picker */
     .picker-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);z-index:9999;padding:12px}
     .picker-box{width:100%;max-width:1180px;max-height:90vh;border-radius:12px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,0.006),rgba(255,255,255,0.003));border:1px solid var(--border);display:flex;gap:12px;overflow:hidden}
     .picker-sidebar{width:160px;display:flex;flex-direction:column;gap:10px;overflow:auto;padding:6px}
@@ -121,13 +139,13 @@
 </head>
 <body>
   <div class="container">
-    <div class="top-row" style="position:relative">
+    <div class="top-row">
       <input id="search-bar" placeholder="Search unit..." aria-label="Search units" />
       <div style="display:flex;gap:12px;align-items:center">
-        <div class="menu-btn" id="menu-btn" title="Menu" aria-haspopup="true" aria-expanded="false"><div class="dots" aria-hidden="true"></div></div>
+        <div class="menu-btn" id="menu-btn" title="Menu"><div class="dots" aria-hidden="true"></div></div>
       </div>
 
-      <!-- 3-dot menu panel -->
+      <!-- 3-dot menu now contains Calculator + All + rarities in order (no sort buttons included) -->
       <div class="menu-panel" id="menu-panel" aria-hidden="true">
         <div class="menu-section">
           <div class="menu-item" data-key="calculator"><div class="menu-label">Calculator</div></div>
@@ -145,18 +163,8 @@
       </div>
     </div>
 
-    <div class="controls-row">
-      <div class="chip active" data-rarity="all">All</div>
-      <div class="chip" data-rarity="astral">Astral</div>
-      <div class="chip" data-rarity="cosmic">Cosmic</div>
-      <div class="chip" data-rarity="divine">Divine</div>
-      <div class="chip" data-rarity="godly">Godly</div>
-      <div class="chip" data-rarity="exclusive">Exclusive</div>
-      <div class="chip" data-rarity="mythic">Mythic</div>
-      <div class="chip" data-rarity="legendary">Legendary</div>
-    </div>
-
-    <div style="display:flex;gap:12px">
+    <!-- leave only sort buttons visible (but enlarged and same size) -->
+    <div class="sort-row">
       <button class="sort-btn active" data-sort="default">Default Sort</button>
       <button class="sort-btn" data-sort="value-desc">High Value</button>
     </div>
@@ -164,9 +172,9 @@
     <div id="list-root" class="list-root"></div>
 
     <div style="display:flex;gap:12px;justify-content:center;align-items:center;margin-top:12px" id="pagination">
-      <button id="prev-btn" class="chip" style="min-width:120px">Previous</button>
+      <button id="prev-btn" class="sort-btn" style="min-width:120px">Previous</button>
       <div id="page-info" style="color:var(--muted)">Page 1 of 1</div>
-      <button id="next-btn" class="chip" style="min-width:120px">Next</button>
+      <button id="next-btn" class="sort-btn" style="min-width:120px">Next</button>
     </div>
 
     <!-- Calculator -->
@@ -174,14 +182,14 @@
       <div style="display:flex;gap:18px;flex-wrap:wrap;justify-content:center">
         <div style="width:46%;min-width:260px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.01));padding:18px;border-radius:12px;border:1px solid var(--border)">
           <div style="text-align:center;font-weight:900">YOUR VALUE</div>
-          <div style="display:flex;justify-content:center;margin:12px 0"><button id="plus-left" class="chip" style="min-width:56px;height:56px;border-radius:12px">+</button></div>
+          <div style="display:flex;justify-content:center;margin:12px 0"><button id="plus-left" class="sort-btn" style="min-width:56px;height:56px;border-radius:12px">+</button></div>
           <div id="left-items" style="display:grid;grid-template-columns:repeat(auto-fill,76px);gap:8px;min-height:120px"></div>
           <div style="text-align:center;margin-top:12px"><span id="left-total" style="padding:8px 12px;border-radius:10px;background:linear-gradient(90deg,#7b00e6,#ff2d6f);color:#000;font-weight:900">TOTAL VALUE: 0</span></div>
         </div>
 
         <div style="width:46%;min-width:260px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.01));padding:18px;border-radius:12px;border:1px solid var(--border)">
           <div style="text-align:center;font-weight:900">THEIR VALUE</div>
-          <div style="display:flex;justify-content:center;margin:12px 0"><button id="plus-right" class="chip" style="min-width:56px;height:56px;border-radius:12px">+</button></div>
+          <div style="display:flex;justify-content:center;margin:12px 0"><button id="plus-right" class="sort-btn" style="min-width:56px;height:56px;border-radius:12px">+</button></div>
           <div id="right-items" style="display:grid;grid-template-columns:repeat(auto-fill,76px);gap:8px;min-height:120px"></div>
           <div style="text-align:center;margin-top:12px"><span id="right-total" style="padding:8px 12px;border-radius:10px;background:linear-gradient(90deg,#7b00e6,#ff2d6f);color:#000;font-weight:900">TOTAL VALUE: 0</span></div>
         </div>
@@ -209,15 +217,12 @@
       </div>
     </div>
 
-  </div><!-- container -->
+  </div> <!-- container -->
 
   <script src="skibidi-td-data.js"></script>
-
   <script>
   (function(){
     'use strict';
-
-    // helpers
     const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const parseValue = v => { if (v===0) return 0; if (!v && v!==0) return 0; let s=String(v).trim().replace(/[\$\€\£\¥\₹]/g,'').replace(/\s+/g,''); const m=s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/); if(m){ let n=parseFloat(m[1].replace(/,/g,''))||0; const sx=m[2]; if(sx){ if(sx.toLowerCase()==='k') n*=1e3; if(sx.toLowerCase()==='m') n*=1e6;} return n; } const f=s.match(/[\d.]+/); return f?parseFloat(f[0].replace(/,/g,'')):0; };
     const abbr = n => { if(!isFinite(n)||n===0) return '0'; if(n>=1e6) return (n/1e6).toFixed(2)+'M+'; if(n>=1e3) return (n/1e3).toFixed(2)+'K'; return Math.round(n).toLocaleString(); };
@@ -225,17 +230,17 @@
     if (typeof unitDatabase === 'undefined' || !unitDatabase) { alert('unitDatabase missing'); return; }
     const imageProvider = "https://corsproxy.io/?https://drive.google.com/thumbnail?id=";
     const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
-    const LS_KEY = 'skibidi_td_vfinal';
+    const LS_KEY = 'skibidi_td_menu_final';
 
     // state
-    let currentFilter = 'all', searchQuery = '', currentSort = 'default', currentPage = 1;
+    let currentFilter='all', searchQuery='', currentSort='default', currentPage=1;
     let itemsPerPage = (window.innerWidth<=900)?8:15;
     const rarityOrder = { astral:1, cosmic:2, godly:3, divine:4, mythic:5, legendary:6, exclusive:99 };
 
-    let leftItems = [], rightItems = [];
+    let leftItems=[], rightItems=[];
     let currentPickerSide='left', pendingPickerKey=null;
 
-    // dom refs
+    // refs
     const menuBtn = document.getElementById('menu-btn');
     const menuPanel = document.getElementById('menu-panel');
     const listRoot = document.getElementById('list-root');
@@ -251,17 +256,18 @@
     const traitList = document.getElementById('trait-list');
     const traitCancel = document.getElementById('trait-cancel');
 
-    function statusClass(status){ if(!status)return 'status-default'; const s=String(status).toLowerCase(); if(/stable/.test(s))return 'status-stable'; if(/high demand|highdemand|high-demand/.test(s))return 'status-high-demand'; if(/hyped|hype/.test(s))return 'status-hyped'; if(/drop|dropp/.test(s))return 'status-dropping'; if(/unstable/.test(s))return 'status-unstable'; return 'status-default'; }
-    function demandClass(d){ if(!d) return 'demand-low'; const m=String(d).match(/(\d+)/); const v=m?Number(m[1]):0; if(v>=8)return 'demand-high'; if(v>=4)return 'demand-mid'; return 'demand-low'; }
+    function statusClass(status){ if(!status) return 'status-default'; const s=String(status).toLowerCase(); if(/stable/.test(s)) return 'status-stable'; if(/high demand|highdemand/.test(s)) return 'status-high-demand'; if(/hyped|hype/.test(s)) return 'status-hyped'; if(/drop|dropp/.test(s)) return 'status-dropping'; if(/unstable/.test(s)) return 'status-unstable'; return 'status-default'; }
+    function demandClass(d){ if(!d) return 'demand-low'; const m=String(d).match(/(\d+)/); const v=m?Number(m[1]):0; if(v>=8) return 'demand-high'; if(v>=4) return 'demand-mid'; return 'demand-low'; }
 
     function renderList(){
       const keys = unitKeys.filter(k=>{ const u=unitDatabase[k]; const r=(u.rarity||'').toLowerCase(); if(currentFilter!=='all' && r!==currentFilter) return false; if(searchQuery && !(u.name||'').toLowerCase().includes(searchQuery.toLowerCase())) return false; return true; });
-      keys.sort((a,b)=>{ if(currentSort==='value-desc') return parseValue(unitDatabase[b].baseStats.value)-parseValue(unitDatabase[a].baseStats.value); const wa = rarityOrder[(unitDatabase[a].rarity||'').toLowerCase()]||999; const wb = rarityOrder[(unitDatabase[b].rarity||'').toLowerCase()]||999; if(wa!==wb) return wa-wb; return (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''); });
+      keys.sort((a,b)=>{ if(currentSort==='value-desc') return parseValue(unitDatabase[b].baseStats.value)-parseValue(unitDatabase[a].baseStats.value); const wa=rarityOrder[(unitDatabase[a].rarity||'').toLowerCase()]||999; const wb=rarityOrder[(unitDatabase[b].rarity||'').toLowerCase()]||999; if(wa!==wb) return wa-wb; return (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''); });
 
       const totalPages = Math.max(1, Math.ceil(keys.length/itemsPerPage));
       if(currentPage>totalPages) currentPage=totalPages;
-      const start = (currentPage-1)*itemsPerPage;
+      const start=(currentPage-1)*itemsPerPage;
       const pageKeys = keys.slice(start, start+itemsPerPage);
+
       document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
       document.getElementById('prev-btn').disabled = currentPage===1;
       document.getElementById('next-btn').disabled = currentPage===totalPages;
@@ -276,9 +282,7 @@
         return `<div class="unit-card ${rcls}" data-key="${k}">
           <div class="card-header">
             <div class="unit-title">${esc(u.name)}</div>
-            <div class="portrait-frame">
-              <div class="portrait-circle ${rcls}"><div class="img" style="background-image:${p}"></div></div>
-            </div>
+            <div class="portrait-frame"><div class="portrait-circle ${rcls}"><div class="img" style="background-image:${p}"></div></div></div>
             ${second}
           </div>
           <div class="info-row">
@@ -294,33 +298,21 @@
     document.addEventListener('click', (e)=>{ if(!menuBtn.contains(e.target) && !menuPanel.contains(e.target)){ menuPanel.style.display='none'; menuPanel.setAttribute('aria-hidden','true'); } });
     menuPanel.querySelectorAll('.menu-item').forEach(it=>{ it.addEventListener('click', ()=>{ const key = it.getAttribute('data-key'); menuPanel.style.display='none'; if(key==='calculator'){ document.getElementById('calculator-root').style.display='block'; listRoot.style.display='none'; document.getElementById('pagination').style.display='none'; } else { document.getElementById('calculator-root').style.display='none'; listRoot.style.display=''; document.getElementById('pagination').style.display='flex'; currentFilter = key || 'all'; currentPage = 1; renderList(); } }); });
 
-    // chips behavior (top visible buttons)
-    document.querySelectorAll('.chip').forEach(ch=>{
-      ch.addEventListener('click', ()=>{
-        document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
-        ch.classList.add('active');
-        const r = ch.getAttribute('data-rarity') || 'all';
-        currentFilter = r; currentPage = 1; renderList();
-      });
-    });
-
-    // sort buttons
-    document.querySelectorAll('.sort-btn').forEach(b=>{
-      b.addEventListener('click', ()=>{ document.querySelectorAll('.sort-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); currentSort = b.getAttribute('data-sort') || 'default'; currentPage = 1; renderList(); });
-    });
+    // sort wiring
+    document.querySelectorAll('.sort-btn').forEach(b=>{ b.addEventListener('click', ()=>{ document.querySelectorAll('.sort-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); currentSort = b.getAttribute('data-sort')||'default'; currentPage = 1; renderList(); }); });
 
     // pagination & search
     document.getElementById('prev-btn').addEventListener('click', ()=>{ if(currentPage>1){ currentPage--; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }});
     document.getElementById('next-btn').addEventListener('click', ()=>{ const keys = unitKeys.filter(k=>{ const u=unitDatabase[k]; const r=(u.rarity||'').toLowerCase(); if(currentFilter!=='all' && r!==currentFilter) return false; if(searchQuery && !(u.name||'').toLowerCase().includes(searchQuery.toLowerCase())) return false; return true; }); const maxp = Math.ceil(keys.length/itemsPerPage)||1; if(currentPage<maxp){ currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }});
     document.getElementById('search-bar').addEventListener('input', e=>{ searchQuery = e.target.value || ''; currentPage = 1; renderList(); });
 
-    // picker functions
+    // picker
     function createPicker(){
-      const cats = ['Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
+      const cats=['Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
       pickerSidebar.innerHTML = cats.map(c=>`<div class="picker-cat" data-cat="${c.toLowerCase()}">${c}</div>`).join('');
       const def = pickerSidebar.querySelector('[data-cat="astral"]'); if(def) def.classList.add('active');
       renderPickerGrid('astral','',1,'astral','');
-      pickerSidebar.querySelectorAll('.picker-cat').forEach(btn=>{ btn.addEventListener('click', ()=>{ pickerSidebar.querySelectorAll('.picker-cat').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); const cat = btn.getAttribute('data-cat')||'astral'; renderPickerGrid(cat,'',1,cat,pickerSearch.value||''); }); });
+      pickerSidebar.querySelectorAll('.picker-cat').forEach(btn=>{ btn.addEventListener('click', ()=>{ pickerSidebar.querySelectorAll('.picker-cat').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); renderPickerGrid(btn.getAttribute('data-cat')||'astral','','',btn.getAttribute('data-cat')||'astral'); }); });
       pickerSearch.removeEventListener('input', onPickerSearch); pickerSearch.addEventListener('input', onPickerSearch);
       pickerOverlay.addEventListener('click', (ev)=>{ if(ev.target===pickerOverlay) hidePicker(); });
     }
@@ -332,8 +324,8 @@
       pickerGrid.innerHTML = keys.map(k=>{ const u=unitDatabase[k]; const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : ''; const rcls=(u.rarity||'').toLowerCase().replace(/\s+/g,'-'); return `<div class="picker-thumb rarity-${rcls}" data-key="${k}"><div style="width:68px;height:68px;border-radius:8px;background-image:${p};background-size:cover;background-position:center"></div></div>`; }).join('');
       pickerGrid.querySelectorAll('.picker-thumb').forEach(t=>{ t.removeEventListener('click', onPickerClick); t.addEventListener('click', onPickerClick); });
     }
-    function onPickerClick(e){ const key=e.currentTarget.getAttribute('data-key'); if(!key) return; pendingPickerKey = key; openTraitChooser(key); }
-    function openTraitChooser(key){ traitList.innerHTML=''; const base=[{id:'clean',label:'Clean'},{id:'normal',label:'Normal'}]; base.forEach(b=>{ const btn=document.createElement('button'); btn.className='trait-btn'; btn.textContent=b.label; btn.addEventListener('click', ()=>{ addToSide(currentPickerSide,key,b.id,1); traitOverlay.style.display='none'; hidePicker(); }); traitList.appendChild(btn); }); const u = unitDatabase[key]; if(u && u.traits) Object.keys(u.traits).forEach(tr=>{ const btn=document.createElement('button'); btn.className='trait-btn'; btn.textContent=tr; btn.addEventListener('click', ()=>{ addToSide(currentPickerSide,key,tr,1); traitOverlay.style.display='none'; hidePicker(); }); traitList.appendChild(btn); }); traitOverlay.style.display='flex'; traitCancel.removeEventListener('click', ()=>{}); traitCancel.addEventListener('click', ()=>{ traitOverlay.style.display='none'; pendingPickerKey=null; }, { once:true }); }
+    function onPickerClick(e){ const key=e.currentTarget.getAttribute('data-key'); if(!key) return; pendingPickerKey=key; openTraitChooser(key); }
+    function openTraitChooser(key){ traitList.innerHTML=''; const base=[{id:'clean',label:'Clean'},{id:'normal',label:'Normal'}]; base.forEach(b=>{ const btn=document.createElement('button'); btn.className='trait-btn'; btn.textContent=b.label; btn.addEventListener('click', ()=>{ addToSide(currentPickerSide,key,b.id,1); traitOverlay.style.display='none'; hidePicker(); }); traitList.appendChild(btn); }); const u=unitDatabase[key]; if(u && u.traits) Object.keys(u.traits).forEach(tr=>{ const btn=document.createElement('button'); btn.className='trait-btn'; btn.textContent=tr; btn.addEventListener('click', ()=>{ addToSide(currentPickerSide,key,tr,1); traitOverlay.style.display='none'; hidePicker(); }); traitList.appendChild(btn); }); traitOverlay.style.display='flex'; traitCancel.removeEventListener('click', ()=>{}); traitCancel.addEventListener('click', ()=>{ traitOverlay.style.display='none'; pendingPickerKey=null; }, { once:true }); }
     function showPicker(){ pickerOverlay.style.display='flex'; document.body.style.overflow='hidden'; }
     function hidePicker(){ pickerOverlay.style.display='none'; document.body.style.overflow=''; }
 
@@ -351,7 +343,7 @@
     // init
     try{ restoreTrade(); renderList(); renderThumbs(); updateTotalsAndVerdict(); }catch(e){ console.error('init',e); }
 
-    // expose for debugging
+    // expose
     window._skibidi = { unitDatabase, leftItems, rightItems, renderList, renderThumbs, updateTotalsAndVerdict };
   })();
   </script>
