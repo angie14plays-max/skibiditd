@@ -134,32 +134,29 @@
     /* Calculator */
     .calculator-root { width:100%; max-width:1200px; margin:0 auto 12px; display:none; }
     .calc-row { display:flex; gap:18px; align-items:flex-start; justify-content:center; }
-    .trade-panel { width:46%; min-height:420px; border-radius:12px; padding:18px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.01)); border:1px solid var(--border); }
+    .trade-panel { width:46%; min-height:300px; border-radius:12px; padding:18px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.01)); border:1px solid var(--border); }
     .trade-title { text-align:center; font-weight:900; text-transform:uppercase; margin-bottom:12px; }
     .plus-wrap { display:flex; justify-content:center; margin-bottom:8px; }
     .plus-btn { width:64px; height:64px; border-radius:16px; font-size:28px; font-weight:900; cursor:pointer; display:grid; place-items:center; background:var(--accent-grad); border:3px solid rgba(255,255,255,0.06); }
 
-    .items-list { border-radius:12px; padding:16px; min-height:260px; border:1px solid rgba(255,255,255,0.04); display:grid; grid-template-columns:repeat(auto-fill,96px); gap:14px; background:rgba(0,0,0,0.01); align-items:start; }
-    .calc-thumb { width:96px; height:96px; border-radius:12px; background:var(--box); border:3px solid rgba(255,255,255,0.04); position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 8px 24px rgba(0,0,0,0.6); cursor:pointer }
-    .calc-thumb .img { width:80%; height:80%; background-size:cover; background-position:center; border-radius:50%; border:3px solid rgba(0,0,0,0.6); box-shadow: var(--neon-glow); }
-    .calc-thumb .thumb-remove { display:none }
-
-    /* qty badge on top, trait label lower-left, demand pill below thumb */
-    .calc-thumb .qty-badge { position:absolute; left:8px; top:8px; background:linear-gradient(90deg,#000000cc,#00000088); color:#fff; font-weight:900; padding:6px 8px; border-radius:999px; font-size:12px; min-width:28px; text-align:center; }
-    .calc-thumb .trait-label { position:absolute; left:8px; bottom:8px; background:linear-gradient(90deg,#000000cc,#00000088); color:#fff; font-weight:900; padding:6px 8px; border-radius:8px; font-size:11px; text-transform:uppercase; }
-    .calc-thumb .demand-pill-mini { position:absolute; left:50%; transform:translateX(-50%); bottom:-16px; padding:6px 8px; border-radius:999px; font-weight:900; font-size:11px; background:linear-gradient(90deg,#ffd54a,#ffb86b); color:#070; border:2px solid rgba(0,0,0,0.25); }
-
-    /* when small, show unit name under the thumb in list (for accessibility) */
-    .items-list .calc-thumb .name-vis { position:absolute; left:50%; transform:translateX(-50%); bottom:-18px; font-size:11px; color:var(--muted); font-weight:800; }
+    .items-list { border-radius:12px; padding:14px; min-height:220px; border:1px solid rgba(255,255,255,0.04); display:grid; grid-template-columns:repeat(auto-fill,120px); gap:14px; background:rgba(0,0,0,0.01); }
+    .calc-thumb { width:116px; height:116px; border-radius:14px; background:var(--box); border:3px solid rgba(255,255,255,0.04); position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 10px 34px rgba(0,0,0,0.7); }
+    .calc-thumb .img { width:84%; height:84%; background-size:cover; background-position:center; border-radius:50%; border:3px solid rgba(0,0,0,0.6); box-shadow: 0 8px 28px rgba(0,0,0,0.6); }
+    .calc-thumb .thumb-remove { position:absolute; left:8px; top:8px; background:rgba(0,0,0,0.6); color:#fff; border-radius:10px; padding:4px 8px; cursor:pointer; font-weight:900; font-size:12px; display:inline-block; }
+    .calc-thumb { cursor:pointer }
+    .calc-thumb .qty-badge { position:absolute; left:10px; top:10px; background:linear-gradient(90deg,#000000cc,#00000088); color:#fff; font-weight:900; padding:6px 10px; border-radius:999px; font-size:13px; min-width:30px; text-align:center; }
+    .calc-thumb .trait-label { position:absolute; left:10px; bottom:10px; background:linear-gradient(90deg,#000000cc,#00000088); color:#fff; font-weight:900; padding:7px 10px; border-radius:10px; font-size:12px; text-transform:uppercase; }
+    .calc-thumb .demand-pill-mini { position:absolute; left:50%; transform:translateX(-50%); bottom:-22px; padding:8px 10px; border-radius:999px; font-weight:900; font-size:12px; background:linear-gradient(90deg,#ffd54a,#ffb86b); color:#070; border:2px solid rgba(0,0,0,0.25); box-shadow: 0 6px 20px rgba(0,0,0,0.45); }
+    .items-list .calc-thumb .name-vis { position:absolute; left:50%; transform:translateX(-50%); bottom:-36px; font-size:12px; color:var(--muted); font-weight:800; }
 
     /* square colored frame behind calc thumb */
-    .calc-thumb.rarity-astral::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-astral); z-index:-1; opacity:0.95; }
-    .calc-thumb.rarity-cosmic::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-cosmic); z-index:-1; opacity:0.95; }
-    .calc-thumb.rarity-divine::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-divine); z-index:-1; opacity:0.95; }
-    .calc-thumb.rarity-godly::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-godly); z-index:-1; opacity:0.95; }
-    .calc-thumb.rarity-exclusive::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-exclusive); z-index:-1; opacity:0.95; }
-    .calc-thumb.rarity-mythic::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-mythic); z-index:-1; opacity:0.95; }
-    .calc-thumb.rarity-legendary::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-legendary); z-index:-1; opacity:0.95; }
+    .calc-thumb.rarity-astral::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-astral); z-index:-1; opacity:0.98; filter: blur(6px); }
+    .calc-thumb.rarity-cosmic::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-cosmic); z-index:-1; opacity:0.98; filter: blur(6px); }
+    .calc-thumb.rarity-divine::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-divine); z-index:-1; opacity:0.98; filter: blur(6px); }
+    .calc-thumb.rarity-godly::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-godly); z-index:-1; opacity:0.98; filter: blur(6px); }
+    .calc-thumb.rarity-exclusive::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-exclusive); z-index:-1; opacity:0.98; filter: blur(6px); }
+    .calc-thumb.rarity-mythic::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-mythic); z-index:-1; opacity:0.98; filter: blur(6px); }
+    .calc-thumb.rarity-legendary::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-legendary); z-index:-1; opacity:0.98; filter: blur(6px); }
 
     .total-box { display:flex; justify-content:center; margin-top:12px; }
     .total-value { padding:10px 16px; border-radius:10px; font-weight:900; color:#000; background: linear-gradient(90deg,#7b00e6,#ff2d6f); }
@@ -177,20 +174,6 @@
     .picker-main { flex:1; display:flex; flex-direction:column; gap:10px; padding:6px; }
     .picker-search input { padding:10px 12px; border-radius:10px; background:var(--box); border:1px solid var(--border); color:var(--text); width:100%; }
     .picker-grid { flex:1; overflow:auto; padding:12px; display:grid; grid-template-columns: repeat(auto-fill,78px); gap:12px; border-radius:10px; }
-
-    /* trait selector modal inside picker */
-    .trait-modal { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:40; width:380px; max-width:94%; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.03)); border-radius:14px; padding:18px; box-shadow:0 18px 60px rgba(0,0,0,0.7); border:3px solid rgba(255,255,255,0.03); }
-    .trait-modal .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-    .trait-modal .title { font-weight:900; letter-spacing:1px; font-size:18px; text-transform:uppercase; }
-    .trait-modal .close-x { cursor:pointer; font-weight:900; font-size:20px; padding:4px 8px; border-radius:8px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); }
-    .trait-modal .traits-list { max-height:220px; overflow:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
-    .trait-modal .trait-row { display:flex; gap:12px; align-items:center; justify-content:space-between; padding:10px 12px; border-radius:10px; background:var(--panel); border:1px solid var(--border); text-transform:uppercase; font-weight:900; color:var(--text); }
-    .trait-modal .trait-row label { display:flex; align-items:center; gap:8px; flex:1; }
-    .trait-modal .trait-row input[type="radio"] { width:16px; height:16px; accent-color:#fff; }
-    .trait-modal .qty-row { display:flex; flex-direction:column; gap:6px; margin-top:4px; }
-    .trait-modal .qty-row input { width:100%; padding:12px 14px; border-radius:10px; background:var(--box); border:1px solid var(--border); color:var(--muted); font-weight:900; text-transform:uppercase; }
-    .trait-modal .btn-row { display:flex; gap:8px; justify-content:center; margin-top:12px; }
-    .trait-modal .btn { padding:12px 18px; border-radius:10px; cursor:pointer; background:linear-gradient(90deg,#7b00e6,#ff2d6f); color:#fff; border:none; font-weight:900; width:100%; }
 
     .picker-thumb { width:78px; height:78px; border-radius:10px; background:var(--box); border:2px solid rgba(255,255,255,0.03); display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; }
     .picker-thumb .img { width:100%; height:100%; background-size:cover; background-position:center; border-radius:8px; }
@@ -217,7 +200,7 @@
       .portrait-circle { width:96px; height:96px; }
       .portrait-circle .unit-image { width:86px; height:86px; }
       .picker-grid { grid-template-columns:repeat(auto-fill,72px); gap:10px; }
-      .items-list { grid-template-columns:repeat(auto-fill,64px); gap:8px; }
+      .items-list { grid-template-columns:repeat(auto-fill,88px); gap:10px; }
     }
 
   </style>
@@ -274,12 +257,6 @@
       <div class="picker-main">
         <div class="picker-search"><input id="picker-search-input" placeholder="SEARCH UNITS..." aria-label="Picker search" /></div>
         <div id="picker-grid" class="picker-grid"></div>
-        <div id="trait-modal" class="trait-modal" style="display:none" role="dialog" aria-modal="true">
-          <div class="header"><div class="title" id="trait-modal-title">ENTER QUANTITY</div><div id="trait-close" class="close-x">×</div></div>
-          <div class="qty-row"><input id="trait-qty" type="number" min="1" value="1" placeholder="QUANTITY" /></div>
-          <div class="traits-list" id="trait-options"></div>
-          <div class="btn-row"><button id="trait-apply" class="btn">ADD</button></div>
-        </div>
       </div>
     </div>
   </div>
@@ -520,77 +497,14 @@
     function onPickerClick(e){
       const key = e.currentTarget.getAttribute('data-key');
       if (!key) return;
-      // open trait/quantity modal to allow picking trait and quantity
-      showTraitModal(key);
+      // add to currently selected side (default to left)
+      const side = currentPickerSide || 'left';
+      addToSide(side, key, 'base', 1);
+      hidePicker();
     }
 
     function showPicker(){ pickerOverlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
     function hidePicker(){ pickerOverlay.style.display = 'none'; document.body.style.overflow = ''; }
-
-    // Trait modal logic
-    let _currentTraitKey = null;
-    const traitModal = document.getElementById('trait-modal');
-    const traitOptions = document.getElementById('trait-options');
-    const traitQty = document.getElementById('trait-qty');
-    const traitTitle = document.getElementById('trait-modal-title');
-    const traitApplyBtn = document.getElementById('trait-apply');
-    const traitCloseBtn = document.getElementById('trait-close');
-
-    // traitIcons map lets you associate a trait name with a drive thumbnail id (test mapping included)
-    const traitIcons = {
-      // example mapping from user: Superpayday -> drive id snippet
-      'Superpayday': '1fskkP2TO22EJ9PVhr8f7IKqzvN6DD0c-'
-    };
-
-    function showTraitModal(key){
-      const u = unitDatabase[key];
-      if (!u) return;
-      _currentTraitKey = key;
-      // title shows unit name for clarity
-      traitTitle.textContent = (u.name || 'Unit').toUpperCase();
-      traitOptions.innerHTML = '';
-      // base option (icon if traitIcons provides one keyed by 'base' or use unit image)
-      const baseVal = esc(u.baseStats && u.baseStats.value ? u.baseStats.value : '0');
-      const baseIconId = u.unitId || traitIcons['Base'] || null;
-      const baseIcon = baseIconId ? `<div class="trait-icon" style="background-image:url('${imageProvider}${baseIconId}')"></div>` : '';
-      const baseRow = document.createElement('div'); baseRow.className = 'trait-row';
-      baseRow.innerHTML = `${baseIcon}<div style="flex:1">BASE — ${baseVal}</div><input type=\"radio\" name=\"trait-choice\" value=\"base\" checked />`;
-      traitOptions.appendChild(baseRow);
-
-      // trait options if available: add icon for each trait when mapping exists
-      if (u.traits && typeof u.traits === 'object'){
-        Object.keys(u.traits).forEach(tk => {
-          const t = u.traits[tk];
-          const tv = esc(t && t.value ? t.value : 'N/A');
-          const iconId = traitIcons[tk] || t.icon || null;
-          const iconHtml = iconId ? `<div class="trait-icon" style="background-image:url('${imageProvider}${iconId}')"></div>` : '';
-          const r = document.createElement('div'); r.className = 'trait-row';
-          r.innerHTML = `${iconHtml}<div style="flex:1">${esc(tk)} — ${tv}</div><input type=\"radio\" name=\"trait-choice\" value=\"${esc(tk)}\" />`;
-          traitOptions.appendChild(r);
-        });
-      }
-      traitQty.value = 1;
-      traitModal.style.display = 'block';
-    }
-
-    function hideTraitModal(){
-      _currentTraitKey = null;
-      traitModal.style.display = 'none';
-    }
-
-    function onTraitApply(){
-      if (!_currentTraitKey) { hideTraitModal(); return; }
-      const chosen = (traitOptions.querySelector('input[name="trait-choice"]:checked') || {}).value || 'base';
-      let qty = parseInt(traitQty.value, 10) || 1; if (qty < 1) qty = 1;
-      const side = currentPickerSide || 'left';
-      addToSide(side, _currentTraitKey, chosen, qty);
-      hideTraitModal();
-      hidePicker();
-    }
-
-    traitApplyBtn.removeEventListener && traitApplyBtn.removeEventListener('click', onTraitApply);
-    traitApplyBtn.addEventListener('click', onTraitApply);
-    traitCloseBtn && traitCloseBtn.addEventListener('click', hideTraitModal);
 
     // calculator rendering functions
     function calcThumbHTML(it){
@@ -599,34 +513,20 @@
       const rcls = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
       const qtyHtml = `<div class="qty-badge">${it.qty || 1}</div>`;
       const traitLabel = (it.trait && it.trait !== 'base') ? `<div class="trait-label">${esc(String(it.trait).toUpperCase())}</div>` : '';
-      const demandText = u.baseStats && u.baseStats.demand ? `DEMAND: ${esc(u.baseStats.demand)}` : '';
-      const demandHtml = demandText ? `<div class="demand-pill-mini">${demandText}</div>` : '';
-      // add optional visible name under thumb when placed in list (for clarity)
+      const demandText = (u.baseStats && u.baseStats.demand) ? esc(u.baseStats.demand) : '';
+      const demandHtml = demandText ? `<div class="demand-pill-mini">DEMAND: ${demandText}</div>` : '';
       const nameVis = `<div class="name-vis">${esc(u.name)}</div>`;
       return `<div class="calc-thumb rarity-${rcls}" data-id="${it.id}" title="${esc(u.name)}"><div class="img" style="background-image:${p}"></div><div class="thumb-remove" data-id="${it.id}">×</div>${qtyHtml}${traitLabel}${demandHtml}${nameVis}</div>`;
-    }
-
-    function onCalcThumbClick(e){
-      const el = e.currentTarget;
-      const id = el.getAttribute('data-id');
-      if(!id) return;
-      // remove from left or right arrays
-      let idx = leftItems.findIndex(x => x.id === id);
-      if (idx >= 0) leftItems.splice(idx,1);
-      else { idx = rightItems.findIndex(x => x.id === id); if (idx >= 0) rightItems.splice(idx,1); }
-      persistTrade(); renderThumbs(); updateTotalsAndVerdict();
     }
 
     function renderThumbs(){
       leftItemsEl.innerHTML = leftItems.map(calcThumbHTML).join('');
       rightItemsEl.innerHTML = rightItems.map(calcThumbHTML).join('');
-      // attach click-to-remove handlers on the whole thumb
-      document.querySelectorAll('.calc-thumb').forEach(el=>{
-        el.removeEventListener('click', onCalcThumbClick);
-        el.addEventListener('click', onCalcThumbClick);
+      // attach remove handlers
+      document.querySelectorAll('.thumb-remove').forEach(btn=>{
+        btn.removeEventListener('click', onThumbRemove);
+        btn.addEventListener('click', onThumbRemove);
       });
-      // ensure totals update after rendering
-      updateTotalsAndVerdict();
     }
 
     function onThumbRemove(e){
@@ -706,12 +606,6 @@
           listRoot.style.display = 'none';
           pagination.style.display = 'none';
         } else {
-          // switching away from calculator should clear selected items
-          leftItems = [];
-          rightItems = [];
-          persistTrade();
-          renderThumbs();
-          updateTotalsAndVerdict();
           calculatorRoot.style.display = 'none';
           calculatorRoot.setAttribute('aria-hidden', 'true');
           listRoot.style.display = '';
