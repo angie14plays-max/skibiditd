@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -170,6 +170,15 @@
     .picker-search input { padding:10px 12px; border-radius:10px; background:var(--box); border:1px solid var(--border); color:var(--text); width:100%; }
     .picker-grid { flex:1; overflow:auto; padding:12px; display:grid; grid-template-columns: repeat(auto-fill,78px); gap:12px; border-radius:10px; }
 
+    /* trait selector modal inside picker */
+    .trait-modal { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:20; width:360px; max-width:90%; background:var(--card); border:2px solid var(--border); border-radius:12px; padding:12px; box-shadow:0 12px 40px rgba(0,0,0,0.6); }
+    .trait-modal .title { font-weight:900; margin-bottom:8px; text-transform:uppercase; }
+    .trait-modal .traits-list { max-height:200px; overflow:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
+    .trait-modal .trait-row { display:flex; gap:8px; align-items:center; justify-content:space-between; padding:8px; border-radius:8px; background:var(--panel); border:1px solid var(--border); }
+    .trait-modal .qty-row { display:flex; gap:8px; align-items:center; justify-content:space-between; margin-top:8px; }
+    .trait-modal .btn-row { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+    .trait-modal .btn { padding:8px 12px; border-radius:8px; cursor:pointer; background:var(--card); border:1px solid var(--border); font-weight:900; }
+
     .picker-thumb { width:78px; height:78px; border-radius:10px; background:var(--box); border:2px solid rgba(255,255,255,0.03); display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; }
     .picker-thumb .img { width:100%; height:100%; background-size:cover; background-position:center; border-radius:8px; }
 
@@ -252,6 +261,18 @@
       <div class="picker-main">
         <div class="picker-search"><input id="picker-search-input" placeholder="SEARCH UNITS..." aria-label="Picker search" /></div>
         <div id="picker-grid" class="picker-grid"></div>
+        <div id="trait-modal" class="trait-modal" style="display:none" role="dialog" aria-modal="true">
+          <div class="title" id="trait-modal-title">Choose trait</div>
+          <div class="traits-list" id="trait-options"></div>
+          <div class="qty-row">
+            <label for="trait-qty">Quantity</label>
+            <input id="trait-qty" type="number" min="1" value="1" style="width:80px;padding:8px;border-radius:8px;background:var(--box);border:1px solid var(--border);color:var(--text)" />
+          </div>
+          <div class="btn-row">
+            <button id="trait-cancel" class="btn">Cancel</button>
+            <button id="trait-apply" class="btn">Apply</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -492,14 +513,66 @@
     function onPickerClick(e){
       const key = e.currentTarget.getAttribute('data-key');
       if (!key) return;
-      // add to currently selected side (default to left)
-      const side = currentPickerSide || 'left';
-      addToSide(side, key, 'base', 1);
-      hidePicker();
+      // open trait/quantity modal to allow picking trait and quantity
+      showTraitModal(key);
     }
 
     function showPicker(){ pickerOverlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
     function hidePicker(){ pickerOverlay.style.display = 'none'; document.body.style.overflow = ''; }
+
+    // Trait modal logic
+    let _currentTraitKey = null;
+    const traitModal = document.getElementById('trait-modal');
+    const traitOptions = document.getElementById('trait-options');
+    const traitQty = document.getElementById('trait-qty');
+    const traitTitle = document.getElementById('trait-modal-title');
+    const traitApplyBtn = document.getElementById('trait-apply');
+    const traitCancelBtn = document.getElementById('trait-cancel');
+
+    function showTraitModal(key){
+      const u = unitDatabase[key];
+      if (!u) return;
+      _currentTraitKey = key;
+      traitTitle.textContent = (u.name || 'Unit');
+      traitOptions.innerHTML = '';
+      // base option
+      const baseVal = esc(u.baseStats && u.baseStats.value ? u.baseStats.value : '0');
+      const baseRow = document.createElement('div'); baseRow.className = 'trait-row';
+      baseRow.innerHTML = `<label style="flex:1"><input type=\"radio\" name=\"trait-choice\" value=\"base\" checked /> Base — ${baseVal}</label>`;
+      traitOptions.appendChild(baseRow);
+      // trait options if available
+      if (u.traits && typeof u.traits === 'object'){
+        Object.keys(u.traits).forEach(tk => {
+          const t = u.traits[tk];
+          const tv = esc(t && t.value ? t.value : '0');
+          const r = document.createElement('div'); r.className = 'trait-row';
+          r.innerHTML = `<label style="flex:1"><input type=\"radio\" name=\"trait-choice\" value=\"${esc(tk)}\" /> ${esc(tk)} — ${tv}</label>`;
+          traitOptions.appendChild(r);
+        });
+      }
+      traitQty.value = 1;
+      traitModal.style.display = 'block';
+    }
+
+    function hideTraitModal(){
+      _currentTraitKey = null;
+      traitModal.style.display = 'none';
+    }
+
+    function onTraitApply(){
+      if (!_currentTraitKey) { hideTraitModal(); return; }
+      const chosen = (traitOptions.querySelector('input[name="trait-choice"]:checked') || {}).value || 'base';
+      let qty = parseInt(traitQty.value, 10) || 1; if (qty < 1) qty = 1;
+      const side = currentPickerSide || 'left';
+      addToSide(side, _currentTraitKey, chosen, qty);
+      hideTraitModal();
+      hidePicker();
+    }
+
+    traitApplyBtn.removeEventListener && traitApplyBtn.removeEventListener('click', onTraitApply);
+    traitCancelBtn.removeEventListener && traitCancelBtn.removeEventListener('click', hideTraitModal);
+    traitApplyBtn.addEventListener('click', onTraitApply);
+    traitCancelBtn.addEventListener('click', hideTraitModal);
 
     // calculator rendering functions
     function calcThumbHTML(it){
