@@ -7,6 +7,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     :root{
+      --c-astral: #7f00ff;
+      --c-cosmic: #b800e6;
+      --c-divine: #ff00c8;
+      --c-godly: #7b00e6;
+      --c-exclusive: #00d1ff;
+      --c-mythic: #ff6d68;
+      --c-legendary: #ffd54a;
       --bg:#000000;
       --card:#0f0f0f;
       --panel:#121212;
@@ -144,19 +151,19 @@
     .calc-thumb .img { width:84%; height:84%; background-size:cover; background-position:center; border-radius:50%; border:3px solid rgba(0,0,0,0.6); box-shadow: 0 8px 28px rgba(0,0,0,0.6); }
     .calc-thumb .thumb-remove { position:absolute; left:8px; top:8px; background:rgba(0,0,0,0.6); color:#fff; border-radius:10px; padding:4px 8px; cursor:pointer; font-weight:900; font-size:12px; display:inline-block; }
     .calc-thumb { cursor:pointer }
-    .calc-thumb .qty-badge { position:absolute; left:10px; top:10px; background:linear-gradient(90deg,#000000cc,#00000088); color:#fff; font-weight:900; padding:6px 10px; border-radius:999px; font-size:13px; min-width:30px; text-align:center; }
-    .calc-thumb .trait-label { position:absolute; left:10px; bottom:10px; background:linear-gradient(90deg,#000000cc,#00000088); color:#fff; font-weight:900; padding:7px 10px; border-radius:10px; font-size:12px; text-transform:uppercase; }
-    .calc-thumb .demand-pill-mini { position:absolute; left:50%; transform:translateX(-50%); bottom:-22px; padding:8px 10px; border-radius:999px; font-weight:900; font-size:12px; background:linear-gradient(90deg,#ffd54a,#ffb86b); color:#070; border:2px solid rgba(0,0,0,0.25); box-shadow: 0 6px 20px rgba(0,0,0,0.45); }
+    .calc-thumb .qty-badge { position:absolute; right:10px; top:8px; background:linear-gradient(90deg,#000000cc,#00000088); color:#fff; font-weight:900; padding:4px 8px; border-radius:8px; font-size:12px; min-width:28px; text-align:center; }
+    .calc-thumb .trait-label { position:absolute; left:10px; bottom:10px; background:linear-gradient(90deg,#000000cc,#00000088); color:#fff; font-weight:900; padding:7px 10px; border-radius:10px; font-size:12px; text-transform:uppercase; display:flex; align-items:center; gap:8px; }
+    .calc-thumb .demand-pill-mini { position:absolute; left:50%; transform:translateX(-50%); bottom:-22px; padding:8px 10px; border-radius:999px; font-weight:900; font-size:12px; background:linear-gradient(90deg,#ffd54a,#ffb86b); color:#000; border:3px solid #fff; box-shadow: 0 6px 20px rgba(0,0,0,0.45); }
     .items-list .calc-thumb .name-vis { position:absolute; left:50%; transform:translateX(-50%); bottom:-36px; font-size:12px; color:var(--muted); font-weight:800; }
 
     /* square colored frame behind calc thumb */
-    .calc-thumb.rarity-astral::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-astral); z-index:-1; opacity:0.98; filter: blur(6px); }
-    .calc-thumb.rarity-cosmic::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-cosmic); z-index:-1; opacity:0.98; filter: blur(6px); }
-    .calc-thumb.rarity-divine::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-divine); z-index:-1; opacity:0.98; filter: blur(6px); }
-    .calc-thumb.rarity-godly::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-godly); z-index:-1; opacity:0.98; filter: blur(6px); }
-    .calc-thumb.rarity-exclusive::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-exclusive); z-index:-1; opacity:0.98; filter: blur(6px); }
-    .calc-thumb.rarity-mythic::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-mythic); z-index:-1; opacity:0.98; filter: blur(6px); }
-    .calc-thumb.rarity-legendary::before { content:''; position:absolute; inset:-12px; border-radius:18px; background:var(--g-legendary); z-index:-1; opacity:0.98; filter: blur(6px); }
+    .calc-thumb.rarity-astral::before { content:''; position:absolute; inset:-10px; border-radius:18px; z-index:-1; opacity:0.98; box-shadow: 0 0 0 4px var(--c-astral); }
+    .calc-thumb.rarity-cosmic::before { content:''; position:absolute; inset:-10px; border-radius:18px; z-index:-1; opacity:0.98; box-shadow: 0 0 0 4px var(--c-cosmic); }
+    .calc-thumb.rarity-divine::before { content:''; position:absolute; inset:-10px; border-radius:18px; z-index:-1; opacity:0.98; box-shadow: 0 0 0 4px var(--c-divine); }
+    .calc-thumb.rarity-godly::before { content:''; position:absolute; inset:-10px; border-radius:18px; z-index:-1; opacity:0.98; box-shadow: 0 0 0 4px var(--c-godly); }
+    .calc-thumb.rarity-exclusive::before { content:''; position:absolute; inset:-10px; border-radius:18px; z-index:-1; opacity:0.98; box-shadow: 0 0 0 4px var(--c-exclusive); }
+    .calc-thumb.rarity-mythic::before { content:''; position:absolute; inset:-10px; border-radius:18px; z-index:-1; opacity:0.98; box-shadow: 0 0 0 4px var(--c-mythic); }
+    .calc-thumb.rarity-legendary::before { content:''; position:absolute; inset:-10px; border-radius:18px; z-index:-1; opacity:0.98; box-shadow: 0 0 0 4px var(--c-legendary); }
 
     .total-box { display:flex; justify-content:center; margin-top:12px; }
     .total-value { padding:10px 16px; border-radius:10px; font-weight:900; color:#000; background: linear-gradient(90deg,#7b00e6,#ff2d6f); }
@@ -180,6 +187,17 @@
 
     /* trait icon (used in modal / calc thumbs) */
     .trait-icon { width:28px; height:28px; border-radius:8px; background-size:cover; background-position:center; margin-right:8px; display:inline-block; vertical-align:middle; }
+
+    /* trait modal styling */
+    .trait-modal { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:10001; width:420px; max-width:94%; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.03)); border-radius:14px; padding:18px; box-shadow:0 18px 60px rgba(0,0,0,0.7); border:3px solid rgba(255,255,255,0.03); display:none }
+    .trait-modal .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .trait-modal .title { font-weight:900; letter-spacing:1px; font-size:18px; text-transform:uppercase; }
+    .trait-modal .close-x { cursor:pointer; font-weight:900; font-size:20px; padding:6px 8px; border-radius:8px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); }
+    .trait-modal .traits-list { max-height:260px; overflow:auto; display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+    .trait-modal .trait-row { display:flex; gap:12px; align-items:center; justify-content:space-between; padding:10px 12px; border-radius:10px; background:var(--panel); border:1px solid var(--border); text-transform:uppercase; font-weight:900; color:var(--text); }
+    .trait-modal .qty-row { display:flex; gap:8px; margin-top:8px; }
+    .trait-modal .qty-row input { width:100%; padding:12px 14px; border-radius:10px; background:var(--box); border:1px solid var(--border); color:var(--muted); font-weight:900; text-transform:uppercase; }
+    .trait-modal .btn { padding:12px 18px; border-radius:10px; cursor:pointer; background:linear-gradient(90deg,#7b00e6,#ff2d6f); color:#fff; border:none; font-weight:900; width:100%; }
 
     /* picker thumbnail colored frame */
     .picker-thumb.rarity-astral::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-astral); z-index:-1; opacity:0.95; }
@@ -264,6 +282,14 @@
     </div>
   </div>
 
+  <!-- Trait modal (outside picker overlay so it can show independently) -->
+  <div id="trait-modal" class="trait-modal" role="dialog" aria-modal="true" style="display:none">
+    <div class="header"><div class="title" id="trait-modal-title">Choose Trait</div><div id="trait-close" class="close-x">×</div></div>
+    <div class="qty-row"><input id="trait-qty" type="number" min="1" value="1" placeholder="Quantity" /></div>
+    <div id="trait-options" class="traits-list"></div>
+    <div style="margin-top:12px"><button id="trait-apply" class="btn">ADD</button></div>
+  </div>
+
   <!-- Main list -->
   <div id="list-root" class="list-root" aria-live="polite"></div>
 
@@ -320,6 +346,12 @@
     const pickerSidebar = document.getElementById('picker-sidebar');
     const pickerGrid = document.getElementById('picker-grid');
     const pickerSearch = document.getElementById('picker-search-input');
+    const traitModal = document.getElementById('trait-modal');
+    const traitOptions = document.getElementById('trait-options');
+    const traitQty = document.getElementById('trait-qty');
+    const traitTitle = document.getElementById('trait-modal-title');
+    const traitApplyBtn = document.getElementById('trait-apply');
+    const traitCloseBtn = document.getElementById('trait-close');
 
     // state
     let currentFilter = 'all';
@@ -495,21 +527,63 @@
         return `<div class="picker-thumb rarity-${rcls}" data-key="${k}" title="${esc(u.name)}"><div class="img" style="background-image:${p}"></div></div>`;
       }).join('');
 
-      // click handlers: add and close picker
+      // click handlers: open trait modal (and hide picker)
       pickerGrid.querySelectorAll('.picker-thumb').forEach(t => {
         t.removeEventListener('click', onPickerClick);
         t.addEventListener('click', onPickerClick);
       });
     }
 
+    // show trait modal populated for a selected key
+    let _currentTraitKey = null;
     function onPickerClick(e){
       const key = e.currentTarget.getAttribute('data-key');
       if (!key) return;
-      // add to currently selected side (default to left)
-      const side = currentPickerSide || 'left';
-      addToSide(side, key, 'base', 1);
+      _currentTraitKey = key;
+      // hide picker while trait modal is open (per your request)
       hidePicker();
+      showTraitModal(key);
     }
+
+    function showTraitModal(key){
+      const u = unitDatabase[key];
+      if (!u) return;
+      traitTitle.textContent = (u.name || 'Unit').toUpperCase();
+      traitOptions.innerHTML = '';
+      // base option
+      const baseVal = esc(u.baseStats && u.baseStats.value ? u.baseStats.value : '0');
+      const baseRow = document.createElement('div'); baseRow.className = 'trait-row';
+      baseRow.innerHTML = `<label><span>BASE — ${baseVal}</span></label><input type="radio" name="trait-choice" value="base" checked />`;
+      traitOptions.appendChild(baseRow);
+      if (u.traits && typeof u.traits === 'object'){
+        Object.keys(u.traits).forEach(tk => {
+          const t = u.traits[tk];
+          const tv = esc(t && t.value ? t.value : 'N/A');
+          const iconId = traitIcons[tk] || (t && t.icon) || null;
+          const iconHtml = iconId ? `<div class="trait-icon" style="background-image:url('${imageProvider}${iconId}')"></div>` : '';
+          const r = document.createElement('div'); r.className = 'trait-row';
+          r.innerHTML = `<label>${iconHtml}<span>${esc(tk)} — ${tv}</span></label><input type="radio" name="trait-choice" value="${esc(tk)}" />`;
+          traitOptions.appendChild(r);
+        });
+      }
+      traitQty.value = 1;
+      traitModal.style.display = 'block';
+    }
+
+    function hideTraitModal(){ _currentTraitKey = null; traitModal.style.display = 'none'; }
+
+    function onTraitApply(){
+      if (!_currentTraitKey) { hideTraitModal(); return; }
+      const chosen = (traitOptions.querySelector('input[name="trait-choice"]:checked') || {}).value || 'base';
+      let qty = parseInt(traitQty.value,10) || 1; if (qty < 1) qty = 1;
+      const side = currentPickerSide || 'left';
+      addToSide(side, _currentTraitKey, chosen, qty);
+      hideTraitModal();
+      // do NOT reopen picker automatically (per your preference)
+    }
+
+    traitApplyBtn && traitApplyBtn.addEventListener('click', onTraitApply);
+    traitCloseBtn && traitCloseBtn.addEventListener('click', hideTraitModal);
 
     function showPicker(){ pickerOverlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
     function hidePicker(){ pickerOverlay.style.display = 'none'; document.body.style.overflow = ''; }
@@ -519,7 +593,7 @@
       const u = unitDatabase[it.key] || {};
       const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
       const rcls = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
-      const qtyHtml = `<div class=\"qty-badge\">${it.qty || 1}</div>`;
+      const qtyHtml = `<div class=\"qty-badge\">QTY:${it.qty || 1}</div>`;
       let traitLabel = '';
       if (it.trait && it.trait !== 'base'){
         const t = String(it.trait);
