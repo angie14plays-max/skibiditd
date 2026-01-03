@@ -35,9 +35,13 @@
 
     /* Search + menu */
     .top-row{width:100%;display:flex;align-items:center;gap:12px;justify-content:space-between;position:relative}
-    #search-bar{flex:1;padding:12px 16px;border-radius:22px;background:var(--card);border:1px solid var(--border);color:var(--text);outline:none}
+    #search-bar{flex:1;padding:12px 16px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.02);color:var(--text);outline:none}
     .menu-btn{width:44px;height:44px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer}
     .menu-btn .dots{width:6px;height:6px;background:var(--muted);border-radius:50%;box-shadow:0 -10px 0 0 var(--muted),0 10px 0 0 var(--muted)}
+
+    /* SMALL: keep menu button on small screens */
+    .menu-btn{display:none}
+    @media (max-width:600px){ .menu-btn{display:block} }
 
     /* menu panel */
     .menu-panel{position:absolute;right:22px;top:78px;min-width:300px;background:#fff;color:#000;border-radius:10px;box-shadow:0 30px 80px rgba(0,0,0,0.6);border:1px solid rgba(0,0,0,0.06);display:none;z-index:9999;overflow:hidden}
@@ -46,21 +50,29 @@
     .menu-item:hover{background:rgba(0,0,0,0.04)}
     .menu-label{font-weight:700;text-transform:uppercase}
 
-    /* uniform controls */
-    .controls-row { width:100%; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    /* uniform controls - made visible and styled as in screenshot */
+    .controls-row { width:100%; display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:6px; }
     .control-btn{
       padding:12px 20px;
       border-radius:14px;
       font-weight:900;
       text-transform:uppercase;
-      background:var(--card);
-      color:var(--text);
-      border:1px solid var(--border);
-      min-width:140px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(0,0,0,0.03));
+      color:var(--muted);
+      border:1px solid rgba(255,255,255,0.03);
+      min-width:120px;
       text-align:center;
       cursor:pointer;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.02);
+      transition:all .12s ease;
     }
-    .control-btn.active{border-color:#ffd54a;box-shadow:0 10px 40px rgba(0,0,0,0.6);}
+    .control-btn:hover{ color:#fff; transform:translateY(-2px); }
+    .control-btn.active{ border-color:#ffd54a; color:#fff; box-shadow:0 0 0 6px rgba(255,213,74,0.06), 0 10px 40px rgba(0,0,0,0.6); }
+
+    /* sort */
+    .sort-row{display:flex;gap:12px;justify-content:center;margin-top:6px}
+    .sort-btn{padding:12px 18px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.006), rgba(255,255,255,0.003));border:1px solid rgba(255,255,255,0.03);color:var(--muted);font-weight:900;cursor:pointer}
+    .sort-btn.active{border-color:#ffd54a;color:#fff;box-shadow:0 0 0 6px rgba(255,213,74,0.06)}
 
     /* list grid */
     .list-root{width:100%;max-width:1200px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:12px}
@@ -84,13 +96,13 @@
     .unit-card.rarity-mythic .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-mythic);z-index:-1;opacity:0.95;filter:blur(8px)}
     .unit-card.rarity-legendary .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-legendary);z-index:-1;opacity:0.95;filter:blur(8px)}
 
-    .unit-card.rarity-astral::after{content:'';position:absolute;inset:0;background:var(--g-astral);opacity:0.06;border-radius:var(--radius);pointer-events:none}
-    .unit-card.rarity-cosmic::after{content:'';position:absolute;inset:0;background:var(--g-cosmic);opacity:0.06;border-radius:var(--radius);pointer-events:none}
-    .unit-card.rarity-divine::after{content:'';position:absolute;inset:0;background:var(--g-divine);opacity:0.06;border-radius:var(--radius);pointer-events:none}
-    .unit-card.rarity-godly::after{content:'';position:absolute;inset:0;background:var(--g-godly);opacity:0.06;border-radius:var(--radius);pointer-events:none}
-    .unit-card.rarity-exclusive::after{content:'';position:absolute;inset:0;background:var(--g-exclusive);opacity:0.06;border-radius:var(--radius);pointer-events:none}
-    .unit-card.rarity-mythic::after{content:'';position:absolute;inset:0;background:var(--g-mythic);opacity:0.06;border-radius:var(--radius);pointer-events:none}
-    .unit-card.rarity-legendary::after{content:'';position:absolute;inset:0;background:var(--g-legendary);opacity:0.06;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-astral::after{content:'';position:absolute;inset:0;background:var(--g-astral);opacity:0.04;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-cosmic::after{content:'';position:absolute;inset:0;background:var(--g-cosmic);opacity:0.04;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-divine::after{content:'';position:absolute;inset:0;background:var(--g-divine);opacity:0.04;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-godly::after{content:'';position:absolute;inset:0;background:var(--g-godly);opacity:0.04;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-exclusive::after{content:'';position:absolute;inset:0;background:var(--g-exclusive);opacity:0.04;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-mythic::after{content:'';position:absolute;inset:0;background:var(--g-mythic);opacity:0.04;border-radius:var(--radius);pointer-events:none}
+    .unit-card.rarity-legendary::after{content:'';position:absolute;inset:0;background:var(--g-legendary);opacity:0.04;border-radius:var(--radius);pointer-events:none}
 
     .info-row{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:12px}
     .info-box{min-width:120px;background:var(--panel);border-radius:10px;padding:12px 14px;text-align:center;border:1px solid var(--border)}
@@ -131,9 +143,10 @@
     .picker-box{width:100%;max-width:1180px;max-height:90vh;border-radius:12px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,0.006),rgba(255,255,255,0.003));border:1px solid var(--border);display:flex;gap:12px;overflow:hidden}
     .picker-sidebar{width:160px;display:flex;flex-direction:column;gap:10px;overflow:auto;padding:6px}
     .picker-cat{padding:12px;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-weight:900;cursor:pointer}
-    .picker-cat.active{outline:2px solid rgba(255,255,255,0.03);color:#fff}
+    .picker-cat.active{outline:2px solid rgba(255,255,255,0.03);color:#fff; box-shadow:0 0 0 6px rgba(255,213,74,0.06); border-color:#ffd54a}
     .picker-grid{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,78px);gap:12px}
 
+    .trait-btn{padding:8px 12px;border-radius:8px;background:var(--panel);color:var(--text);border:1px solid var(--border);font-weight:800;cursor:pointer;margin:6px}
     @media (max-width:1024px){ .list-root{grid-template-columns:repeat(2,1fr)} .picker-box{flex-direction:column} .picker-sidebar{width:100%;flex-direction:row;overflow:auto} }
     @media (max-width:600px){ .list-root{grid-template-columns:1fr} .card-header{height:170px} .portrait-frame{width:118px;height:118px} }
   </style>
@@ -163,8 +176,8 @@
       </div>
     </div>
 
-    <div class="controls-row" style="display:none">
-      <!-- kept hidden because menu controls categories now; if you want them visible set display:block -->
+    <!-- Controls visible (restored like the screenshot) -->
+    <div class="controls-row">
       <div class="control-btn active" data-rarity="all">All</div>
       <div class="control-btn" data-rarity="astral">Astral</div>
       <div class="control-btn" data-rarity="cosmic">Cosmic</div>
@@ -173,6 +186,7 @@
       <div class="control-btn" data-rarity="exclusive">Exclusive</div>
       <div class="control-btn" data-rarity="mythic">Mythic</div>
       <div class="control-btn" data-rarity="legendary">Legendary</div>
+      <div class="control-btn" data-rarity="calculator">Calculator</div>
     </div>
 
     <div class="sort-row">
@@ -301,10 +315,10 @@
       </div>`; }).join('');
   }
 
-  // menu
+  // menu (kept for small screens)
   menuBtn.addEventListener('click', ()=>{ const open = menuPanel.style.display==='block'; menuPanel.style.display = open ? 'none' : 'block'; menuPanel.setAttribute('aria-hidden', open ? 'true' : 'false'); });
   document.addEventListener('click', (e)=>{ if(!menuBtn.contains(e.target) && !menuPanel.contains(e.target)){ menuPanel.style.display='none'; menuPanel.setAttribute('aria-hidden','true'); } });
-  menuPanel.querySelectorAll('.menu-item').forEach(it=>{ it.addEventListener('click', ()=>{ const key = it.getAttribute('data-key'); menuPanel.style.display='none'; if(key==='calculator'){ document.getElementById('calculator-root').style.display='block'; listRoot.style.display='none'; document.getElementById('pagination').style.display='none'; } else { document.getElementById('calculator-root').style.display='none'; listRoot.style.display=''; document.getElementById('pagination').style.display='flex'; currentFilter = key || 'all'; currentPage = 1; renderList(); } }); });
+  menuPanel.querySelectorAll('.menu-item').forEach(it=>{ it.addEventListener('click', ()=>{ const key = it.getAttribute('data-key'); menuPanel.style.display='none'; if(key==='calculator'){ document.getElementById('calculator-root').style.display='block'; listRoot.style.display='none'; document.getElementById('pagination').style.display='none'; } else { document.getElementById('calculator-root').style.display='none'; listRoot.style.display=''; document.getElementById('pagination').style.display='flex'; currentFilter = key || 'all'; currentPage = 1; updateControlActiveFromFilter(); renderList(); } }); });
 
   // sort
   document.querySelectorAll('.sort-btn').forEach(b=>{ b.addEventListener('click', ()=>{ document.querySelectorAll('.sort-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); currentSort = b.getAttribute('data-sort')||'default'; currentPage = 1; renderList(); }); });
@@ -313,6 +327,38 @@
   document.getElementById('prev-btn').addEventListener('click', ()=>{ if(currentPage>1){ currentPage--; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }});
   document.getElementById('next-btn').addEventListener('click', ()=>{ const keys = unitKeys.filter(k=>{ const u=unitDatabase[k]; const r=(u.rarity||'').toLowerCase(); if(currentFilter!=='all' && r!==currentFilter) return false; if(searchQuery && !(u.name||'').toLowerCase().includes(searchQuery.toLowerCase())) return false; return true; }); const maxp = Math.ceil(keys.length/itemsPerPage)||1; if(currentPage<maxp){ currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }});
   document.getElementById('search-bar').addEventListener('input', e=>{ searchQuery = e.target.value || ''; currentPage = 1; renderList(); });
+
+  // Controls row (restored UI controls like the screenshot)
+  const controlButtons = Array.from(document.querySelectorAll('.control-btn'));
+  controlButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      controlButtons.forEach(x=>x.classList.remove('active'));
+      btn.classList.add('active');
+      const r = btn.getAttribute('data-rarity');
+      if(r === 'calculator'){
+        document.getElementById('calculator-root').style.display='block';
+        listRoot.style.display='none';
+        document.getElementById('pagination').style.display='none';
+      } else {
+        document.getElementById('calculator-root').style.display='none';
+        listRoot.style.display='';
+        document.getElementById('pagination').style.display='flex';
+        currentFilter = r || 'all';
+        currentPage = 1;
+        renderList();
+      }
+    });
+  });
+
+  function updateControlActiveFromFilter(){
+    controlButtons.forEach(b=>{
+      const r = b.getAttribute('data-rarity');
+      if(r===currentFilter){ b.classList.add('active'); } else { b.classList.remove('active'); }
+    });
+    // ensure calculator button not marked active when filter set
+    const calcBtn = document.querySelector('.control-btn[data-rarity="calculator"]');
+    if(calcBtn) calcBtn.classList.remove('active');
+  }
 
   // picker functions
   function createPicker(){
@@ -347,8 +393,12 @@
   function persistTrade(){ try{ const payload={ left:leftItems.map(i=>({key:i.key,trait:i.trait,qty:i.qty,clean:!!i.clean})), right:rightItems.map(i=>({key:i.key,trait:i.trait,qty:i.qty,clean:!!i.clean})) }; localStorage.setItem(LS_KEY,JSON.stringify(payload)); }catch(e){console.warn(e);} }
   function restoreTrade(){ try{ const raw=localStorage.getItem(LS_KEY); if(!raw) return; const p=JSON.parse(raw); leftItems=(p.left||[]).map(it=>{ const single=(it.trait && it.trait!=='normal' && it.trait!=='clean' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait])?parseValue(unitDatabase[it.key].traits[it.trait].value):parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value)||0); return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single*(it.qty||1), clean:!!it.clean }; }); rightItems=(p.right||[]).map(it=>{ const single=(it.trait && it.trait!=='normal' && it.trait!=='clean' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait])?parseValue(unitDatabase[it.key].traits[it.trait].value):parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value)||0); return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single*(it.qty||1), clean:!!it.clean }; }); }catch(e){console.warn(e);} }
 
+  // plus buttons for calculator - open picker for left/right
+  document.getElementById('plus-left').addEventListener('click', ()=>{ currentPickerSide='left'; showPicker(); });
+  document.getElementById('plus-right').addEventListener('click', ()=>{ currentPickerSide='right'; showPicker(); });
+
   // init
-  try{ restoreTrade(); renderList(); renderThumbs(); updateTotalsAndVerdict(); }catch(e){ console.error('init',e); }
+  try{ createPicker(); restoreTrade(); renderList(); renderThumbs(); updateTotalsAndVerdict(); }catch(e){ console.error('init',e); }
 
   // expose
   window._skibidi = { unitDatabase, leftItems, rightItems, renderList, renderThumbs, updateTotalsAndVerdict };
