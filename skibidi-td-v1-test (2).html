@@ -4,18 +4,20 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-  <title>Skibidi TD — Value List + Calculator (final layout)</title>
+  <title>Skibidi TD — Value List + Calculator (final)</title>
   <style>
     :root{
       --bg:#000;
-      --card:#111;
-      --box:#1a1a1a;
-      --border:#333;
-      --muted:#777;
+      --card:#0f0f0f;
+      --box:#151515;
+      --border:#2f2f2f;
+      --muted:#8a8a8a;
       --gold:#facc15;
       --purple:#a855f7;
       --accent-grad: linear-gradient(90deg,#8b4bff,#ff2d6f);
-      --text:#fff;
+      --neon-red: rgba(255,50,80,0.18);
+      --neon-white: rgba(255,255,255,0.12);
+      --text:#ffffff;
 
       --grad-astral: linear-gradient(60deg, #640081, #7e00a5, #154af0, #00cd82, #11ff46);
       --grad-cosmic: linear-gradient(80deg, #b800e6, #6cedf0);
@@ -26,156 +28,126 @@
       --grad-legendary: linear-gradient(180deg, #f5a623, #d48c00);
     }
 
-    *{box-sizing:border-box;font-family:'Montserrat',sans-serif;-webkit-font-smoothing:antialiased}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);padding:20px 30px}
+    *{box-sizing:border-box;font-family:'Montserrat',sans-serif;-webkit-font-smoothing:antialiased;}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);padding:22px}
 
-    /* Controls (unchanged look) */
+    /* Controls */
     .controls{max-width:1200px;margin:0 auto 18px;display:flex;flex-direction:column;gap:14px}
-    #search-bar{width:100%;padding:14px;border-radius:12px;background:var(--card);border:2px solid var(--border);color:var(--text);outline:none}
+    #search-bar{width:100%;padding:14px;border-radius:12px;background:var(--card);border:2px solid var(--border);color:var(--text);outline:none;font-size:15px}
     .tabs,.sort{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
     .tab-btn,.sort-btn{background:var(--card);border:2px solid var(--border);padding:10px 16px;border-radius:8px;color:var(--muted);font-weight:900;cursor:pointer;text-transform:uppercase}
-    .tab-btn.active,.sort-btn.active{color:#fff;border-color:var(--gold);box-shadow:0 0 0 3px rgba(250,204,21,0.06) inset}
+    .tab-btn.active,.sort-btn.active{color:#fff;border-color:var(--gold);box-shadow:0 0 0 4px rgba(250,204,21,0.06) inset}
 
-    /* Main list grid (restored, unchanged) */
+    /* Main list */
     .list-root{max-width:1200px;margin:22px auto;display:grid;grid-template-columns:repeat(3,1fr);gap:25px}
-    .unit-card{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px;text-align:center;display:flex;flex-direction:column;justify-content:space-between}
-    .header-section{min-height:60px;margin-bottom:8px;display:flex;flex-direction:column;justify-content:center;align-items:center}
-    /* fix broken words: prevent mid-word breaks, center, wrap naturally between words */
-    .unit-title{font-weight:900;text-transform:uppercase;font-size:16px;line-height:1.1;white-space:normal;word-break:normal;overflow-wrap:break-word;text-align:center}
+    .unit-card{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;min-height:260px;justify-content:space-between}
+    .header-section{display:flex;flex-direction:column;align-items:center;gap:6px}
+    .unit-title{font-weight:900;font-size:16px;text-transform:uppercase;line-height:1.1;text-align:center;white-space:normal;word-break:normal;overflow-wrap:break-word}
     .second-edition-tag{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;margin-top:4px;letter-spacing:1px}
-    .portrait-frame{width:120px;height:120px;border-radius:50%;margin:6px auto 6px;display:flex;align-items:center;justify-content:center;background:var(--grad-astral);border:3px solid #000}
+    .portrait-frame{width:120px;height:120px;border-radius:50%;margin:0 auto;border:4px solid #000;display:flex;align-items:center;justify-content:center;position:relative}
     .unit-image{width:110px;height:110px;border-radius:50%;background-size:cover;background-position:center}
-    .data-table{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-    .data-cell{background:var(--box);border:1px solid var(--border);padding:10px;border-radius:8px}
-    .label{font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;margin-bottom:6px}
+    /* Rarity halo for main portraits */
+    .portrait-frame.rarity-astral::after{content:'';position:absolute;inset:-6px;border-radius:50%;background:var(--grad-astral);z-index:-1;opacity:0.95}
+    .portrait-frame.rarity-cosmic::after{content:'';position:absolute;inset:-6px;border-radius:50%;background:var(--grad-cosmic);z-index:-1;opacity:0.95}
+    .portrait-frame.rarity-divine::after{content:'';position:absolute;inset:-6px;border-radius:50%;background:var(--grad-divine);z-index:-1;opacity:0.95}
+    .portrait-frame.rarity-godly::after{content:'';position:absolute;inset:-6px;border-radius:50%;background:var(--grad-godly);z-index:-1;opacity:0.95}
+    .portrait-frame.rarity-exclusive::after{content:'';position:absolute;inset:-6px;border-radius:50%;background:var(--grad-exclusive);z-index:-1;opacity:0.95}
+    .portrait-frame.rarity-mythic::after{content:'';position:absolute;inset:-6px;border-radius:50%;background:var(--grad-mythic);z-index:-1;opacity:0.95}
+    .portrait-frame.rarity-legendary::after{content:'';position:absolute;inset:-6px;border-radius:50%;background:var(--grad-legendary);z-index:-1;opacity:0.95}
+
+    .data-table{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .data-cell{background:var(--box);border:1px solid var(--border);padding:10px;border-radius:8px;text-align:center;min-height:56px;display:flex;flex-direction:column;justify-content:center}
+    .label{color:var(--muted);font-size:11px;font-weight:900;text-transform:uppercase;margin-bottom:6px}
     .val{font-weight:900}
     .highlight-gold{color:var(--gold)}
     .highlight-purple{color:var(--purple)}
 
-    .pagination{max-width:1200px;margin:22px auto;display:flex;gap:10px;justify-content:center;align-items:center}
+    .pagination{max-width:1200px;margin:22px auto;display:flex;gap:12px;justify-content:center;align-items:center}
     .pagination-btn{background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;color:var(--muted);font-weight:900}
     .page-info{color:var(--muted);font-weight:900}
 
-    /* ---------------- Calculator (fixed frame & layout) ---------------- */
-    .calculator-root{max-width:1200px;margin:20px auto 8px;display:none}
-    /* Keep panels centered and aligned on same row, responsive fallback -> column */
+    /* ---------------- Calculator styles ---------------- */
+    .calculator-root{max-width:1200px;margin:0 auto 10px;display:none}
     .calc-row{display:flex;gap:28px;align-items:flex-start;justify-content:center}
     .trade-panel{
       width:46%;
-      background:var(--card);
       border-radius:14px;
-      border:2px solid rgba(255,255,255,0.06);
-      padding:28px 26px;
+      padding:22px;
       min-height:380px;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.01) inset;
-      display:flex;flex-direction:column;align-items:stretch;gap:16px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+      border: 2px solid rgba(255,255,255,0.06);
+      box-shadow: 0 0 28px var(--neon-white), 0 0 40px var(--neon-red) inset;
     }
     .trade-title{font-weight:900;text-transform:uppercase;text-align:center;font-size:20px;letter-spacing:1px}
-    .trade-title.you{color:#ff3b3b}
+    .trade-title.you{color:#ff2d6f}
     .trade-title.them{color:#6ea0ff}
-
-    /* center plus button exactly like your example */
     .plus-wrap{display:flex;justify-content:center}
-    .plus-btn{
-      width:56px;height:56px;border-radius:10px;background:linear-gradient(180deg,#7b00e6,#ff2d6f);display:grid;place-items:center;font-size:28px;font-weight:900;color:#fff;cursor:pointer;
-      border:3px solid rgba(255,255,255,0.06);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
-    }
-
-    /* control row hidden visually but accessible for keyboard */
-    .controls-row{display:flex;gap:10px;align-items:center;justify-content:flex-start}
+    .plus-btn{width:56px;height:56px;border-radius:12px;background:linear-gradient(180deg,#7b00e6,#ff2d6f);display:grid;place-items:center;font-size:28px;font-weight:900;color:#fff;cursor:pointer;border:3px solid rgba(255,255,255,0.06);box-shadow:0 14px 40px rgba(255,0,60,0.12)}
+    .controls-row{display:flex;gap:10px;align-items:center}
     select,input[type=number]{background:var(--box);border:2px solid var(--border);padding:10px;border-radius:10px;color:var(--text)}
-    select.unit-select{min-width:280px}
+    select.unit-select{min-width:260px}
     .add-small{background:var(--accent-grad);border-radius:8px;padding:8px 10px;border:none;cursor:pointer;color:#000;font-weight:900}
 
-    /* big interior item box matches screenshot: inset border and rounded corners */
-    .items-list{
-      background:transparent;
-      border-radius:10px;
-      min-height:180px;
-      padding:14px;
-      border:2px solid rgba(255,255,255,0.03);
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-content:flex-start;
-      align-items:flex-start;
-      justify-content:flex-start;
-    }
-
-    /* thumbnails inside calculator: no value text, simple QTY & demand optionally */
-    .selected-thumb{
-      width:76px;height:76px;border-radius:10px;position:relative;overflow:hidden;border:3px solid rgba(255,255,255,0.04);background:var(--box);flex:0 0 auto;
-      display:flex;align-items:center;justify-content:center;
-    }
+    .items-list{border-radius:10px;min-height:180px;padding:14px;border:2px solid rgba(255,255,255,0.03);display:flex;gap:12px;flex-wrap:wrap;align-content:flex-start;align-items:flex-start}
+    .selected-thumb{width:76px;height:76px;border-radius:10px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,0.04);background:var(--box)}
     .thumb-img{width:100%;height:100%;background-size:cover;background-position:center}
-    .thumb-badge{position:absolute;right:6px;top:6px;background:rgba(0,0,0,0.65);padding:4px 6px;border-radius:8px;font-weight:900;color:#fff;font-size:11px;display:none} /* hide value badge */
-    .thumb-demand{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,0.65);padding:4px 6px;border-radius:6px;font-weight:900;color:#fff;font-size:11px;display:none} /* hide demand on squares */
+    .thumb-remove{position:absolute;left:6px;top:6px;background:rgba(0,0,0,0.6);color:#fff;border-radius:6px;padding:2px 6px;cursor:pointer;font-weight:900}
+    /* hide value/demand badges on squares */
+    .thumb-badge, .thumb-demand{display:none}
 
-    /* total button centered and matching style */
-    .total-box{display:flex;justify-content:center}
-    .total-value{
-      background:linear-gradient(90deg,#7b00e6,#ff2d6f);
-      padding:10px 18px;border-radius:10px;color:#000;font-weight:900;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.6);
-    }
+    .total-box{display:flex;justify-content:center;margin-top:auto}
+    .total-value{background:linear-gradient(90deg,#7b00e6,#ff2d6f);padding:10px 18px;border-radius:10px;color:#000;font-weight:900;box-shadow:0 10px 26px rgba(0,0,0,0.6)}
 
-    /* verdict centered under the calculator panels (big) */
-    .verdict-wrap{max-width:1200px;margin:22px auto;display:flex;justify-content:center}
-    .verdict{
-      width:520px;background:var(--card);border-radius:12px;border:2px solid rgba(255,255,255,0.04);padding:18px;display:flex;justify-content:center;
-    }
-    .verdict-text{font-weight:900;font-size:32px;color:#6ea0ff;letter-spacing:2px}
+    .verdict-wrap{max-width:1200px;margin:18px auto;display:flex;justify-content:center}
+    .verdict{width:520px;padding:16px;border-radius:12px;border:2px solid rgba(255,255,255,0.03);display:flex;justify-content:center;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005))}
+    .verdict-text{font-weight:900;font-size:32px;color:#6ea0ff;letter-spacing:2px;text-transform:uppercase}
 
-    /* ---------------- Picker modal improvements ---------------- */
+    /* ---------------- Picker modal ---------------- */
     .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:9999;padding:18px}
-    /* outer frame like your sample: thicker rounded border and inset inner dark panel */
-    .picker-box{
-      width:100%;max-width:1180px;border-radius:14px;padding:14px;background:linear-gradient(#0f0f0f,#0f0f0f);
-      border:3px solid rgba(255,255,255,0.04);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-      display:flex;gap:12px;min-height:520px;
-    }
-    .picker-sidebar{width:160px;display:flex;flex-direction:column;gap:12px;padding:8px}
-    .picker-cat{padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.03);color:var(--muted);font-weight:900;cursor:pointer;text-transform:uppercase;background:transparent}
-    .picker-cat.active{border-color:var(--gold);color:#fff}
-    .picker-main{flex:1;display:flex;flex-direction:column;gap:12px;padding:8px}
+    .picker-box{width:100%;max-width:1180px;min-height:520px;border-radius:12px;padding:12px;display:flex;gap:12px;background:linear-gradient(180deg, rgba(255,255,255,0.006), rgba(255,255,255,0.003));border:3px solid rgba(255,255,255,0.03);box-shadow:0 30px 80px rgba(0,0,0,0.75)}
+    .picker-sidebar{width:160px;display:flex;flex-direction:column;gap:12px;padding:6px}
+    .picker-cat{padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.03);color:var(--muted);font-weight:900;cursor:pointer;text-transform:uppercase}
+    .picker-cat.active{color:#fff;border-color:var(--gold);box-shadow:0 0 0 4px rgba(250,204,21,0.05) inset}
+    .picker-main{flex:1;display:flex;flex-direction:column;gap:10px;padding:6px}
     .picker-search input{width:100%;padding:12px;border-radius:12px;background:var(--box);border:2px solid var(--border);color:var(--text)}
-    .picker-grid{flex:1;background:transparent;border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.03);overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,78px);gap:12px;align-content:start}
-    .picker-thumb{width:78px;height:78px;border-radius:10px;overflow:hidden;border:3px solid rgba(255,255,255,0.04);cursor:pointer;position:relative;background:var(--box);display:flex;align-items:center;justify-content:center}
+    .picker-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,78px);gap:12px;overflow:auto;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);background:transparent}
+    .picker-thumb{width:78px;height:78px;border-radius:10px;border:3px solid rgba(255,255,255,0.04);background:var(--box);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
     .picker-thumb:hover{transform:translateY(-6px);transition:transform .12s ease;box-shadow:0 8px 20px rgba(0,0,0,0.6)}
+    .picker-thumb .p-badge{display:none!important} /* ensure no values on thumbs */
 
-    /* remove value badge on picker thumbnails (you asked no values) */
-    .picker-thumb .p-badge{display:none !important}
+    .rarity-astral .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-astral);z-index:-1;opacity:0.95}
+    .rarity-cosmic .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-cosmic);z-index:-1;opacity:0.95}
+    .rarity-divine .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-divine);z-index:-1;opacity:0.95}
+    .rarity-godly .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-godly);z-index:-1;opacity:0.95}
+    .rarity-exclusive .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-exclusive);z-index:-1;opacity:0.95}
+    .rarity-mythic .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-mythic);z-index:-1;opacity:0.95}
+    .rarity-legendary .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-legendary);z-index:-1;opacity:0.95}
 
-    /* rarity halos */
-    .rarity-astral .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-astral);z-index:-1;opacity:.95}
-    .rarity-cosmic .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-cosmic);z-index:-1;opacity:.95}
-    .rarity-divine .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-divine);z-index:-1;opacity:.95}
-    .rarity-godly .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-godly);z-index:-1;opacity:.95}
-    .rarity-exclusive .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-exclusive);z-index:-1;opacity:.95}
-    .rarity-mythic .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-mythic);z-index:-1;opacity:.95}
-    .rarity-legendary .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-legendary);z-index:-1;opacity:.95}
+    /* show placeholder text in picker grid until category selected */
+    .picker-placeholder{display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:900;font-size:14px;padding:20px;border-radius:8px;border:1px dashed rgba(255,255,255,0.02);height:100%}
 
-    /* Responsive */
     @media(max-width:1024px){
       .list-root{grid-template-columns:repeat(2,1fr)}
-      .calc-row{flex-direction:column;gap:18px}
+      .calc-row{flex-direction:column}
       .trade-panel{width:100%}
       .picker-box{flex-direction:column;min-height:560px}
-      .picker-sidebar{width:100%;display:flex;overflow:auto;gap:10px}
+      .picker-sidebar{width:100%;display:flex;overflow:auto;gap:8px}
       .picker-grid{grid-template-columns:repeat(auto-fill,86px)}
     }
     @media(max-width:600px){
       .list-root{grid-template-columns:1fr}
+      .portrait-frame{width:96px;height:96px}
+      .unit-image{width:86px;height:86px}
       .picker-grid{grid-template-columns:repeat(auto-fill,86px)}
-      .unit-title{font-size:14px}
     }
   </style>
 </head>
 <body>
   <div class="controls">
-    <input id="search-bar" placeholder="Search unit...">
+    <input id="search-bar" placeholder="Search unit..." aria-label="Search units">
     <div class="tabs" id="tabs">
       <button class="tab-btn active" data-rarity="all">All</button>
       <button class="tab-btn" data-rarity="astral">Astral</button>
@@ -198,61 +170,50 @@
     <div class="calc-row">
       <div class="trade-panel" id="left-panel">
         <div class="trade-title you">YOUR VALUE</div>
+        <div class="plus-wrap"><div class="plus-btn" id="plus-left" title="Open picker">+</div></div>
 
-        <div class="plus-wrap">
-          <div class="plus-btn" id="plus-left">+</div>
-        </div>
-
-        <!-- controls are available but visually secondary (picker is primary) -->
         <div style="display:none" aria-hidden="true">
-          <div class="controls-row">
-            <select id="unit-select-left" class="unit-select"></select>
-            <select id="trait-select-left">
+          <div class="controls-row" role="group">
+            <select id="unit-select-left" class="unit-select" aria-label="left unit select"></select>
+            <select id="trait-select-left" aria-label="left trait select">
               <option value="base">Base</option>
               <option value="grandmaster">Grandmaster</option>
               <option value="master">Master</option>
               <option value="superPayday">Super Payday</option>
               <option value="sniper">Sniper</option>
             </select>
-            <input id="qty-left" type="number" min="1" value="1" style="width:80px">
+            <input id="qty-left" type="number" min="1" value="1" aria-label="left quantity" style="width:80px">
             <button class="add-small" id="add-left">Add</button>
           </div>
         </div>
 
         <div class="items-list" id="left-items" aria-live="polite"></div>
 
-        <div class="total-box">
-          <div class="total-value" id="left-total">TOTAL VALUE: 0</div>
-        </div>
+        <div class="total-box"><div class="total-value" id="left-total">TOTAL VALUE: 0</div></div>
       </div>
 
       <div class="trade-panel" id="right-panel">
         <div class="trade-title them">THEIR VALUE</div>
-
-        <div class="plus-wrap">
-          <div class="plus-btn" id="plus-right">+</div>
-        </div>
+        <div class="plus-wrap"><div class="plus-btn" id="plus-right" title="Open picker">+</div></div>
 
         <div style="display:none" aria-hidden="true">
-          <div class="controls-row">
-            <select id="unit-select-right" class="unit-select"></select>
-            <select id="trait-select-right">
+          <div class="controls-row" role="group">
+            <select id="unit-select-right" class="unit-select" aria-label="right unit select"></select>
+            <select id="trait-select-right" aria-label="right trait select">
               <option value="base">Base</option>
               <option value="grandmaster">Grandmaster</option>
               <option value="master">Master</option>
               <option value="superPayday">Super Payday</option>
               <option value="sniper">Sniper</option>
             </select>
-            <input id="qty-right" type="number" min="1" value="1" style="width:80px">
+            <input id="qty-right" type="number" min="1" value="1" aria-label="right quantity" style="width:80px">
             <button class="add-small" id="add-right">Add</button>
           </div>
         </div>
 
         <div class="items-list" id="right-items" aria-live="polite"></div>
 
-        <div class="total-box">
-          <div class="total-value" id="right-total">TOTAL VALUE: 0</div>
-        </div>
+        <div class="total-box"><div class="total-value" id="right-total">TOTAL VALUE: 0</div></div>
       </div>
     </div>
   </div>
@@ -272,41 +233,40 @@
     <button id="next-btn" class="pagination-btn">Next</button>
   </div>
 
-  <!-- Unit data (unchanged) -->
+  <!-- Keep your data file unchanged -->
   <script src="skibidi-td-data.js"></script>
 
-  <!-- Renderer, calculator and picker script (keeps previous logic; small adjustments to keep thumbnails/value hidden) -->
+  <!-- Script: render list, calculator and picker -->
   <script>
   (function(){
     function parseValue(valString){
-      if(valString===0) return 0;
+      if(valString === 0) return 0;
       if(!valString && valString !== 0) return 0;
       let s = String(valString).trim();
       s = s.replace(/[\$\€\£\¥\₹]/g,'').replace(/\s+/g,'');
-      const full = s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/);
-      if(full){
-        let num = parseFloat(full[1].replace(/,/g,''))||0;
-        const sfx = full[2];
+      const m = s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/);
+      if(m){
+        let n = parseFloat(m[1].replace(/,/g,'')) || 0;
+        const sfx = m[2];
         if(sfx){
-          if(sfx.toLowerCase()==='k') num*=1e3;
-          if(sfx.toLowerCase()==='m') num*=1e6;
+          if(sfx.toLowerCase() === 'k') n *= 1e3;
+          if(sfx.toLowerCase() === 'm') n *= 1e6;
         }
-        return num;
+        return n;
       }
-      const match = s.match(/[\d.]+/);
-      return match ? parseFloat(match[0].replace(/,/g,'')) : 0;
+      const f = s.match(/[\d.]+/);
+      return f ? parseFloat(f[0].replace(/,/g,'')) : 0;
     }
     window.parseValue = parseValue;
 
     function abbr(n){
-      if(!isFinite(n) || n===0) return '0';
+      if(!isFinite(n) || n === 0) return '0';
       if(n >= 1e6) return (n/1e6).toFixed(2) + 'M+';
       if(n >= 1e3) return (n/1e3).toFixed(2) + 'K';
       return Math.round(n).toLocaleString();
     }
     function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    // DOM refs
     const listRoot = document.getElementById('list-root');
     const searchBar = document.getElementById('search-bar');
     const tabs = document.getElementById('tabs');
@@ -333,76 +293,62 @@
     const plusRight = document.getElementById('plus-right');
 
     let pickerOverlay = null;
-    let currentFilter='all';
-    let searchQuery='';
-    let currentSort='default';
-    let currentPage=1;
+    let currentFilter = 'all';
+    let searchQuery = '';
+    let currentSort = 'default';
+    let currentPage = 1;
     const itemsPerPage = 15;
     const rarityOrder = { 'astral':1,'cosmic':2,'godly':3,'divine':4,'mythic':5,'legendary':6,'exclusive':99 };
 
-    if(typeof unitDatabase === 'undefined'){
-      listRoot.innerHTML = '<div style="color:#f88">Error: unitDatabase not loaded</div>';
-      throw new Error('unitDatabase missing');
-    }
-
+    if(typeof unitDatabase === 'undefined'){ listRoot.innerHTML = '<div style="color:#f88">Error: unitDatabase not loaded</div>'; throw new Error('unitDatabase required'); }
     const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
     const imageProvider = "https://corsproxy.io/?https://drive.google.com/thumbnail?id=";
 
+    /* render list */
     function renderList(){
-      const keys = unitKeys.filter(k=>{
+      const filtered = unitKeys.filter(k=>{
         const u = unitDatabase[k];
         const r = (u.rarity||'').toLowerCase();
-        const matchesRarity = currentFilter==='all' || r===currentFilter;
+        const matchesRarity = currentFilter === 'all' || r === currentFilter;
         const matchesSearch = (u.name||'').toLowerCase().includes(searchQuery.toLowerCase());
         return matchesRarity && matchesSearch;
       });
 
-      keys.sort((a,b)=>{
-        if(currentSort==='value-desc'){
-          return parseValue(unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats.value);
-        } else {
-          const wa = rarityOrder[(unitDatabase[a].rarity||'').toLowerCase()]||999;
-          const wb = rarityOrder[(unitDatabase[b].rarity||'').toLowerCase()]||999;
-          if(wa!==wb) return wa - wb;
-          return (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||'');
-        }
+      filtered.sort((a,b)=>{
+        if(currentSort === 'value-desc'){ return parseValue(unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats.value); }
+        const wa = rarityOrder[(unitDatabase[a].rarity||'').toLowerCase()]||999;
+        const wb = rarityOrder[(unitDatabase[b].rarity||'').toLowerCase()]||999;
+        if(wa !== wb) return wa - wb;
+        return (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||'');
       });
 
-      const totalPages = Math.max(1, Math.ceil(keys.length / itemsPerPage));
+      const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
       if(currentPage > totalPages) currentPage = totalPages;
-      const start = (currentPage-1) * itemsPerPage;
-      const pageKeys = keys.slice(start, start + itemsPerPage);
+      const start = (currentPage - 1) * itemsPerPage;
+      const pageKeys = filtered.slice(start, start + itemsPerPage);
 
       pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
-      prevBtn.disabled = currentPage===1;
-      nextBtn.disabled = currentPage===totalPages;
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages;
 
       listRoot.innerHTML = pageKeys.map(k=>{
         const u = unitDatabase[k];
         const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
-        const isSecond = u.secondEdition && String(u.secondEdition).toLowerCase()==='yes';
-        const edition = isSecond ? `<div class="second-edition-tag">2nd Edition</div>` : '';
+        const edition = u.secondEdition && String(u.secondEdition).toLowerCase() === 'yes' ? `<div class="second-edition-tag">2nd Edition</div>` : '';
         const rslug = (u.rarity||'').toLowerCase();
-        return `<div class="unit-card rarity-${rslug}" data-unit="${k}">
-          <div class="header-section"><div class="unit-title">${escapeHtml(u.name)}</div>${edition}</div>
-          <div class="card-body" style="display:flex;align-items:center;justify-content:center;gap:10px">
-            <div class="portrait-frame" onclick="updateUnitStats('${k}', null)" title="Reset to Base Stats">
+        return `<div class="unit-card" data-unit="${k}">
+          <div class="header-section">
+            <div class="unit-title">${escapeHtml(u.name)}</div>${edition}
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center">
+            <div class="portrait-frame rarity-${rslug}" onclick="updateUnitStats('${k}', null)" title="Reset to Base Stats">
               <div class="unit-image" style="background-image:${portrait}"></div>
             </div>
           </div>
           <div class="data-table">
-            <div class="data-cell">
-              <span class="label">Value</span>
-              <span class="val highlight-gold">${u.baseStats.value}</span>
-            </div>
-            <div class="data-cell">
-              <span class="label">Status</span>
-              <span class="val">${u.baseStats.status}</span>
-            </div>
-            <div class="data-cell">
-              <span class="label">Demand</span>
-              <span class="val highlight-purple">${u.baseStats.demand}</span>
-            </div>
+            <div class="data-cell"><span class="label">Value</span><span class="val highlight-gold">${escapeHtml(u.baseStats.value)}</span></div>
+            <div class="data-cell"><span class="label">Status</span><span class="val">${escapeHtml(u.baseStats.status)}</span></div>
+            <div class="data-cell"><span class="label">Demand</span><span class="val highlight-purple">${escapeHtml(u.baseStats.demand)}</span></div>
           </div>
         </div>`;
       }).join('');
@@ -421,113 +367,114 @@
       if(statusEl) statusEl.innerText = stats.status;
     };
 
-    searchBar.addEventListener('input',e=>{ searchQuery=e.target.value||''; currentPage=1; renderList(); });
-    tabs.addEventListener('click',e=>{
+    searchBar.addEventListener('input', e => { searchQuery = e.target.value || ''; currentPage = 1; renderList(); });
+
+    tabs.addEventListener('click', e => {
       if(!e.target.classList.contains('tab-btn')) return;
-      tabs.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      tabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       currentFilter = e.target.getAttribute('data-rarity') || 'all';
       if(currentFilter === 'calculator'){
-        calcRoot.style.display = 'block';
-        calcRoot.setAttribute('aria-hidden','false');
-        listRoot.style.display = 'none';
+        calcRoot.style.display = 'block'; calcRoot.setAttribute('aria-hidden','false'); listRoot.style.display = 'none';
       } else {
-        calcRoot.style.display = 'none';
-        calcRoot.setAttribute('aria-hidden','true');
-        listRoot.style.display = '';
-        currentPage = 1;
-        renderList();
+        calcRoot.style.display = 'none'; calcRoot.setAttribute('aria-hidden','true'); listRoot.style.display = ''; currentPage = 1; renderList();
       }
     });
-    sort.addEventListener('click', e=>{
+
+    sort.addEventListener('click', e => {
       if(!e.target.classList.contains('sort-btn')) return;
-      sort.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+      sort.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       currentSort = e.target.getAttribute('data-sort') || 'default';
-      currentPage = 1;
-      renderList();
+      currentPage = 1; renderList();
     });
-    prevBtn.addEventListener('click', ()=>{ if(currentPage>1){currentPage--;renderList(); window.scrollTo({top:0,behavior:'smooth'});} });
-    nextBtn.addEventListener('click', ()=>{ const filteredTotal = unitKeys.filter(k=>{ const u = unitDatabase[k]; return (currentFilter==='all' || (u.rarity||'').toLowerCase()===currentFilter) && (u.name||'').toLowerCase().includes(searchQuery.toLowerCase()) }).length; const maxPage = Math.ceil(filteredTotal/itemsPerPage)||1; if(currentPage<maxPage){currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'});} });
 
-    // ---------------- Calculator ----------------
-    const leftItems = [];
-    const rightItems = [];
+    prevBtn.addEventListener('click', ()=>{ if(currentPage>1){ currentPage--; renderList(); window.scrollTo({top:0,behavior:'smooth'}); } });
+    nextBtn.addEventListener('click', ()=> {
+      const filteredTotal = unitKeys.filter(k => {
+        const u = unitDatabase[k];
+        return (currentFilter === 'all' || (u.rarity||'').toLowerCase()===currentFilter) && (u.name||'').toLowerCase().includes(searchQuery.toLowerCase());
+      }).length;
+      const maxPage = Math.ceil(filteredTotal / itemsPerPage) || 1;
+      if(currentPage < maxPage){ currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }
+    });
+
+    /* Calculator + picker */
+    const leftItems = [], rightItems = [];
 
     function populateSelects(){
-      const makeOpt = key=>{
+      const makeOpt = key => {
         const u = unitDatabase[key];
         return `<option value="${key}">${escapeHtml(u.name)} (${u.rarity||'n/a'}) — ${u.baseStats.value||'N/A'}</option>`;
       };
-      leftSelect.innerHTML = unitKeys.map(makeOpt).join('');
-      rightSelect.innerHTML = unitKeys.map(makeOpt).join('');
+      if(leftSelect) leftSelect.innerHTML = unitKeys.map(makeOpt).join('');
+      if(rightSelect) rightSelect.innerHTML = unitKeys.map(makeOpt).join('');
     }
 
     function getUnitValue(key, trait){
       const u = unitDatabase[key];
       if(!u) return 0;
-      if(trait && trait!=='base' && u.traits && u.traits[trait]) return parseValue(u.traits[trait].value);
+      if(trait && trait !== 'base' && u.traits && u.traits[trait]) return parseValue(u.traits[trait].value);
       return parseValue(u.baseStats.value);
     }
 
-    function addToSide(side,key,trait,qty){
-      qty = Math.max(1, Math.floor(qty)||1);
+    function addToSide(side, key, trait, qty){
+      qty = Math.max(1, Math.floor(qty) || 1);
       const single = getUnitValue(key, trait);
       const computed = single * qty;
       const id = `${key}|${trait}|${Date.now()}|${Math.random().toString(36).slice(2,6)}`;
-      const entry = {id,key,trait,qty,single,computed};
-      if(side==='left') leftItems.push(entry); else rightItems.push(entry);
+      const entry = { id, key, trait, qty, single, computed };
+      if(side === 'left') leftItems.push(entry); else rightItems.push(entry);
       renderThumbs(); updateTotalsAndVerdict();
     }
 
     function renderThumbs(){
-      leftItemsEl.innerHTML = leftItems.length ? leftItems.map(it=> thumbHTML(it,'left')).join('') : '';
-      rightItemsEl.innerHTML = rightItems.length ? rightItems.map(it=> thumbHTML(it,'right')).join('') : '';
-      document.querySelectorAll('.thumb-remove').forEach(btn=>{
-        btn.removeEventListener('click', thumbRemoveHandler);
-        btn.addEventListener('click', thumbRemoveHandler);
-      });
+      leftItemsEl.innerHTML = leftItems.length ? leftItems.map(it => thumbHTML(it,'left')).join('') : '';
+      rightItemsEl.innerHTML = rightItems.length ? rightItems.map(it => thumbHTML(it,'right')).join('') : '';
+      document.querySelectorAll('.thumb-remove').forEach(btn => { btn.removeEventListener('click', thumbRemoveHandler); btn.addEventListener('click', thumbRemoveHandler); });
     }
-    function thumbHTML(it,side){
+
+    function thumbHTML(it, side){
       const u = unitDatabase[it.key] || {};
       const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
-      const r = (u.rarity||'').toLowerCase();
-      return `<div class="selected-thumb rarity-${r}" data-id="${it.id}" data-side="${side}">
+      const r = (u.rarity || '').toLowerCase();
+      return `<div class="selected-thumb rarity-${r}" data-id="${it.id}" data-side="${side}" title="${escapeHtml(u.name)}">
         <div class="thumb-img" style="background-image:${portrait}"></div>
-        <div class="thumb-remove" style="position:absolute;left:6px;top:6px;background:rgba(0,0,0,0.7);color:#fff;border-radius:6px;padding:2px 6px;cursor:pointer;font-weight:900" data-id="${it.id}" data-side="${side}">×</div>
+        <div class="thumb-remove" data-id="${it.id}" data-side="${side}" aria-label="Remove">×</div>
       </div>`;
     }
+
     function thumbRemoveHandler(e){
       const id = e.currentTarget.getAttribute('data-id');
       const side = e.currentTarget.getAttribute('data-side');
-      if(side==='left'){ const idx=leftItems.findIndex(x=>x.id===id); if(idx>=0) leftItems.splice(idx,1); }
-      else { const idx=rightItems.findIndex(x=>x.id===id); if(idx>=0) rightItems.splice(idx,1); }
+      if(side === 'left'){ const idx = leftItems.findIndex(x => x.id === id); if(idx >= 0) leftItems.splice(idx,1); }
+      else { const idx = rightItems.findIndex(x => x.id === id); if(idx >= 0) rightItems.splice(idx,1); }
       renderThumbs(); updateTotalsAndVerdict();
     }
 
-    function sumList(list){ return list.reduce((s,it)=> s + Number(it.computed||0), 0); }
+    function sumList(list){ return list.reduce((s,it) => s + Number(it.computed||0), 0); }
 
     function updateTotalsAndVerdict(){
-      leftItems.forEach(i=> i.computed = (i.single||0) * (i.qty||1));
-      rightItems.forEach(i=> i.computed = (i.single||0) * (i.qty||1));
+      leftItems.forEach(i => i.computed = (i.single||0) * (i.qty||1));
+      rightItems.forEach(i => i.computed = (i.single||0) * (i.qty||1));
       const leftSum = sumList(leftItems);
       const rightSum = sumList(rightItems);
       leftTotalEl.innerText = `TOTAL VALUE: ${abbr(leftSum)}`;
       rightTotalEl.innerText = `TOTAL VALUE: ${abbr(rightSum)}`;
 
-      const FAIR = 0.02; const SMALL = 0.10;
-      let verdict='NO ITEMS';
-      if(leftSum===0 && rightSum===0) verdict='NO ITEMS';
-      else if(Math.abs(leftSum - rightSum) <= Math.max(1, FAIR * Math.max(leftSum, rightSum))) verdict='FAIR';
+      const FAIR = 0.02, SMALL = 0.10;
+      let verdict = 'NO ITEMS';
+      if(leftSum === 0 && rightSum === 0) verdict = 'NO ITEMS';
+      else if(Math.abs(leftSum - rightSum) <= Math.max(1, FAIR * Math.max(leftSum, rightSum))) verdict = 'FAIR';
       else if(leftSum > rightSum){
-        if(rightSum===0 || leftSum > rightSum*(1+SMALL)) verdict='OVERPAYING'; else verdict='LOSE';
+        if(rightSum === 0 || leftSum > rightSum * (1 + SMALL)) verdict = 'OVERPAYING'; else verdict = 'LOSE';
       } else {
-        if(leftSum===0 || rightSum > leftSum*(1+SMALL)) verdict='UNDERPAYING'; else verdict='WIN';
+        if(leftSum === 0 || rightSum > leftSum * (1 + SMALL)) verdict = 'UNDERPAYING'; else verdict = 'WIN';
       }
       verdictText.innerText = verdict.toUpperCase();
     }
 
-    // ---------- Picker (rarity categories) ----------
+    /* Picker (rarity only). Picker shows no thumbnails until user clicks a category. */
     function createPicker(){
       if(pickerOverlay) return;
       pickerOverlay = document.createElement('div');
@@ -535,61 +482,67 @@
       pickerOverlay.innerHTML = `<div class="picker-box" role="dialog" aria-modal="true">
         <div class="picker-sidebar" id="picker-sidebar"></div>
         <div class="picker-main">
-          <div class="picker-search"><input id="picker-search-input" placeholder="SEARCH UNITS..."></div>
+          <div class="picker-search"><input id="picker-search-input" placeholder="SEARCH UNITS..." aria-label="Picker search"></div>
           <div class="picker-grid" id="picker-grid"></div>
         </div>
       </div>`;
       document.body.appendChild(pickerOverlay);
-      pickerOverlay.addEventListener('click', (e)=>{ if(e.target===pickerOverlay) pickerOverlay.style.display='none'; });
+      pickerOverlay.addEventListener('click', e => { if(e.target === pickerOverlay) pickerOverlay.style.display = 'none'; });
 
       const sidebar = pickerOverlay.querySelector('#picker-sidebar');
       const rarities = ['All','Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
       sidebar.innerHTML = rarities.map(r => `<div class="picker-cat" data-cat="${r.toLowerCase()}">${r}</div>`).join('');
-      sidebar.querySelectorAll('.picker-cat').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          sidebar.querySelectorAll('.picker-cat').forEach(x=>x.classList.remove('active'));
+      sidebar.querySelectorAll('.picker-cat').forEach(btn => {
+        btn.addEventListener('click', () => {
+          sidebar.querySelectorAll('.picker-cat').forEach(x => x.classList.remove('active'));
           btn.classList.add('active');
+          // when category clicked, show thumbs filtered by rarity
           const cat = btn.getAttribute('data-cat');
           renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, cat, pickerOverlay.querySelector('#picker-search-input').value || '');
         });
       });
-      const first = sidebar.querySelector('.picker-cat'); if(first) first.classList.add('active');
+      // placeholder in picker-grid until category chosen
+      const grid = pickerOverlay.querySelector('#picker-grid');
+      grid.innerHTML = `<div class="picker-placeholder">Choose a category on the left to view units</div>`;
 
-      pickerOverlay.querySelector('#picker-search-input').addEventListener('input', (e)=>{
+      const searchInput = pickerOverlay.querySelector('#picker-search-input');
+      searchInput.addEventListener('input', e => {
         const active = sidebar.querySelector('.picker-cat.active');
-        const cat = active ? active.getAttribute('data-cat') : 'all';
-        renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, cat, e.target.value || '');
+        if(!active) return; // nothing to do until category chosen
+        renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, active.getAttribute('data-cat'), e.target.value || '');
       });
     }
 
-    let currentPickerSide='left', currentPickerTrait='base', currentPickerQty=1;
+    let currentPickerSide = 'left', currentPickerTrait = 'base', currentPickerQty = 1;
 
     function openPicker(side, trait, qty){
       currentPickerSide = side;
       currentPickerTrait = trait || 'base';
-      currentPickerQty = Math.max(1, Math.floor(qty)||1);
+      currentPickerQty = Math.max(1, Math.floor(qty) || 1);
       createPicker();
       pickerOverlay.style.display = 'flex';
-      const active = pickerOverlay.querySelector('.picker-cat.active');
-      const cat = active ? active.getAttribute('data-cat') : 'all';
-      renderPickerGrid(side, trait, qty, cat, '');
+      // ensure no thumbnails show until a category is clicked
+      const grid = pickerOverlay.querySelector('#picker-grid');
+      grid.innerHTML = `<div class="picker-placeholder">Choose a category on the left to view units</div>`;
+      pickerOverlay.querySelector('#picker-search-input').value = '';
       setTimeout(()=>{ const s = pickerOverlay.querySelector('#picker-search-input'); if(s) s.focus(); },120);
     }
 
     function renderPickerGrid(side, trait, qty, category, q){
-      category = (category||'all').toLowerCase();
-      q = (q||'').toLowerCase();
-      const keys = unitKeys.filter(k=>{
+      category = (category || 'all').toLowerCase();
+      q = (q || '').toLowerCase();
+      const keys = unitKeys.filter(k => {
         const u = unitDatabase[k];
         if(!u) return false;
         if(!(u.name||'').toLowerCase().includes(q)) return false;
         if(category === 'all') return true;
-        const rar = (u.rarity||'').toLowerCase();
-        return rar === category;
+        return (u.rarity || '').toLowerCase() === category;
       });
 
       const grid = pickerOverlay.querySelector('#picker-grid');
-      grid.innerHTML = keys.map(k=>{
+      if(!keys.length) { grid.innerHTML = `<div class="picker-placeholder">No units match</div>`; return; }
+
+      grid.innerHTML = keys.map(k => {
         const u = unitDatabase[k];
         const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
         const rslug = (u.rarity||'').toLowerCase();
@@ -598,8 +551,8 @@
         </div>`;
       }).join('');
 
-      grid.querySelectorAll('.picker-thumb').forEach(t=>{
-        t.addEventListener('click', ()=>{
+      grid.querySelectorAll('.picker-thumb').forEach(t => {
+        t.addEventListener('click', () => {
           const key = t.getAttribute('data-key');
           addToSide(currentPickerSide, key, currentPickerTrait, currentPickerQty);
           pickerOverlay.style.display = 'none';
@@ -607,12 +560,13 @@
       });
     }
 
-    plusLeft.addEventListener('click', ()=> openPicker('left', traitLeft.value, Number(qtyLeft.value||1)));
-    plusRight.addEventListener('click', ()=> openPicker('right', traitRight.value, Number(qtyRight.value||1)));
-    addLeft.addEventListener('click', ()=> addToSide('left', leftSelect.value, traitLeft.value, Number(qtyLeft.value||1)));
-    addRight.addEventListener('click', ()=> addToSide('right', rightSelect.value, traitRight.value, Number(qtyRight.value||1)));
-    leftSelect.addEventListener('dblclick', ()=> addToSide('left', leftSelect.value, traitLeft.value, Number(qtyLeft.value||1)));
-    rightSelect.addEventListener('dblclick', ()=> addToSide('right', rightSelect.value, traitRight.value, Number(qtyRight.value||1)));
+    plusLeft.addEventListener('click', ()=> openPicker('left', traitLeft.value, Number(qtyLeft.value || 1)));
+    plusRight.addEventListener('click', ()=> openPicker('right', traitRight.value, Number(qtyRight.value || 1)));
+
+    addLeft.addEventListener('click', ()=> addToSide('left', leftSelect.value, traitLeft.value, Number(qtyLeft.value || 1)));
+    addRight.addEventListener('click', ()=> addToSide('right', rightSelect.value, traitRight.value, Number(qtyRight.value || 1)));
+    leftSelect.addEventListener('dblclick', ()=> addToSide('left', leftSelect.value, traitLeft.value, Number(qtyLeft.value || 1)));
+    rightSelect.addEventListener('dblclick', ()=> addToSide('right', rightSelect.value, traitRight.value, Number(qtyRight.value || 1)));
 
     // init
     populateSelects();
@@ -620,6 +574,7 @@
     renderThumbs();
     updateTotalsAndVerdict();
 
+    // expose debug arrays
     window._leftItems = leftItems;
     window._rightItems = rightItems;
   })();
