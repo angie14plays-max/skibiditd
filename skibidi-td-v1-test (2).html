@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-  <title>Skibidi TD Value List (fixed) + Calculator</title>
+  <title>Skibidi TD Value List (fixed) + Calculator (picker)</title>
   <style>
     :root {
       --bg-page: #000000;
@@ -24,6 +24,15 @@
       --hyped: #3b82f6;
       --recovering: #555555;
       --unstable: #9d174d;
+
+      --grad-astral: linear-gradient(135deg,#7b00e6,#b800e6,#6cedf0);
+      --grad-cosmic: linear-gradient(135deg,#6cedf0,#7b00e6);
+      --grad-divine: linear-gradient(135deg,#c400cf,#2248ff);
+      --grad-godly: linear-gradient(135deg,#7b00e6,#6367ff);
+      --grad-exclusive: linear-gradient(135deg,#2e7dff,#2be7f6);
+      --grad-mythic: linear-gradient(135deg,#ff6d68,#cc1d1b);
+      --grad-legendary: linear-gradient(135deg,#f5a623,#d48c00);
+      --grad-default: linear-gradient(135deg,#444,#222);
     }
 
     * { font-family: 'Montserrat', sans-serif; letter-spacing: 0.5px; box-sizing: border-box; }
@@ -106,7 +115,7 @@
     .calculator-root {
       width: 100%;
       max-width: 1200px;
-      display: none;
+      display: none; /* shown when Calculator tab clicked */
       margin-bottom: 28px;
       gap: 16px;
     }
@@ -160,31 +169,37 @@
       font-weight:800;
     }
 
+    /* items area shows thumbnails in a grid (matches your screenshot) */
     .items-list {
       background: rgba(255,255,255,0.01);
       border:1px solid rgba(255,255,255,0.04);
-      padding:8px;
+      padding:12px;
       border-radius:8px;
-      min-height:160px;
+      min-height:180px;
       overflow:auto;
       display:flex;
-      flex-direction:column;
-      gap:8px;
+      gap:10px;
+      flex-wrap:wrap;
+      align-content:flex-start;
     }
-    .trade-item {
-      display:flex;
-      gap:8px;
-      align-items:center;
-      padding:8px;
-      border-radius:8px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.01), transparent);
-      border:1px solid rgba(255,255,255,0.03);
-      justify-content:space-between;
+
+    .selected-thumb {
+      width:74px; height:74px; border-radius:10px; position:relative;
+      display:flex; align-items:center; justify-content:center;
+      background:var(--box-bg); border:3px solid rgba(255,255,255,0.03);
+      overflow:hidden;
     }
-    .trade-item .left { display:flex; gap:8px; align-items:center; flex:1; }
-    .trade-item .meta { color:var(--text-dim); font-size:13px; }
-    .trade-item input[type="number"]{ width:110px; padding:6px; background:transparent; border:1px solid rgba(255,255,255,0.04); border-radius:6px; color:var(--text-main); text-align:right; }
-    .remove-btn { background:transparent; color:var(--underpaid); border:0; cursor:pointer; font-weight:700; padding:6px; }
+    .thumb-img { width:100%; height:100%; background-size:cover; background-position:center; filter:brightness(.98); }
+    .thumb-badge {
+      position:absolute; right:4px; bottom:4px;
+      background:linear-gradient(90deg,#ff6dcd,#ff8a4d); color:#000; font-weight:800;
+      padding:4px 6px; border-radius:8px; font-size:12px;
+      box-shadow:0 2px 4px rgba(0,0,0,.6);
+    }
+    .thumb-remove {
+      position:absolute; left:6px; top:6px; background:rgba(0,0,0,0.5); color:#fff; border-radius:6px;
+      width:20px; height:20px; display:grid; place-items:center; cursor:pointer; font-weight:900; font-size:12px;
+    }
 
     .total-row { display:flex; justify-content:space-between; align-items:center; margin-top:6px; }
     .total-label { font-weight:900; color:var(--text-dim); }
@@ -211,8 +226,38 @@
     .balance-bar { width:100%; height:14px; background:rgba(255,255,255,0.03); border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.02); }
     .balance-fill { height:100%; width:50%; background:linear-gradient(90deg,#22c55e,#6ea0ff); }
 
-    @media (max-width:1024px) { .list-container { grid-template-columns: repeat(2,1fr); } .calc-inner { flex-direction:column; } .verdict { width:100%; } }
-    @media (max-width:600px) { .list-container { grid-template-columns: 1fr; } .portrait-frame { width:90px; height:90px; } .unit-image { width:100px; height:100px; } }
+    /* Unit picker modal (full-screen) */
+    .unit-picker-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:9999;
+      padding:24px;
+    }
+    .unit-picker {
+      width:100%; max-width:1200px; background:var(--card-bg); border-radius:12px; border:2px solid var(--border-solid);
+      padding:16px; display:flex; gap:14px; min-height:420px;
+    }
+    .picker-sidebar { width:160px; display:flex; flex-direction:column; gap:10px; }
+    .picker-cat { padding:10px 12px; border-radius:8px; border:2px solid var(--border-solid); background:transparent; color:var(--text-dim); font-weight:900; cursor:pointer; text-transform:uppercase; }
+    .picker-cat.active { color:#fff; border-color:var(--gold); }
+    .picker-main { flex:1; display:flex; flex-direction:column; gap:12px; }
+    .picker-search { display:flex; gap:8px; }
+    .picker-search input { flex:1; padding:10px; border-radius:8px; background:var(--box-bg); border:1px solid var(--border-solid); color:var(--text-main); }
+    .picker-grid { background:rgba(0,0,0,0.02); border-radius:8px; padding:10px; border:1px solid rgba(255,255,255,0.03);
+      display:grid; grid-template-columns: repeat(auto-fill, 54px); gap:10px; align-content:start; overflow:auto; padding-bottom:8px;
+    }
+
+    /* rarity border helpers */
+    .rarity-astral .selected-thumb { border-image: none; box-shadow: 0 0 0 3px rgba(123,0,230,0.06) inset; }
+    .rarity-astral .selected-thumb::after { content:''; position:absolute; inset:-3px; border-radius:10px; background:var(--grad-astral); opacity:0.95; z-index:-1; }
+
+    .rarity-cosmic .selected-thumb::after { content:''; position:absolute; inset:-3px; border-radius:10px; background:var(--grad-cosmic); z-index:-1; }
+    .rarity-divine .selected-thumb::after { content:''; position:absolute; inset:-3px; border-radius:10px; background:var(--grad-divine); z-index:-1; }
+    .rarity-godly .selected-thumb::after { content:''; position:absolute; inset:-3px; border-radius:10px; background:var(--grad-godly); z-index:-1; }
+    .rarity-exclusive .selected-thumb::after { content:''; position:absolute; inset:-3px; border-radius:10px; background:var(--grad-exclusive); z-index:-1; }
+    .rarity-mythic .selected-thumb::after { content:''; position:absolute; inset:-3px; border-radius:10px; background:var(--grad-mythic); z-index:-1; }
+    .rarity-legendary .selected-thumb::after { content:''; position:absolute; inset:-3px; border-radius:10px; background:var(--grad-legendary); z-index:-1; }
+
+    @media (max-width:1024px) { .list-container { grid-template-columns: repeat(2,1fr); } .calc-inner { flex-direction:column; } .verdict { width:100%; } .unit-picker { flex-direction:column; min-height:520px; } .picker-sidebar{width:100%; display:flex; overflow:auto;} .picker-grid{grid-template-columns: repeat(auto-fill, 64px);} }
+    @media (max-width:600px) { .list-container { grid-template-columns: 1fr; } .portrait-frame { width:90px; height:90px; } .unit-image { width:100px; height:100px; } .picker-grid{grid-template-columns: repeat(auto-fill, 64px);} }
   </style>
 </head>
 <body>
@@ -228,7 +273,7 @@
       <button class="tab-btn" data-rarity="exclusive">Exclusive</button>
       <button class="tab-btn" data-rarity="mythic">Mythic</button>
       <button class="tab-btn" data-rarity="legendary">Legendary</button>
-      <!-- NEW: Calculator tab -->
+      <!-- Calculator tab -->
       <button class="tab-btn" data-rarity="calculator" id="calculator-tab">Calculator</button>
     </div>
 
@@ -240,7 +285,7 @@
 
   <div id="list-root" class="list-container"></div>
 
-  <!-- Calculator panel (hidden by default) -->
+  <!-- Calculator panel -->
   <div id="calculator-root" class="calculator-root">
     <div class="calc-inner">
       <div class="trade-panel" id="left-panel">
@@ -256,6 +301,7 @@
             <option value="sniper">Sniper</option>
           </select>
           <input id="qty-left" type="number" min="1" value="1" />
+          <!-- Opens unit picker modal -->
           <button class="btn" data-side="left" id="add-left">Add</button>
         </div>
 
@@ -280,6 +326,7 @@
             <option value="sniper">Sniper</option>
           </select>
           <input id="qty-right" type="number" min="1" value="1" />
+          <!-- Opens unit picker modal -->
           <button class="btn" data-side="right" id="add-right">Add</button>
         </div>
 
@@ -311,10 +358,10 @@
     <button class="pagination-btn" id="next-btn">Next</button>
   </div>
 
-  <!-- Your data file should define `unitDatabase` as a global object -->
+  <!-- Unit data -->
   <script src="skibidi-td-data.js"></script>
 
-  <!-- Existing renderer script (unchanged) -->
+  <!-- Render list script (same as before) -->
   <script>
   (function () {
     function showFatal(message) {
@@ -594,13 +641,13 @@
   })();
   </script>
 
-  <!-- Calculator script: uses global unitDatabase and parseValue -->
+  <!-- Calculator + Unit Picker script -->
   <script>
     (function () {
-      // Config thresholds (change these if you want different sensitivity)
-      const FAIR_THRESHOLD = 0.02;   // 2% => considered "Fair"
-      const SMALL_DIFF = 0.10;      // <=10% considered small win/lose
-      // Helper formatting
+      // thresholds
+      const FAIR_THRESHOLD = 0.02;   // 2%
+      const SMALL_DIFF = 0.10;      // 10%
+
       function abbr(n) {
         if (!isFinite(n) || n === 0) return '0';
         if (n >= 1e6) return +(n / 1e6).toFixed(2) + 'M';
@@ -613,7 +660,7 @@
       }
 
       document.addEventListener('DOMContentLoaded', () => {
-        if (typeof unitDatabase === 'undefined') return; // skip if missing
+        if (typeof unitDatabase === 'undefined') return;
 
         // Elements
         const unitSelectLeft = document.getElementById('unit-select-left');
@@ -634,11 +681,15 @@
         const clearLeft = document.getElementById('clear-left');
         const clearRight = document.getElementById('clear-right');
 
+        // unit picker elements will be created below
+        let pickerOverlay, pickerGrid, pickerSearch, pickerSidebar;
+
         // Data stores
         const unitKeys = Object.keys(unitDatabase).sort((a,b) => (unitDatabase[a].name || '').localeCompare(unitDatabase[b].name || ''));
         const leftItems = [];
         const rightItems = [];
 
+        // populate selects for convenience (keeps original dropdowns workable)
         function populateUnitSelects() {
           const makeOption = (key) => {
             const u = unitDatabase[key];
@@ -649,6 +700,8 @@
           unitSelectRight.innerHTML = unitKeys.map(makeOption).join('');
         }
         function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        const imageProvider = "https://corsproxy.io/?https://drive.google.com/thumbnail?id=";
 
         function readUnitValue(key, trait) {
           const unit = unitDatabase[key];
@@ -665,7 +718,7 @@
           const computedValue = numericSingle * qty;
           const item = {
             id: `${key}:${trait}:${Date.now()}${Math.random().toString(36).slice(2,6)}`,
-            key, trait, qty, numericSingle, computedValue, override: null
+            key, trait, qty, numericSingle, computedValue
           };
           if (side === 'left') leftItems.push(item); else rightItems.push(item);
           renderLists();
@@ -684,72 +737,60 @@
           computeAndUpdate();
         }
 
-        function updateOverride(side, id, newVal) {
-          const list = side === 'left' ? leftItems : rightItems;
-          const it = list.find(i => i.id === id);
-          if (!it) return;
-          const nv = parseFloat(newVal);
-          it.override = Number.isFinite(nv) ? nv : null;
-          computeAndUpdate();
-        }
-
+        // Renders thumbnail grid for selected items (matches screenshot)
         function renderLists() {
-          leftItemsEl.innerHTML = leftItems.map(itemEl('left')).join('');
-          rightItemsEl.innerHTML = rightItems.map(itemEl('right')).join('');
-          // attach listeners for remove and override inputs
-          attachListListeners();
-        }
-
-        function itemEl(side) {
-          return function (it) {
-            const unit = unitDatabase[it.key];
-            const name = (unit && unit.name) ? unit.name : it.key;
-            const traitLabel = it.trait && it.trait !== 'base' ? ` (${it.trait})` : '';
-            const displayValue = it.override != null ? comma(it.override) : comma(it.computedValue);
+          function thumbHTML(it) {
+            const unit = unitDatabase[it.key] || {};
+            const portrait = unit.unitId ? `url('${imageProvider}${unit.unitId}')` : '';
+            const raritySlug = (unit.rarity || '').toLowerCase();
             return `
-              <div class="trade-item" data-id="${it.id}" data-side="${side}">
-                <div class="left">
-                  <div>
-                    <div style="font-weight:800">${escapeHtml(name)}${escapeHtml(traitLabel)}</div>
-                    <div class="meta">qty: ${it.qty} • unit: ${abbr(it.numericSingle)}</div>
-                  </div>
-                </div>
-                <div style="display:flex; gap:8px; align-items:center;">
-                  <input type="number" class="override-input" data-id="${it.id}" data-side="${side}" value="${it.override != null ? it.override : it.computedValue}" />
-                  <button class="remove-btn" data-id="${it.id}" data-side="${side}">×</button>
-                </div>
+              <div class="selected-thumb rarity-${raritySlug}" data-id="${it.id}" data-side="">
+                <div class="thumb-remove" data-id="${it.id}" title="Remove">×</div>
+                <div class="thumb-img" style="background-image: ${portrait};"></div>
+                <div class="thumb-badge">${escapeHtml(String(it.qty))}</div>
               </div>`;
           }
+          leftItemsEl.innerHTML = leftItems.map(it => {
+            const unit = unitDatabase[it.key] || {};
+            const portrait = unit.unitId ? `url('${imageProvider}${unit.unitId}')` : '';
+            const raritySlug = (unit.rarity || '').toLowerCase();
+            return `
+              <div class="selected-thumb rarity-${raritySlug}" data-id="${it.id}" data-side="left">
+                <div class="thumb-remove" data-id="${it.id}" data-side="left">×</div>
+                <div class="thumb-img" style="background-image: ${portrait};"></div>
+                <div class="thumb-badge">${escapeHtml(String(it.qty))}</div>
+              </div>`;
+          }).join('');
+          rightItemsEl.innerHTML = rightItems.map(it => {
+            const unit = unitDatabase[it.key] || {};
+            const portrait = unit.unitId ? `url('${imageProvider}${unit.unitId}')` : '';
+            const raritySlug = (unit.rarity || '').toLowerCase();
+            return `
+              <div class="selected-thumb rarity-${raritySlug}" data-id="${it.id}" data-side="right">
+                <div class="thumb-remove" data-id="${it.id}" data-side="right">×</div>
+                <div class="thumb-img" style="background-image: ${portrait};"></div>
+                <div class="thumb-badge">${escapeHtml(String(it.qty))}</div>
+              </div>`;
+          }).join('');
+
+          // attach remove handlers
+          document.querySelectorAll('.thumb-remove').forEach(btn => {
+            btn.removeEventListener('click', thumbRemoveHandler);
+            btn.addEventListener('click', thumbRemoveHandler);
+          });
         }
 
-        function attachListListeners() {
-          document.querySelectorAll('.remove-btn').forEach(btn => {
-            btn.removeEventListener('click', removeBtnHandler);
-            btn.addEventListener('click', removeBtnHandler);
-          });
-          document.querySelectorAll('.override-input').forEach(inp => {
-            inp.removeEventListener('input', overrideHandler);
-            inp.addEventListener('input', overrideHandler);
-          });
-        }
-        function removeBtnHandler(e) {
+        function thumbRemoveHandler(e) {
           const id = e.currentTarget.getAttribute('data-id');
           const side = e.currentTarget.getAttribute('data-side');
           removeItem(side, id);
         }
-        function overrideHandler(e) {
-          const id = e.currentTarget.getAttribute('data-id');
-          const side = e.currentTarget.getAttribute('data-side');
-          const val = parseFloat(e.currentTarget.value) || 0;
-          updateOverride(side, id, val);
-        }
 
         function sumList(list) {
-          return list.reduce((s,it) => s + (it.override != null ? Number(it.override) : Number(it.computedValue || 0)), 0);
+          return list.reduce((s,it) => s + Number(it.computedValue || 0), 0);
         }
 
         function computeAndUpdate() {
-          // recompute computedValue from qty & numericSingle in case override numericSingle changed externally
           leftItems.forEach(it => it.computedValue = (it.numericSingle || 0) * (it.qty || 1));
           rightItems.forEach(it => it.computedValue = (it.numericSingle || 0) * (it.qty || 1));
 
@@ -769,19 +810,16 @@
           let verdict = 'No items';
           let details = 'Add units on each side to compare values.';
           let statusClass = '';
-          // if both zero
+
           if (leftSum === 0 && rightSum === 0) {
             verdict = 'No items';
             statusClass = 'status-fair';
           } else {
-            // consider equal within FAIR_THRESHOLD
             if (Math.abs(leftSum - rightSum) <= Math.max(1, FAIR_THRESHOLD * Math.max(leftSum, rightSum))) {
               verdict = 'Fair';
               details = `Totals are within ${(FAIR_THRESHOLD*100).toFixed(0)}% of each other.`;
               statusClass = 'status-fair';
             } else if (leftSum > rightSum) {
-              // you are giving more than them
-              // if other side is zero or left much larger => Overpaying
               if (rightSum === 0 || leftSum > rightSum * (1 + SMALL_DIFF)) {
                 verdict = 'Overpaying';
                 details = `You're giving ${formatPercentDifference(leftSum, rightSum)} more than them. Consider lowering your offer.`;
@@ -791,7 +829,7 @@
                 details = `You're giving slightly more (${formatPercentDifference(leftSum, rightSum)}).`;
                 statusClass = 'status-lose';
               }
-            } else { // leftSum < rightSum => you're receiving more value => good for you
+            } else {
               if (leftSum === 0 || rightSum > leftSum * (1 + SMALL_DIFF)) {
                 verdict = 'Underpaying';
                 details = `You're receiving ${formatPercentDifference(rightSum, leftSum)} more value — great deal for you.`;
@@ -805,7 +843,6 @@
           }
 
           verdictText.innerText = verdict;
-          // update class colors
           verdictText.className = 'status-text ' + statusClass;
           verdictDetails.innerText = details;
         }
@@ -817,29 +854,148 @@
           return Math.abs(pct).toFixed(0) + '%';
         }
 
-        // Wire add buttons
-        addLeftBtn.addEventListener('click', () => {
-          addItem('left', unitSelectLeft.value, traitLeft.value, Number(qtyLeft.value || 1));
-        });
-        addRightBtn.addEventListener('click', () => {
-          addItem('right', unitSelectRight.value, traitRight.value, Number(qtyRight.value || 1));
-        });
-
-        // clear
+        // Clear buttons
         clearLeft.addEventListener('click', () => { leftItems.splice(0,leftItems.length); renderLists(); computeAndUpdate(); });
         clearRight.addEventListener('click', () => { rightItems.splice(0,rightItems.length); renderLists(); computeAndUpdate(); });
 
-        // populate selects & initial compute
+        // populate selects & initial render
         populateUnitSelects();
         renderLists();
         computeAndUpdate();
 
-        // small helper to allow the calculator ui to be reachable from keyboard quickly
-        document.getElementById('calculator-tab').addEventListener('click', () => {
-          // focus first select after a short delay
-          setTimeout(()=> unitSelectLeft.focus(), 150);
+        // ------------ Unit Picker Modal -------------
+        function createPicker() {
+          pickerOverlay = document.createElement('div');
+          pickerOverlay.className = 'unit-picker-overlay';
+          pickerOverlay.innerHTML = `
+            <div class="unit-picker">
+              <div class="picker-sidebar" id="picker-sidebar"></div>
+              <div class="picker-main">
+                <div class="picker-search"><input id="picker-search-input" placeholder="SEARCH UNITS..." /></div>
+                <div class="picker-grid" id="picker-grid"></div>
+              </div>
+            </div>`;
+          document.body.appendChild(pickerOverlay);
+
+          pickerGrid = pickerOverlay.querySelector('#picker-grid');
+          pickerSearch = pickerOverlay.querySelector('#picker-search-input');
+          pickerSidebar = pickerOverlay.querySelector('#picker-sidebar');
+
+          // categories (left buttons) — you can change labels to match your categories
+          const categories = ['ALL','APEX','EVOLUTIONS','FORGOTTEN','NIGHTMARES','SECRETS','MYTHICS+','ITEMS','DEVELOPER','LOOKING FOR'];
+          pickerSidebar.innerHTML = categories.map(cat => `<div class="picker-cat" data-cat="${cat.toLowerCase()}">${cat}</div>`).join('');
+
+          // attach category handlers
+          pickerSidebar.querySelectorAll('.picker-cat').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              pickerSidebar.querySelectorAll('.picker-cat').forEach(x=>x.classList.remove('active'));
+              btn.classList.add('active');
+              // For now categories only act as visual grouping; we still filter by rarity/search
+              const cat = btn.getAttribute('data-cat');
+              renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, pickerSearch.value || '', cat);
+            });
+          });
+          // mark ALL active by default
+          const first = pickerSidebar.querySelector('.picker-cat');
+          if (first) first.classList.add('active');
+
+          pickerSearch.addEventListener('input', () => {
+            renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, pickerSearch.value || '');
+          });
+
+          // close on overlay click outside panel
+          pickerOverlay.addEventListener('click', (ev) => {
+            if (ev.target === pickerOverlay) closePicker();
+          });
+        }
+
+        // build grid of icons; filters: search, rarityCategory
+        function renderPickerGrid(side, trait, qty, q, category) {
+          q = (q || '').toLowerCase();
+          const keys = unitKeys.filter(k => {
+            const u = unitDatabase[k];
+            if (!u) return false;
+            // optional: map categories to rarities; by default 'all' shows everything
+            if (category && category !== 'all' && category !== 'apex') {
+              // using category only as UI grouping; don't exclude units unless you want mapping
+            }
+            return (u.name || '').toLowerCase().includes(q);
+          });
+
+          pickerGrid.innerHTML = keys.map(k => {
+            const u = unitDatabase[k];
+            const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
+            const raritySlug = (u.rarity || '').toLowerCase();
+            const display = `${u.name} (${u.rarity || ''})`;
+            return `
+              <div class="picker-thumb rarity-${raritySlug}" data-key="${k}" title="${escapeHtml(display)}" style="width:48px; height:48px; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; border:3px solid rgba(255,255,255,0.04); background:var(--box-bg);">
+                <div style="width:100%; height:100%; background-image:${portrait}; background-size:cover; background-position:center;"></div>
+              </div>`;
+          }).join('');
+          // attach click handlers for thumbs
+          pickerGrid.querySelectorAll('.picker-thumb').forEach(t => {
+            t.addEventListener('click', (e) => {
+              const key = t.getAttribute('data-key');
+              // Add item to chosen side
+              addItem(currentPickerSide, key, currentPickerTrait, currentPickerQty);
+              closePicker();
+            });
+          });
+        }
+
+        function openPicker(side, trait, qty) {
+          currentPickerSide = side;
+          currentPickerTrait = trait;
+          currentPickerQty = Math.max(1, Math.floor(qty) || 1);
+          if (!pickerOverlay) createPicker();
+          pickerOverlay.style.display = 'flex';
+          // prefill search
+          const c = pickerOverlay.querySelector('.picker-cat.active');
+          const cat = c ? c.getAttribute('data-cat') : 'all';
+          renderPickerGrid(side, trait, qty, '', cat);
+          setTimeout(()=> pickerOverlay.querySelector('#picker-search-input').focus(), 120);
+        }
+        function closePicker() {
+          if (pickerOverlay) pickerOverlay.style.display = 'none';
+        }
+
+        // store current picker state
+        let currentPickerSide = 'left';
+        let currentPickerTrait = 'base';
+        let currentPickerQty = 1;
+
+        // change Add buttons to open the picker modal
+        addLeftBtn.addEventListener('click', () => {
+          currentPickerSide = 'left';
+          currentPickerTrait = traitLeft.value;
+          currentPickerQty = Number(qtyLeft.value || 1);
+          openPicker('left', currentPickerTrait, currentPickerQty);
+        });
+        addRightBtn.addEventListener('click', () => {
+          currentPickerSide = 'right';
+          currentPickerTrait = traitRight.value;
+          currentPickerQty = Number(qtyRight.value || 1);
+          openPicker('right', currentPickerTrait, currentPickerQty);
         });
 
+        // also make double-click on a select's chosen unit quick-add (optional convenience)
+        unitSelectLeft.addEventListener('dblclick', () => {
+          const key = unitSelectLeft.value;
+          addItem('left', key, traitLeft.value, Number(qtyLeft.value || 1));
+        });
+        unitSelectRight.addEventListener('dblclick', () => {
+          const key = unitSelectRight.value;
+          addItem('right', key, traitRight.value, Number(qtyRight.value || 1));
+        });
+
+        // allow closing picker with Escape
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && pickerOverlay && pickerOverlay.style.display === 'flex') closePicker();
+        });
+
+        // focus helper when switching to calculator tab
+        const calcTab = document.getElementById('calculator-tab');
+        if (calcTab) calcTab.addEventListener('click', () => setTimeout(()=> unitSelectLeft.focus(), 150));
       });
     })();
   </script>
