@@ -3,274 +3,433 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Skibidi TD — Value List + Calculator (fixed)</title>
+  <title>Skibidi TD — Value List + Calculator (ultimate)</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
+    /* =========================================================================
+       THEME VARIABLES
+       ========================================================================= */
     :root{
-      --bg:#000;
-      --card:#0f0f0f;
-      --panel:#121212;
-      --box:#151515;
-      --border:#2f2f2f;
-      --muted:#9a9a9a;
-      --gold:#facc15;
-      --purple:#a855f7;
+      --bg: #000000;
+      --card: #0f0f0f;
+      --panel: #121212;
+      --panel-2: #151515;
+      --box: #181818;
+      --border: #2f2f2f;
+      --muted: #8a8a8a;
+      --white-dim: rgba(255,255,255,0.06);
+
+      --gold: #facc15;
+      --purple: #a855f7;
       --accent-grad: linear-gradient(90deg,#8b4bff,#ff2d6f);
-      --text:#ffffff;
 
-      /* Rarity gradients */
-      --g-astral: linear-gradient(135deg,#640081,#7e00a5,#154af0,#00cd82,#11ff46);
-      --g-cosmic: linear-gradient(135deg,#b800e6,#6cedf0);
-      --g-divine: linear-gradient(135deg,#c400cf,#2248ff);
-      --g-godly: linear-gradient(135deg,#7b00e6,#6367ff);
-      --g-exclusive: linear-gradient(135deg,#2e7dff,#2be7f6);
-      --g-mythic: linear-gradient(135deg,#ff6d68,#cc1d1b);
-      --g-legendary: linear-gradient(135deg,#f5a623,#d48c00);
+      --neon-red: rgba(255,50,80,0.18);
+      --neon-white: rgba(255,255,255,0.08);
+      --text: #ffffff;
+
+      /* Rarity gradients (used for halos & frames) */
+      --grad-astral: linear-gradient(135deg,#640081,#7e00a5,#154af0,#00cd82,#11ff46);
+      --grad-cosmic: linear-gradient(135deg,#b800e6,#6cedf0);
+      --grad-divine: linear-gradient(135deg,#c400cf,#2248ff);
+      --grad-godly: linear-gradient(135deg,#7b00e6,#6367ff);
+      --grad-exclusive: linear-gradient(135deg,#2e7dff,#2be7f6);
+      --grad-mythic: linear-gradient(135deg,#ff6d68,#cc1d1b);
+      --grad-legendary: linear-gradient(135deg,#f5a623,#d48c00);
     }
 
-    *{box-sizing:border-box;font-family:'Montserrat',sans-serif;-webkit-font-smoothing:antialiased}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--text)}
-    body{padding:22px;display:flex;flex-direction:column;align-items:center;gap:18px}
+    /* =========================================================================
+       BASE LAYOUT
+       ========================================================================= */
+    * { box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+    html,body { height:100%; margin:0; background:var(--bg); color:var(--text); }
+    body { padding:22px; display:flex; flex-direction:column; align-items:center; gap:18px; }
 
-    /* Debug overlay (hidden unless an error happens) */
-    #debug-overlay{display:none;position:fixed;left:0;right:0;top:0;padding:12px;background:#b91c1c;color:white;z-index:99999;text-align:center;font-family:sans-serif}
-
-    /* =========================
-       Controls - single row of full-colored category buttons
-       ========================= */
-    .controls { width:100%; max-width:1200px; display:flex; flex-direction:column; gap:14px; align-items:center; }
+    /* =========================================================================
+       CONTROLS: SEARCH / TABS / SORT
+       ========================================================================= */
+    .controls { width:100%; max-width:1200px; display:flex; flex-direction:column; gap:14px; margin:0 auto; }
     #search-bar {
-      width:100%; max-width:1200px; padding:12px 16px; border-radius:12px; background:var(--card);
-      border:2px solid var(--border); color:var(--text); outline:none;
+      width:100%; padding:14px 16px; border-radius:12px; background:var(--panel); border:2px solid var(--border); color:var(--text); font-size:15px;
+      outline: none;
+    }
+    .tabs, .sort { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    .tab-btn, .sort-btn {
+      background:var(--card); border:2px solid var(--border); padding:10px 16px; border-radius:8px; color:var(--muted);
+      font-weight:900; text-transform:uppercase; cursor:pointer;
+    }
+    .tab-btn.active, .sort-btn.active {
+      color:#fff; border-color:var(--gold); box-shadow:0 0 0 4px rgba(250,204,21,0.06) inset;
     }
 
-    .top-buttons { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:6px; }
-    .cat-btn {
-      padding:10px 16px; border-radius:10px; font-weight:900; text-transform:uppercase; cursor:pointer;
-      color:var(--text); border:2px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02);
-      transition: transform .08s ease, box-shadow .12s ease;
+    /* =========================================================================
+       LIST: GRID & CARDS
+       - Ensure titles don't break words awkwardly (user complaint)
+       - Add rarity background mapping (user wants each rarity to show a color)
+       ========================================================================= */
+    .list-root { max-width:1200px; width:100%; display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin:14px auto 36px; align-items:start; }
+    .unit-card {
+      background:var(--card); border-radius:16px; padding:18px; border:2px solid var(--border);
+      display:flex; flex-direction:column; gap:12px; justify-content:space-between; min-height:260px;
     }
-    .cat-btn:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,0.6); }
+    .header-section { display:flex; flex-direction:column; align-items:center; gap:6px; min-height:60px; }
+    .unit-title {
+      font-weight:900; font-size:16px; text-transform:uppercase; text-align:center; line-height:1.1;
+      white-space:normal; word-break:normal; overflow-wrap:break-word; /* prevents mid-word breaks */
+    }
+    .second-edition-tag { font-size:10px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:1px; }
 
-    /* Rarity button backgrounds (persistent). Non-active are muted via opacity. Active gets full color + gold outline */
-    .cat-btn[data-rarity="astral"] { background:var(--g-astral); opacity:0.28; }
-    .cat-btn[data-rarity="cosmic"] { background:var(--g-cosmic); opacity:0.28; }
-    .cat-btn[data-rarity="divine"] { background:var(--g-divine); opacity:0.28; }
-    .cat-btn[data-rarity="godly"] { background:var(--g-godly); opacity:0.28; }
-    .cat-btn[data-rarity="exclusive"] { background:var(--g-exclusive); opacity:0.28; }
-    .cat-btn[data-rarity="mythic"] { background:var(--g-mythic); opacity:0.28; }
-    .cat-btn[data-rarity="legendary"] { background:var(--g-legendary); opacity:0.28; }
-    .cat-btn[data-rarity="all"] { background: rgba(255,255,255,0.02); color:var(--muted); opacity:1; }
+    /* Portrait frame with small colored background ring (rarity color) behind the portrait */
+    .portrait-frame {
+      width:120px; height:120px; border-radius:50%; margin:0 auto; display:flex; align-items:center; justify-content:center; position:relative;
+      border:4px solid rgba(0,0,0,0.8);
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
+    }
+    .unit-image { width:110px; height:110px; border-radius:50%; background-size:cover; background-position:center; }
 
-    .cat-btn.active { opacity:1; border-color:var(--gold); box-shadow:0 8px 36px rgba(0,0,0,0.6); }
+    /* Add rarity background classes for portrait frame - these show a colored ring */
+    .rarity-astral .portrait-frame::before   { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-astral); z-index:-1; opacity:0.95; }
+    .rarity-cosmic .portrait-frame::before   { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-cosmic); z-index:-1; opacity:0.95; }
+    .rarity-divine .portrait-frame::before   { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-divine); z-index:-1; opacity:0.95; }
+    .rarity-godly .portrait-frame::before    { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-godly); z-index:-1; opacity:0.95; }
+    .rarity-exclusive .portrait-frame::before{ content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-exclusive); z-index:-1; opacity:0.95; }
+    .rarity-mythic .portrait-frame::before   { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-mythic); z-index:-1; opacity:0.95; }
+    .rarity-legendary .portrait-frame::before{ content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-legendary); z-index:-1; opacity:0.95; }
 
-    /* Sort buttons */
-    .sort-row { display:flex; gap:10px; margin-top:4px; }
-    .sort-btn { padding:8px 12px; border-radius:8px; background:var(--card); border:2px solid var(--border); color:var(--muted); font-weight:900; }
+    /* Data boxes (value/status/demand) styled as small rounded pills like original */
+    .data-table { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:8px; }
+    .data-cell {
+      background:var(--panel-2); border-radius:10px; border:1px solid var(--border); padding:10px; text-align:center; min-height:56px;
+      display:flex; flex-direction:column; justify-content:center; gap:6px;
+    }
+    .data-cell .label { color:var(--muted); font-size:11px; font-weight:800; text-transform:uppercase; }
+    .data-cell .val { font-weight:900; }
 
-    /* =========================
-       Main list grid
-       ========================= */
-    .list-root { width:100%; max-width:1200px; display:grid; grid-template-columns: repeat(3, 1fr); gap:24px; margin-top:10px; padding:12px; border-radius:12px; }
-    .unit-card { position:relative; background:var(--card); border-radius:16px; padding:18px; border:2px solid var(--border); min-height:300px; display:flex; flex-direction:column; gap:12px; justify-content:space-between; overflow:hidden; }
-    .unit-card > * { position:relative; z-index:2; }
-    .unit-title { font-weight:900; text-transform:uppercase; text-align:center; letter-spacing:0.6px; }
+    .highlight-gold { color:var(--gold); }
+    .highlight-purple { color:var(--purple); }
 
-    /* circular portrait (list) with persistent halo */
-    .portrait-circle { width:120px; height:120px; border-radius:50%; margin:0 auto; display:flex; align-items:center; justify-content:center; position:relative; border:3px solid rgba(0,0,0,0.6); background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02)); }
-    .portrait-circle .unit-image { width:110px; height:110px; border-radius:50%; background-size:cover; background-position:center; }
+    /* Pagination */
+    .pagination { max-width:1200px; width:100%; display:flex; gap:12px; justify-content:center; align-items:center; margin:24px auto; }
+    .pagination-btn { background:var(--card); border:1px solid var(--border); padding:8px 12px; border-radius:8px; color:var(--muted); font-weight:900; cursor:pointer; }
+    .pagination-btn:disabled { opacity:0.35; cursor:not-allowed; }
+    .page-info { color:var(--muted); font-weight:900; }
 
-    /* colored halo behind circle (persistent) */
-    .unit-card.rarity-astral .portrait-circle::before { content:""; position:absolute; inset:-6px; border-radius:50%; background:var(--g-astral); z-index:-1; opacity:0.95; }
-    .unit-card.rarity-cosmic .portrait-circle::before { content:""; position:absolute; inset:-6px; border-radius:50%; background:var(--g-cosmic); z-index:-1; opacity:0.95; }
-    .unit-card.rarity-divine .portrait-circle::before { content:""; position:absolute; inset:-6px; border-radius:50%; background:var(--g-divine); z-index:-1; opacity:0.95; }
-    .unit-card.rarity-godly .portrait-circle::before { content:""; position:absolute; inset:-6px; border-radius:50%; background:var(--g-godly); z-index:-1; opacity:0.95; }
-    .unit-card.rarity-exclusive .portrait-circle::before { content:""; position:absolute; inset:-6px; border-radius:50%; background:var(--g-exclusive); z-index:-1; opacity:0.95; }
-    .unit-card.rarity-mythic .portrait-circle::before { content:""; position:absolute; inset:-6px; border-radius:50%; background:var(--g-mythic); z-index:-1; opacity:0.95; }
-    .unit-card.rarity-legendary .portrait-circle::before { content:""; position:absolute; inset:-6px; border-radius:50%; background:var(--g-legendary); z-index:-1; opacity:0.95; }
+    /* =========================================================================
+       CALCULATOR: fully contained and only shown when calculator tab active
+       - user demanded neon white + red frame
+       - thumbnails inside calculator should have colored frames (rarity color)
+       - no space between each unit (tight grid look)
+       ========================================================================= */
+    .calculator-root { width:100%; max-width:1200px; margin: 0 auto 18px; display:none; } /* hidden by default */
+    .calc-row { display:flex; gap:30px; align-items:flex-start; justify-content:center; }
+    .trade-panel {
+      width:46%;
+      border-radius:14px;
+      padding:20px;
+      min-height:380px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      /* neon white + red frame effect */
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006));
+      border: 2px solid rgba(255,255,255,0.06);
+      box-shadow: 0 0 30px rgba(255,255,255,0.03), 0 0 24px rgba(255,50,80,0.08) inset;
+    }
+    .trade-title { text-align:center; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:var(--gold); }
+    .trade-title.you { color:#ff4d4d; } /* left red */
+    .trade-title.them { color:#6ea0ff; } /* right blue */
 
-    /* subtle full-card tint so category is obvious */
-    .unit-card.rarity-astral::after { content:""; position:absolute; inset:0; background:var(--g-astral); opacity:0.12; z-index:0; border-radius:12px }
-    .unit-card.rarity-cosmic::after { content:""; position:absolute; inset:0; background:var(--g-cosmic); opacity:0.12; z-index:0; border-radius:12px }
-    .unit-card.rarity-divine::after { content:""; position:absolute; inset:0; background:var(--g-divine); opacity:0.12; z-index:0; border-radius:12px }
-    .unit-card.rarity-godly::after { content:""; position:absolute; inset:0; background:var(--g-godly); opacity:0.12; z-index:0; border-radius:12px }
-    .unit-card.rarity-exclusive::after { content:""; position:absolute; inset:0; background:var(--g-exclusive); opacity:0.12; z-index:0; border-radius:12px }
-    .unit-card.rarity-mythic::after { content:""; position:absolute; inset:0; background:var(--g-mythic); opacity:0.12; z-index:0; border-radius:12px }
-    .unit-card.rarity-legendary::after { content:""; position:absolute; inset:0; background:var(--g-legendary); opacity:0.12; z-index:0; border-radius:12px }
+    .plus-wrap { display:flex; justify-content:center; }
+    .plus-btn {
+      width:56px; height:56px; border-radius:12px; display:grid; place-items:center; font-size:30px; font-weight:900; color:#fff;
+      background: linear-gradient(180deg,#7b00e6,#ff2d6f);
+      border:3px solid rgba(255,255,255,0.06);
+      box-shadow: 0 12px 36px rgba(255,50,80,0.14);
+      cursor:pointer;
+    }
 
-    .data-table { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-    .data-cell { background:var(--panel); border-radius:10px; border:1px solid var(--border); padding:10px; text-align:center; min-height:56px; display:flex; flex-direction:column; justify-content:center; z-index:2; }
-    .label { color:var(--muted); font-weight:800; font-size:11px; text-transform:uppercase; }
-    .val { font-weight:900; }
+    /* Hide the "controls" selects visually (picker is primary) but keep available for keyboard users */
+    .controls-row { display:flex; gap:10px; align-items:center; }
+    select, input[type=number] { background:var(--box); border:2px solid var(--border); padding:10px; border-radius:10px; color:var(--text); }
+    select.unit-select { min-width:260px; }
 
-    /* =========================
-       Calculator (fully isolated)
-       - square framed thumbnails (rarity colored) inside calculator
-       - no 'all' or duplicate category controls shown here
-       ========================= */
-    .calculator-root { width:100%; max-width:1200px; margin: 0 auto 12px; display:none; }
-    .calc-row { display:flex; gap:28px; align-items:flex-start; justify-content:center; }
-    .trade-panel { width:46%; min-height:380px; border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:14px; background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.006)); border:2px solid rgba(255,255,255,0.06); }
-    .trade-title { text-align:center; font-weight:900; text-transform:uppercase; }
+    /* Items area in calculator: user requested no space between items / tight look */
+    .items-list {
+      border-radius:10px; min-height:180px; padding:6px;
+      display:grid;
+      grid-template-columns: repeat(auto-fill, 76px);
+      grid-auto-rows: 76px;
+      gap:4px; /* very small gap for tight look */
+      align-content:start;
+      justify-content:start;
+      border:2px solid rgba(255,255,255,0.03);
+      background: rgba(0,0,0,0.01);
+    }
 
-    .plus-btn { width:56px; height:56px; border-radius:12px; display:grid; place-items:center; font-size:28px; font-weight:900; color:#fff; background:var(--accent-grad); border:3px solid rgba(255,255,255,0.06); cursor:pointer; }
-
-    .items-list { border-radius:10px; padding:8px; display:grid; grid-template-columns:repeat(auto-fill,76px); grid-auto-rows:76px; gap:6px; min-height:180px; border:1px solid rgba(255,255,255,0.03); background:rgba(0,0,0,0.01); }
-    .calc-thumb { width:76px; height:76px; border-radius:10px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center; background:var(--box); border:3px solid rgba(255,255,255,0.04); }
+    /* Calculator thumbnail: framed by rarity color and no extra badges */
+    .calc-thumb {
+      width:76px; height:76px; border-radius:10px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center;
+      background:var(--box); border:3px solid rgba(255,255,255,0.03);
+    }
     .calc-thumb .img { width:100%; height:100%; background-size:cover; background-position:center; }
-    .calc-thumb .thumb-remove { position:absolute; left:6px; top:6px; background:rgba(0,0,0,0.6); color:#fff; border-radius:6px; padding:2px 6px; cursor:pointer; font-weight:900; font-size:12px; }
+    .calc-thumb .remove { position:absolute; left:6px; top:6px; background:rgba(0,0,0,0.6); color:#fff; border-radius:6px; padding:2px 6px; cursor:pointer; font-weight:900; }
 
-    /* square frame for calculator thumbs (persistent) */
-    .calc-thumb.rarity-astral::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-astral); z-index:-1; opacity:0.95; }
-    .calc-thumb.rarity-cosmic::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-cosmic); z-index:-1; opacity:0.95; }
-    .calc-thumb.rarity-divine::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-divine); z-index:-1; opacity:0.95; }
-    .calc-thumb.rarity-godly::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-godly); z-index:-1; opacity:0.95; }
-    .calc-thumb.rarity-exclusive::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-exclusive); z-index:-1; opacity:0.95; }
-    .calc-thumb.rarity-mythic::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-mythic); z-index:-1; opacity:0.95; }
-    .calc-thumb.rarity-legendary::before { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-legendary); z-index:-1; opacity:0.95; }
+    /* Add rarity frame for calculator thumbs (outer ring) */
+    .calc-thumb.rarity-astral { box-shadow: 0 0 0 3px rgba(100,0,129,0.12) inset; border-color: rgba(100,0,129,0.25); }
+    .calc-thumb.rarity-cosmic { box-shadow: 0 0 0 3px rgba(184,0,230,0.12) inset; border-color: rgba(184,0,230,0.25); }
+    .calc-thumb.rarity-divine { box-shadow: 0 0 0 3px rgba(196,0,207,0.12) inset; border-color: rgba(196,0,207,0.25); }
+    .calc-thumb.rarity-godly { box-shadow: 0 0 0 3px rgba(123,0,230,0.12) inset; border-color: rgba(123,0,230,0.25); }
+    .calc-thumb.rarity-exclusive { box-shadow: 0 0 0 3px rgba(46,125,255,0.12) inset; border-color: rgba(46,125,255,0.25); }
+    .calc-thumb.rarity-mythic { box-shadow: 0 0 0 3px rgba(255,109,104,0.12) inset; border-color: rgba(255,109,104,0.25); }
+    .calc-thumb.rarity-legendary { box-shadow: 0 0 0 3px rgba(245,166,35,0.12) inset; border-color: rgba(245,166,35,0.25); }
 
-    .total-box { display:flex; justify-content:center; margin-top:auto; }
+    .total-box { display:flex; justify-content:center; margin-top:6px; }
     .total-value { background: linear-gradient(90deg,#7b00e6,#ff2d6f); padding:10px 18px; border-radius:10px; color:#000; font-weight:900; }
 
-    /* verdict banner inside calculator */
-    .verdict-wrap { width:100%; max-width:1200px; display:flex; justify-content:center; margin-top:12px; }
-    .verdict { width:520px; padding:12px; border-radius:12px; border:2px solid rgba(255,255,255,0.03); display:flex; justify-content:center; background:transparent; }
+    /* Verdict banner (only inside calculator) */
+    .verdict-wrap { max-width:1200px; margin:18px auto; display:flex; justify-content:center; }
+    .verdict { width:520px; padding:16px; border-radius:12px; border:2px solid rgba(255,255,255,0.03); display:flex; justify-content:center; background:transparent; }
     .verdict-text { font-weight:900; font-size:32px; color:#6ea0ff; text-transform:uppercase; letter-spacing:2px; }
 
-    /* =========================
-       Picker modal (fixed frame, internal scroll). Defaults to Astral.
-       No "All" inside picker; no duplicate rows.
-       ========================= */
-    .picker-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.85); z-index:9999; padding:18px; }
+    /* =========================================================================
+       PICKER MODAL
+       - Hidden thumbs until category clicked
+       ========================================================================= */
+    .picker-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:9999; padding:18px; }
     .picker-box { width:100%; max-width:1180px; min-height:520px; border-radius:12px; padding:12px; display:flex; gap:12px; background:linear-gradient(180deg, rgba(255,255,255,0.006), rgba(255,255,255,0.003)); border:3px solid rgba(255,255,255,0.03); box-shadow:0 30px 80px rgba(0,0,0,0.75); }
-    .picker-sidebar { width:160px; display:flex; flex-direction:column; gap:12px; padding:6px; overflow:auto; }
-    .picker-cat { padding:12px; border-radius:10px; border:2px solid rgba(255,255,255,0.03); color:var(--muted); font-weight:900; cursor:pointer; text-transform:uppercase; text-align:left; }
+    .picker-sidebar { width:160px; display:flex; flex-direction:column; gap:12px; padding:6px; }
+    .picker-cat { padding:12px; border-radius:10px; border:2px solid rgba(255,255,255,0.03); color:var(--muted); font-weight:900; cursor:pointer; text-transform:uppercase; background:transparent; }
     .picker-cat.active { color:#fff; border-color:var(--gold); box-shadow:0 0 0 4px rgba(250,204,21,0.05) inset; }
     .picker-main { flex:1; display:flex; flex-direction:column; gap:10px; padding:6px; }
     .picker-search input { width:100%; padding:12px; border-radius:12px; background:var(--box); border:2px solid var(--border); color:var(--text); }
-    .picker-grid { flex:1; display:grid; grid-template-columns:repeat(auto-fill,78px); gap:12px; overflow:auto; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.02); background:transparent; }
-    .picker-thumb { width:78px; height:78px; border-radius:10px; overflow:hidden; border:3px solid rgba(255,255,255,0.04); background:var(--box); display:flex; align-items:center; justify-content:center; position:relative; cursor:grab; }
+    .picker-grid { flex:1; display:grid; grid-template-columns:repeat(auto-fill,78px); gap:12px; overflow:auto; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.02); }
+    .picker-thumb { width:78px; height:78px; border-radius:10px; overflow:hidden; border:3px solid rgba(255,255,255,0.04); background:var(--box); display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; }
     .picker-thumb .img { width:100%; height:100%; background-size:cover; background-position:center; }
+    .picker-thumb:hover { transform:translateY(-6px); transition: transform .12s ease; box-shadow:0 8px 20px rgba(0,0,0,0.6); }
+    .picker-placeholder { padding:24px; border-radius:8px; border:1px dashed rgba(255,255,255,0.02); color:var(--muted); display:flex; align-items:center; justify-content:center; height:100%; }
 
-    .picker-thumb.rarity-astral::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-astral); z-index:-1; opacity:0.95; }
-    .picker-thumb.rarity-cosmic::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-cosmic); z-index:-1; opacity:0.95; }
-    .picker-thumb.rarity-divine::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-divine); z-index:-1; opacity:0.95; }
-    .picker-thumb.rarity-godly::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-godly); z-index:-1; opacity:0.95; }
-    .picker-thumb.rarity-exclusive::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-exclusive); z-index:-1; opacity:0.95; }
-    .picker-thumb.rarity-mythic::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-mythic); z-index:-1; opacity:0.95; }
-    .picker-thumb.rarity-legendary::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-legendary); z-index:-1; opacity:0.95; }
+    /* Rarity halos on picker thumbs */
+    .picker-thumb.rarity-astral::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-astral); z-index:-1; opacity:0.95; }
+    .picker-thumb.rarity-cosmic::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-cosmic); z-index:-1; opacity:0.95; }
+    .picker-thumb.rarity-divine::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-divine); z-index:-1; opacity:0.95; }
+    .picker-thumb.rarity-godly::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-godly); z-index:-1; opacity:0.95; }
+    .picker-thumb.rarity-exclusive::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-exclusive); z-index:-1; opacity:0.95; }
+    .picker-thumb.rarity-mythic::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-mythic); z-index:-1; opacity:0.95; }
+    .picker-thumb.rarity-legendary::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-legendary); z-index:-1; opacity:0.95; }
 
-    /* Responsive */
+    /* =========================================================================
+       RESPONSIVE
+       ========================================================================= */
     @media (max-width:1024px) {
       .list-root { grid-template-columns:repeat(2,1fr); }
-      .calc-row { flex-direction:column; }
+      .calc-row { flex-direction:column; gap:18px; }
       .trade-panel { width:100%; }
       .picker-box { flex-direction:column; min-height:560px; }
-      .picker-sidebar { width:100%; display:flex; overflow:auto; }
+      .picker-sidebar { width:100%; display:flex; overflow:auto; gap:10px; }
       .picker-grid { grid-template-columns:repeat(auto-fill,86px); }
+      .items-list { grid-template-columns:repeat(auto-fill,72px); grid-auto-rows:72px; gap:6px; }
     }
     @media (max-width:600px) {
-      .list-root { grid-template-columns:1fr; gap:14px; }
-      .portrait-circle { width:96px; height:96px; }
-      .portrait-circle .unit-image { width:86px; height:86px; }
+      .list-root { grid-template-columns:1fr; gap:18px; }
+      .portrait-frame { width:96px; height:96px; }
+      .unit-image { width:86px; height:86px; }
       .picker-grid { grid-template-columns:repeat(auto-fill,86px); }
       .items-list { grid-template-columns:repeat(auto-fill,64px); grid-auto-rows:64px; gap:6px; }
+    }
+
+    /* =========================================================================
+       DEBUG / ERROR OVERLAY (safe, visible only when errors)
+       ========================================================================= */
+    #debug-overlay {
+      display:none;
+      position:fixed; left:0; right:0; top:0; padding:12px; background:#b91c1c; color:white; z-index:99999; text-align:center; font-family:sans-serif;
     }
   </style>
 </head>
 <body>
   <div id="debug-overlay" role="alert" aria-live="assertive"></div>
 
+  <!-- CONTROLS -->
   <div class="controls">
     <input id="search-bar" placeholder="Search unit..." aria-label="Search units" />
-
-    <div class="top-buttons" id="top-buttons">
-      <button class="cat-btn active" data-rarity="all">All</button>
-      <button class="cat-btn" data-rarity="astral">Astral</button>
-      <button class="cat-btn" data-rarity="cosmic">Cosmic</button>
-      <button class="cat-btn" data-rarity="divine">Divine</button>
-      <button class="cat-btn" data-rarity="godly">Godly</button>
-      <button class="cat-btn" data-rarity="exclusive">Exclusive</button>
-      <button class="cat-btn" data-rarity="mythic">Mythic</button>
-      <button class="cat-btn" data-rarity="legendary">Legendary</button>
-      <button class="cat-btn" data-rarity="calculator" id="calculator-tab">Calculator</button>
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-rarity="all">All</button>
+      <button class="tab-btn" data-rarity="astral">Astral</button>
+      <button class="tab-btn" data-rarity="cosmic">Cosmic</button>
+      <button class="tab-btn" data-rarity="divine">Divine</button>
+      <button class="tab-btn" data-rarity="godly">Godly</button>
+      <button class="tab-btn" data-rarity="exclusive">Exclusive</button>
+      <button class="tab-btn" data-rarity="mythic">Mythic</button>
+      <button class="tab-btn" data-rarity="legendary">Legendary</button>
+      <button class="tab-btn" data-rarity="calculator" id="calculator-tab">Calculator</button>
     </div>
-
-    <div class="sort-row">
+    <div class="sort" id="sort">
       <button class="sort-btn active" data-sort="default">Default Sort</button>
       <button class="sort-btn" data-sort="value-desc">High Value</button>
     </div>
   </div>
 
-  <!-- Calculator (hidden unless chosen) -->
-  <div id="calculator-root" class="calculator-root" aria-hidden="true" style="display:none">
+  <!-- CALCULATOR (hidden outside calculator tab) -->
+  <div id="calculator-root" class="calculator-root" aria-hidden="true">
     <div class="calc-row">
-      <div class="trade-panel" id="left-panel">
+      <div class="trade-panel" id="left-panel" aria-label="Your value panel">
         <div class="trade-title you">YOUR VALUE</div>
-        <div class="plus-wrap"><div class="plus-btn" id="plus-left" title="Open picker">+</div></div>
-        <div id="left-items" class="items-list" aria-live="polite"></div>
-        <div class="total-box"><div id="left-total" class="total-value">TOTAL VALUE: 0</div></div>
+        <div class="plus-wrap"><div class="plus-btn" id="plus-left" title="Open picker to add units">+</div></div>
+
+        <!-- Hidden selects (for accessibility / advanced users) -->
+        <div style="display:none" aria-hidden="true">
+          <div class="controls-row" role="group" aria-label="Left quick controls">
+            <select id="unit-select-left" class="unit-select" aria-label="Left unit select"></select>
+            <select id="trait-select-left" aria-label="Left trait select">
+              <option value="base">Base</option>
+              <option value="grandmaster">Grandmaster</option>
+              <option value="master">Master</option>
+              <option value="superPayday">Super Payday</option>
+              <option value="sniper">Sniper</option>
+            </select>
+            <input id="qty-left" type="number" min="1" value="1" aria-label="Left quantity" style="width:80px">
+            <button class="add-small" id="add-left">Add</button>
+          </div>
+        </div>
+
+        <!-- Tight grid, no large spacing (as user requested) -->
+        <div class="items-list" id="left-items" aria-live="polite" aria-label="Your items area"></div>
+
+        <div class="total-box"><div class="total-value" id="left-total">TOTAL VALUE: 0</div></div>
       </div>
 
-      <div class="trade-panel" id="right-panel">
+      <div class="trade-panel" id="right-panel" aria-label="Their value panel">
         <div class="trade-title them">THEIR VALUE</div>
-        <div class="plus-wrap"><div class="plus-btn" id="plus-right" title="Open picker">+</div></div>
-        <div id="right-items" class="items-list" aria-live="polite"></div>
-        <div class="total-box"><div id="right-total" class="total-value">TOTAL VALUE: 0</div></div>
+        <div class="plus-wrap"><div class="plus-btn" id="plus-right" title="Open picker to add units">+</div></div>
+
+        <div style="display:none" aria-hidden="true">
+          <div class="controls-row" role="group" aria-label="Right quick controls">
+            <select id="unit-select-right" class="unit-select" aria-label="Right unit select"></select>
+            <select id="trait-select-right" aria-label="Right trait select">
+              <option value="base">Base</option>
+              <option value="grandmaster">Grandmaster</option>
+              <option value="master">Master</option>
+              <option value="superPayday">Super Payday</option>
+              <option value="sniper">Sniper</option>
+            </select>
+            <input id="qty-right" type="number" min="1" value="1" aria-label="Right quantity" style="width:80px">
+            <button class="add-small" id="add-right">Add</button>
+          </div>
+        </div>
+
+        <div class="items-list" id="right-items" aria-live="polite" aria-label="Their items area"></div>
+
+        <div class="total-box"><div class="total-value" id="right-total">TOTAL VALUE: 0</div></div>
       </div>
     </div>
-
-    <div class="verdict-wrap"><div class="verdict"><div id="verdict-text" class="verdict-text">NO ITEMS</div></div></div>
   </div>
 
-  <!-- Picker modal -->
+  <!-- Verdict banner (only visible when calculator is active, updated by JS) -->
+  <div class="verdict-wrap">
+    <div class="verdict" id="verdict-panel" aria-live="polite">
+      <div class="verdict-text" id="verdict-text">NO ITEMS</div>
+    </div>
+  </div>
+
+  <!-- Picker Modal -->
   <div id="picker-overlay" class="picker-overlay" style="display:none" role="dialog" aria-modal="true">
     <div class="picker-box" role="document" aria-label="Unit picker">
-      <div id="picker-sidebar" class="picker-sidebar"></div>
+      <div class="picker-sidebar" id="picker-sidebar"></div>
       <div class="picker-main">
-        <div id="picker-quicktabs" class="picker-quicktabs"></div>
         <div class="picker-search"><input id="picker-search-input" placeholder="SEARCH UNITS..." aria-label="Picker search" /></div>
         <div id="picker-grid" class="picker-grid"></div>
       </div>
     </div>
   </div>
 
-  <!-- Main list -->
+  <!-- MAIN LIST (the gallery) -->
   <div id="list-root" class="list-root" aria-live="polite"></div>
 
-  <!-- Pagination -->
-  <div class="pagination" id="pagination">
+  <div class="pagination">
     <button id="prev-btn" class="pagination-btn">Previous</button>
-    <div id="page-info" class="page-info">Page 1 of 1</div>
+    <div class="page-info" id="page-info">Page 1 of 1</div>
     <button id="next-btn" class="pagination-btn">Next</button>
   </div>
 
-  <!-- Data source (leave unchanged) -->
+  <!-- -------------------------------------------------------------------------
+       Unit data file (must be present and load before main script).
+       Keep your existing skibidi-td-data.js file unchanged in the same folder.
+       ------------------------------------------------------------------------- -->
   <script src="skibidi-td-data.js"></script>
 
-  <!-- App script -->
+  <!-- =========================================================================
+       MAIN SCRIPT (rendering, picker, calculator)
+       - Defensive checks
+       - Clear separation between list UI and calculator UI (nothing shown outside)
+       - Picker empty until category chosen
+       - Calculator thumbnails have colored frames and tight layout
+       - Rarity colors applied to main list portraits and calculator thumbs
+     ========================================================================= -->
   <script>
   (function () {
     'use strict';
 
-    // helpers
-    function showFatal(msg){ console.error(msg); const overlay = document.getElementById('debug-overlay'); if (overlay) { overlay.style.display = 'block'; overlay.textContent = 'Fatal: ' + msg; } else alert(msg); }
-    function parseValue(v){ if (v === 0) return 0; if (!v && v !== 0) return 0; let s = String(v).trim(); s = s.replace(/[\$\€\£\¥\₹]/g,'').replace(/\s+/g,''); const m = s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/); if (m) { let n = parseFloat(m[1].replace(/,/g,''))||0; const sx = m[2]; if (sx) { if (sx.toLowerCase()==='k') n *= 1e3; if (sx.toLowerCase()==='m') n *= 1e6; } return n; } const f = s.match(/[\d.]+/); return f ? parseFloat(f[0].replace(/,/g,'')) : 0; }
-    function abbr(n){ if(!isFinite(n)||n===0) return '0'; if (n >= 1e6) return (n/1e6).toFixed(2)+'M+'; if (n >= 1e3) return (n/1e3).toFixed(2)+'K'; return Math.round(n).toLocaleString(); }
-    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    // -----------------------
+    // Helper: show fatal error overlay
+    // -----------------------
+    function showFatal(message) {
+      console.error(message);
+      const overlay = document.getElementById('debug-overlay');
+      if (overlay) {
+        overlay.style.display = 'block';
+        overlay.textContent = 'Fatal: ' + message;
+      } else {
+        alert(message);
+      }
+    }
 
-    if (typeof unitDatabase === 'undefined' || !unitDatabase || typeof unitDatabase !== 'object') { showFatal('unitDatabase missing. Ensure skibidi-td-data.js is present.'); return; }
+    // -----------------------
+    // parseValue: same robust K/M logic (exposed globally for debugging)
+    // -----------------------
+    function parseValue(valString) {
+      if (valString === 0) return 0;
+      if (!valString && valString !== 0) return 0;
+      let s = String(valString).trim();
+      s = s.replace(/[\$\€\£\¥\₹]/g, '').replace(/\s+/g, '');
+      const m = s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/);
+      if (m) {
+        let num = parseFloat(m[1].replace(/,/g, '')) || 0;
+        const sfx = m[2];
+        if (sfx) {
+          if (sfx.toLowerCase() === 'k') num *= 1e3;
+          if (sfx.toLowerCase() === 'm') num *= 1e6;
+        }
+        return num;
+      }
+      const fallback = s.match(/[\d.]+/);
+      return fallback ? parseFloat(fallback[0].replace(/,/g, '')) : 0;
+    }
+    window.parseValue = parseValue;
 
-    const imageProvider = "https://corsproxy.io/?https://drive.google.com/thumbnail?id=";
-    const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
+    // -----------------------
+    // Formatting helpers
+    // -----------------------
+    function abbr(n) {
+      if (!isFinite(n) || n === 0) return '0';
+      if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M+';
+      if (n >= 1e3) return (n / 1e3).toFixed(2) + 'K';
+      return Math.round(n).toLocaleString();
+    }
+    function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    // DOM refs
+    // -----------------------
+    // Basic DOM refs (cached)
+    // -----------------------
+    const debugOverlay = document.getElementById('debug-overlay');
     const listRoot = document.getElementById('list-root');
-    const topButtons = document.getElementById('top-buttons');
-    const catButtons = Array.from(document.querySelectorAll('.cat-btn'));
-    const sortRow = document.getElementById('sort');
-    const pagination = document.getElementById('pagination');
-    const pageInfo = document.getElementById('page-info');
+    const pickerOverlay = document.getElementById('picker-overlay');
+    const pickerSidebar = document.getElementById('picker-sidebar');
+    const pickerGrid = document.getElementById('picker-grid');
+    const pickerSearch = document.getElementById('picker-search-input');
+
+    const searchBar = document.getElementById('search-bar');
+    const tabs = document.getElementById('tabs');
+    const sort = document.getElementById('sort');
+    const pageInfoEl = document.getElementById('page-info');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
 
@@ -283,312 +442,381 @@
     const rightTotalEl = document.getElementById('right-total');
     const verdictText = document.getElementById('verdict-text');
 
-    const pickerOverlay = document.getElementById('picker-overlay');
-    const pickerSidebar = document.getElementById('picker-sidebar');
-    const pickerGrid = document.getElementById('picker-grid');
-    const pickerSearch = document.getElementById('picker-search-input');
+    // Hidden selects (kept for accessibility / advanced usage)
+    const unitSelectLeft = document.getElementById('unit-select-left');
+    const unitSelectRight = document.getElementById('unit-select-right');
+    const traitSelectLeft = document.getElementById('trait-select-left');
+    const traitSelectRight = document.getElementById('trait-select-right');
+    const qtyLeft = document.getElementById('qty-left');
+    const qtyRight = document.getElementById('qty-right');
+    const addLeft = document.getElementById('add-left');
+    const addRight = document.getElementById('add-right');
 
-    const LS_KEY = 'skibidi_td_trade_v1';
-    let leftItems = [], rightItems = [];
+    // -----------------------
+    // Validate unitDatabase exists
+    // -----------------------
+    if (typeof unitDatabase === 'undefined' || !unitDatabase || typeof unitDatabase !== 'object') {
+      showFatal('unitDatabase is missing or invalid. Make sure skibidi-td-data.js is loaded and defines a global unitDatabase object.');
+      return;
+    }
 
-    // state
+    // -----------------------
+    // State
+    // -----------------------
     let currentFilter = 'all';
     let searchQuery = '';
     let currentSort = 'default';
     let currentPage = 1;
     const itemsPerPage = 15;
+
     const rarityOrder = { astral:1, cosmic:2, godly:3, divine:4, mythic:5, legendary:6, exclusive:99 };
 
-    // util: rarity class
-    function rarityClass(u) { return u && u.rarity ? 'rarity-' + String(u.rarity).toLowerCase().replace(/\s+/g,'-') : ''; }
+    const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
+    const imageProvider = "https://corsproxy.io/?https://drive.google.com/thumbnail?id=";
 
-    // apply subtle page tint when a category tab is chosen (visual)
-    function applyListBackground(filter){
-      const map = {
-        astral:'linear-gradient(180deg, rgba(100,0,129,0.06), rgba(0,0,0,0))',
-        cosmic:'linear-gradient(180deg, rgba(184,0,230,0.06), rgba(0,0,0,0))',
-        divine:'linear-gradient(180deg, rgba(196,0,207,0.06), rgba(0,0,0,0))',
-        godly:'linear-gradient(180deg, rgba(123,0,230,0.06), rgba(0,0,0,0))',
-        exclusive:'linear-gradient(180deg, rgba(46,125,255,0.06), rgba(0,0,0,0))',
-        mythic:'linear-gradient(180deg, rgba(255,109,104,0.06), rgba(0,0,0,0))',
-        legendary:'linear-gradient(180deg, rgba(245,166,35,0.06), rgba(0,0,0,0))',
-        all:'transparent'
-      };
-      listRoot.style.background = map[(filter || 'all')] || 'transparent';
+    // Calculator arrays
+    const leftItems = [];
+    const rightItems = [];
+
+    // -----------------------
+    // Utility: add class for rarity on elements (safe)
+    // -----------------------
+    function rarityClassFor(unit) {
+      if (!unit || !unit.rarity) return '';
+      return 'rarity-' + String(unit.rarity || '').toLowerCase().replace(/\s+/g, '-');
     }
 
-    // render list
-    function renderList(){
-      const keys = unitKeys.filter(k => {
-        const u = unitDatabase[k];
+    // -----------------------
+    // RENDER MAIN LIST
+    // -----------------------
+    function renderList() {
+      // Build filtered list
+      const keys = unitKeys.filter(key => {
+        const u = unitDatabase[key];
         const r = (u.rarity || '').toLowerCase();
-        if (currentFilter !== 'all' && r !== currentFilter) return false;
-        if (searchQuery && !(u.name || '').toLowerCase().includes(searchQuery.toLowerCase())) return false;
-        return true;
+        const matchesRarity = currentFilter === 'all' || r === currentFilter;
+        const matchesSearch = (u.name || '').toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesRarity && matchesSearch;
       });
 
+      // Sort
       keys.sort((a,b) => {
-        if (currentSort === 'value-desc') return parseValue(unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats.value);
-        const wa = rarityOrder[(unitDatabase[a].rarity||'').toLowerCase()]||999;
-        const wb = rarityOrder[(unitDatabase[b].rarity||'').toLowerCase()]||999;
+        if (currentSort === 'value-desc') {
+          return parseValue(unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats.value);
+        }
+        const wa = rarityOrder[(unitDatabase[a].rarity || '').toLowerCase()] || 999;
+        const wb = rarityOrder[(unitDatabase[b].rarity || '').toLowerCase()] || 999;
         if (wa !== wb) return wa - wb;
         return (unitDatabase[a].name || '').localeCompare(unitDatabase[b].name || '');
       });
 
+      // Pagination
       const totalPages = Math.max(1, Math.ceil(keys.length / itemsPerPage));
       if (currentPage > totalPages) currentPage = totalPages;
-      const start = (currentPage-1) * itemsPerPage;
+      const start = (currentPage - 1) * itemsPerPage;
       const pageKeys = keys.slice(start, start + itemsPerPage);
 
-      pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
+      pageInfoEl.innerText = `Page ${currentPage} of ${totalPages}`;
       prevBtn.disabled = currentPage === 1;
       nextBtn.disabled = currentPage === totalPages;
 
-      applyListBackground(currentFilter);
-
-      listRoot.innerHTML = pageKeys.map(k => {
-        const u = unitDatabase[k];
+      // Render cards
+      listRoot.innerHTML = pageKeys.map(key => {
+        const u = unitDatabase[key];
         const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
-        const rcls = rarityClass(u);
-        const second = u.secondEdition && String(u.secondEdition).toLowerCase() === 'yes' ? `<div style="color:var(--gold);font-weight:800;font-size:11px;margin-top:4px">2nd Edition</div>` : '';
+        const rarityCls = rarityClassFor(u);
+        const second = u.secondEdition && String(u.secondEdition).toLowerCase() === 'yes' ? `<div class="second-edition-tag">2nd Edition</div>` : '';
         return `
-          <div class="unit-card ${rcls}" data-unit="${k}">
-            <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div class="unit-card">
+            <div class="header-section">
               <div class="unit-title">${esc(u.name)}</div>
-              <div class="portrait-circle ${rcls}">
-                <div class="unit-image" style="background-image:${portrait}"></div>
-              </div>
               ${second}
             </div>
+            <div style="display:flex;align-items:center;justify-content:center">
+              <div class="portrait-frame ${rarityCls}">
+                <div class="unit-image" style="background-image:${portrait}"></div>
+              </div>
+            </div>
             <div class="data-table">
-              <div class="data-cell"><div class="label">Value</div><div class="val highlight-gold">${esc(u.baseStats.value)}</div></div>
-              <div class="data-cell"><div class="label">Status</div><div class="val">${esc(u.baseStats.status)}</div></div>
-              <div class="data-cell"><div class="label">Demand</div><div class="val highlight-purple">${esc(u.baseStats.demand)}</div></div>
+              <div class="data-cell">
+                <div class="label">Value</div>
+                <div class="val highlight-gold">${esc(u.baseStats.value)}</div>
+              </div>
+              <div class="data-cell">
+                <div class="label">Status</div>
+                <div class="val">${esc(u.baseStats.status)}</div>
+              </div>
+              <div class="data-cell">
+                <div class="label">Demand</div>
+                <div class="val highlight-purple">${esc(u.baseStats.demand)}</div>
+              </div>
             </div>
           </div>`;
       }).join('');
     }
 
-    // picker modal: create sidebar, default to astral
-    function createPicker(){
-      const cats = ['Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
-      pickerSidebar.innerHTML = cats.map(c => `<div class="picker-cat" data-cat="${c.toLowerCase()}">${c}</div>`).join('');
-      // default active = astral
-      const defaultBtn = pickerSidebar.querySelector('[data-cat="astral"]');
-      if (defaultBtn) defaultBtn.classList.add('active');
-      renderPickerGrid('astral','',1,'astral','');
-
-      // handlers
-      pickerSidebar.querySelectorAll('.picker-cat').forEach(btn => {
-        btn.addEventListener('click', () => {
-          pickerSidebar.querySelectorAll('.picker-cat').forEach(x => x.classList.remove('active'));
-          btn.classList.add('active');
-          const cat = btn.getAttribute('data-cat') || 'astral';
-          renderPickerGrid(cat, '', 1, cat, pickerSearch.value || '');
-        });
-      });
-
-      pickerSearch.removeEventListener('input', onPickerSearch);
-      pickerSearch.addEventListener('input', onPickerSearch);
-      pickerOverlay.addEventListener('click', (ev) => { if (ev.target === pickerOverlay) hidePicker(); });
-    }
-
-    function onPickerSearch(e){
-      const active = pickerSidebar.querySelector('.picker-cat.active');
-      const cat = active ? active.getAttribute('data-cat') : 'astral';
-      renderPickerGrid(cat, '', 1, cat, e.target.value || '');
-    }
-
-    function renderPickerGrid(side, trait, qty, category, q){
-      category = (category || 'astral').toLowerCase();
-      q = (q || '').toLowerCase();
-      const keys = unitKeys.filter(k => {
-        const u = unitDatabase[k];
-        if (!u) return false;
-        if ((u.rarity || '').toLowerCase() !== category) return false;
-        if (q && !(u.name || '').toLowerCase().includes(q)) return false;
-        return true;
-      });
-
-      if (!keys.length) { pickerGrid.innerHTML = ''; return; }
-
-      pickerGrid.innerHTML = keys.map(k => {
-        const u = unitDatabase[k];
-        const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
-        const rcls = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
-        return `<div class="picker-thumb rarity-${rcls}" data-key="${k}" draggable="true" title="${esc(u.name)}"><div class="img" style="background-image:${p}"></div></div>`;
+    // -----------------------
+    // POPULATE hidden selects (fallback)
+    // -----------------------
+    function populateSelects() {
+      const opts = unitKeys.map(key => {
+        const u = unitDatabase[key];
+        return `<option value="${key}">${esc(u.name)} (${esc(u.rarity||'n/a')}) — ${esc(u.baseStats.value||'N/A')}</option>`;
       }).join('');
-
-      // attach dragstart and click
-      pickerGrid.querySelectorAll('.picker-thumb').forEach(t => {
-        t.removeEventListener('dragstart', onPickerDragStart);
-        t.addEventListener('dragstart', onPickerDragStart);
-        t.removeEventListener('click', onPickerClick);
-        t.addEventListener('click', onPickerClick);
-      });
+      if (unitSelectLeft) unitSelectLeft.innerHTML = opts;
+      if (unitSelectRight) unitSelectRight.innerHTML = opts;
     }
 
-    function onPickerDragStart(e){ const key = e.currentTarget.getAttribute('data-key'); if (!key) return; e.dataTransfer.setData('text/plain', key); e.dataTransfer.effectAllowed = 'copy'; }
-    function onPickerClick(e){ const key = e.currentTarget.getAttribute('data-key'); if (!key) return; addToSide(currentPickerSide || 'left', key, 'base', 1); }
-
-    function showPicker(){ pickerOverlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
-    function hidePicker(){ pickerOverlay.style.display = 'none'; document.body.style.overflow = ''; }
-
-    // drag/drop on calculator
-    function onDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }
-    function onDropLeft(e){ e.preventDefault(); const key = e.dataTransfer.getData('text/plain'); if (key) addToSide('left', key, 'base', 1); }
-    function onDropRight(e){ e.preventDefault(); const key = e.dataTransfer.getData('text/plain'); if (key) addToSide('right', key, 'base', 1); }
-
-    // calculate and render thumbs
-    function calcThumbHTML(it){
-      const u = unitDatabase[it.key] || {};
-      const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
-      const rcls = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
-      return `<div class="calc-thumb rarity-${rcls}" data-id="${it.id}" title="${esc(u.name)}"><div class="img" style="background-image:${p}"></div><div class="thumb-remove" data-id="${it.id}">×</div></div>`;
-    }
-
-    function renderThumbs(){
-      leftItemsEl.innerHTML = leftItems.map(calcThumbHTML).join('');
-      rightItemsEl.innerHTML = rightItems.map(calcThumbHTML).join('');
-      // remove handlers then add
+    // -----------------------
+    // CALCULATOR: rendering thumbnails & totals
+    // -----------------------
+    function renderThumbs() {
+      leftItemsEl.innerHTML = leftItems.length ? leftItems.map(it => calcThumbHTML(it)).join('') : '';
+      rightItemsEl.innerHTML = rightItems.length ? rightItems.map(it => calcThumbHTML(it)).join('') : '';
+      // Attach remove listeners
       document.querySelectorAll('.thumb-remove').forEach(btn => {
-        btn.removeEventListener('click', onThumbRemove);
-        btn.addEventListener('click', onThumbRemove);
+        btn.removeEventListener('click', thumbRemoveHandler);
+        btn.addEventListener('click', thumbRemoveHandler);
       });
     }
-    function onThumbRemove(e){ const id = e.currentTarget.getAttribute('data-id'); let idx = leftItems.findIndex(x=>x.id===id); if (idx>=0) leftItems.splice(idx,1); idx = rightItems.findIndex(x=>x.id===id); if (idx>=0) rightItems.splice(idx,1); persistTrade(); renderThumbs(); updateTotalsAndVerdict(); }
-
-    function addToSide(side, key, trait, qty){
-      if (!key || !unitDatabase[key]) return;
-      qty = Math.max(1, Math.floor(qty) || 1);
-      const u = unitDatabase[key];
-      const single = (trait && trait !== 'base' && u.traits && u.traits[trait]) ? parseValue(u.traits[trait].value) : parseValue(u.baseStats.value);
-      const item = { id: `${key}:${trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key, trait, qty, single, computed: single * qty };
-      if (side === 'left') leftItems.push(item); else rightItems.push(item);
-      persistTrade();
+    function calcThumbHTML(it) {
+      const u = unitDatabase[it.key] || {};
+      const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
+      const rcls = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
+      return `
+        <div class="calc-thumb rarity-${rcls}" data-id="${it.id}" data-key="${it.key}">
+          <div class="img" style="background-image:${portrait}"></div>
+          <div class="thumb-remove" data-id="${it.id}" title="Remove">×</div>
+        </div>`;
+    }
+    function thumbRemoveHandler(e) {
+      const id = e.currentTarget.getAttribute('data-id');
+      if (!id) return;
+      // remove from arrays
+      let idx = leftItems.findIndex(x => x.id === id);
+      if (idx >= 0) leftItems.splice(idx, 1);
+      idx = rightItems.findIndex(x => x.id === id);
+      if (idx >= 0) rightItems.splice(idx, 1);
       renderThumbs();
       updateTotalsAndVerdict();
     }
 
-    function updateTotalsAndVerdict(){
-      leftItems.forEach(i => i.computed = (i.single || 0) * (i.qty || 1));
-      rightItems.forEach(i => i.computed = (i.single || 0) * (i.qty || 1));
-      const leftSum = leftItems.reduce((s,i)=> s + Number(i.computed||0), 0);
-      const rightSum = rightItems.reduce((s,i)=> s + Number(i.computed||0), 0);
+    function updateTotalsAndVerdict() {
+      leftItems.forEach(i => i.computed = ((i.single||0) * (i.qty||1)));
+      rightItems.forEach(i => i.computed = ((i.single||0) * (i.qty||1)));
+      const leftSum = leftItems.reduce((s,i) => s + Number(i.computed||0), 0);
+      const rightSum = rightItems.reduce((s,i) => s + Number(i.computed||0), 0);
       leftTotalEl.innerText = `TOTAL VALUE: ${abbr(leftSum)}`;
       rightTotalEl.innerText = `TOTAL VALUE: ${abbr(rightSum)}`;
+
+      // verdict logic
       const FAIR = 0.02, SMALL = 0.10;
       let verdict = 'NO ITEMS';
       if (leftSum === 0 && rightSum === 0) verdict = 'NO ITEMS';
       else if (Math.abs(leftSum - rightSum) <= Math.max(1, FAIR * Math.max(leftSum, rightSum))) verdict = 'FAIR';
-      else if (leftSum > rightSum) { if (rightSum === 0 || leftSum > rightSum * (1 + SMALL)) verdict = 'OVERPAYING'; else verdict = 'LOSE'; }
-      else { if (leftSum === 0 || rightSum > leftSum * (1 + SMALL)) verdict = 'UNDERPAYING'; else verdict = 'WIN'; }
+      else if (leftSum > rightSum) {
+        if (rightSum === 0 || leftSum > rightSum * (1 + SMALL)) verdict = 'OVERPAYING'; else verdict = 'LOSE';
+      } else {
+        if (leftSum === 0 || rightSum > leftSum * (1 + SMALL)) verdict = 'UNDERPAYING'; else verdict = 'WIN';
+      }
       verdictText.innerText = verdict.toUpperCase();
     }
 
-    // persistence
-    function persistTrade(){
-      try {
-        const payload = { left: leftItems.map(i => ({ key:i.key, trait:i.trait, qty:i.qty })), right: rightItems.map(i => ({ key:i.key, trait:i.trait, qty:i.qty })) };
-        localStorage.setItem(LS_KEY, JSON.stringify(payload));
-      } catch (err) { console.warn('persist error', err); }
-    }
-    function restoreTrade(){
-      try {
-        const raw = localStorage.getItem(LS_KEY);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.left && parsed.right) {
-          leftItems = parsed.left.map(it => {
-            const single = (it.trait && it.trait !== 'base' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0);
-            return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1, it.qty||1), single, computed: single * Math.max(1, it.qty||1) };
-          });
-          rightItems = parsed.right.map(it => {
-            const single = (it.trait && it.trait !== 'base' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0);
-            return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1, it.qty||1), single, computed: single * Math.max(1, it.qty||1) };
-          });
-        }
-      } catch (err) { console.warn('restore error', err); }
+    // -----------------------
+    // Add item to calculator array
+    // -----------------------
+    function addToSide(side, key, trait, qty) {
+      if (!key || !unitDatabase[key]) return;
+      qty = Math.max(1, Math.floor(qty) || 1);
+      const single = (trait && trait !== 'base' && unitDatabase[key].traits && unitDatabase[key].traits[trait]) ? parseValue(unitDatabase[key].traits[trait].value) : parseValue(unitDatabase[key].baseStats.value);
+      const entry = { id: `${key}:${trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key, trait, qty, single, computed: single * qty };
+      if (side === 'left') leftItems.push(entry); else rightItems.push(entry);
+      renderThumbs();
+      updateTotalsAndVerdict();
     }
 
-    // wiring: top category buttons row (single)
-    document.querySelectorAll('.cat-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const allBtns = Array.from(document.querySelectorAll('.cat-btn'));
-        allBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const rval = btn.getAttribute('data-rarity') || 'all';
-        if (rval === 'calculator') {
-          calculatorRoot.style.display = 'block';
-          calculatorRoot.setAttribute('aria-hidden', 'false');
-          listRoot.style.display = 'none';
-          pagination.style.display = 'none';
-        } else {
-          calculatorRoot.style.display = 'none';
-          calculatorRoot.setAttribute('aria-hidden', 'true');
-          listRoot.style.display = '';
-          pagination.style.display = 'flex';
-          currentFilter = rval;
-          currentPage = 1;
-          renderList();
-        }
-      });
-    });
+    // -----------------------
+    // PICKER: show placeholder until category clicked
+    // -----------------------
+    function createPicker() {
+      if (!pickerSidebar || !pickerGrid || !pickerSearch) return;
+      // Build sidebar categories (rarities)
+      const cats = ['All','Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
+      pickerSidebar.innerHTML = cats.map(c => `<div class="picker-cat" data-cat="${c.toLowerCase()}">${c}</div>`).join('');
+      // Default: none active -> show placeholder
+      pickerGrid.innerHTML = `<div class="picker-placeholder">Choose a category from the left</div>`;
 
-    // sorting
-    document.querySelectorAll('.sort-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentSort = btn.getAttribute('data-sort') || 'default';
-        currentPage = 1; renderList();
+      // Attach handlers
+      pickerSidebar.querySelectorAll('.picker-cat').forEach(btn => {
+        btn.addEventListener('click', () => {
+          pickerSidebar.querySelectorAll('.picker-cat').forEach(x => x.classList.remove('active'));
+          btn.classList.add('active');
+          const cat = btn.getAttribute('data-cat') || 'all';
+          renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, cat, pickerSearch.value || '');
+        });
       });
-    });
 
-    // pagination
-    prevBtn.addEventListener('click', ()=>{ if (currentPage>1) { currentPage--; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }});
-    nextBtn.addEventListener('click', ()=> {
+      pickerSearch.addEventListener('input', (e) => {
+        const active = pickerSidebar.querySelector('.picker-cat.active');
+        if (!active) { pickerGrid.innerHTML = `<div class="picker-placeholder">Choose a category from the left</div>`; return; }
+        const cat = active.getAttribute('data-cat');
+        renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, cat, e.target.value || '');
+      });
+    }
+
+    // render picker grid filtered by category & search
+    function renderPickerGrid(side, trait, qty, category, q) {
+      category = (category || 'all').toLowerCase();
+      q = (q || '').toLowerCase();
+
       const keys = unitKeys.filter(k => {
         const u = unitDatabase[k];
-        const r = (u.rarity || '').toLowerCase();
-        if (currentFilter !== 'all' && r !== currentFilter) return false;
-        if (searchQuery && !(u.name||'').toLowerCase().includes(searchQuery.toLowerCase())) return false;
-        return true;
+        if (!u) return false;
+        if (q && !(u.name || '').toLowerCase().includes(q)) return false;
+        if (category === 'all') return true;
+        return ((u.rarity || '').toLowerCase() === category);
       });
-      const maxPage = Math.ceil(keys.length / itemsPerPage) || 1;
+
+      if (!keys.length) {
+        pickerGrid.innerHTML = `<div class="picker-placeholder">No units found for "${category}"${q ? ' + search "' + esc(q) + '"' : ''}</div>`;
+        return;
+      }
+
+      // Build thumbs (no value badges as requested)
+      pickerGrid.innerHTML = keys.map(key => {
+        const u = unitDatabase[key];
+        const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
+        const rslug = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
+        return `<div class="picker-thumb rarity-${rslug}" data-key="${key}" title="${esc(u.name)}">
+          <div class="img" style="background-image:${portrait}"></div>
+        </div>`;
+      }).join('');
+
+      // attach thumb click listeners
+      pickerGrid.querySelectorAll('.picker-thumb').forEach(t => {
+        t.addEventListener('click', () => {
+          const key = t.getAttribute('data-key');
+          addToSide(currentPickerSide, key, currentPickerTrait, currentPickerQty);
+          hidePicker();
+        });
+      });
+    }
+
+    // -----------------------
+    // Picker visibility helpers
+    // -----------------------
+    function showPicker() {
+      pickerOverlay.style.display = 'flex';
+    }
+    function hidePicker() {
+      pickerOverlay.style.display = 'none';
+    }
+
+    // -----------------------
+    // Event wiring
+    // -----------------------
+    searchBar.addEventListener('input', e => { searchQuery = e.target.value || ''; currentPage = 1; renderList(); });
+
+    tabs.addEventListener('click', e => {
+      if (!e.target.classList.contains('tab-btn')) return;
+      tabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      currentFilter = e.target.getAttribute('data-rarity') || 'all';
+      // show/hide calculator
+      if (currentFilter === 'calculator') {
+        calculatorRoot.style.display = 'block';
+        calculatorRoot.setAttribute('aria-hidden', 'false');
+        listRoot.style.display = 'none';
+        // show verdict & calculator
+      } else {
+        calculatorRoot.style.display = 'none';
+        calculatorRoot.setAttribute('aria-hidden', 'true');
+        listRoot.style.display = '';
+        currentPage = 1;
+        renderList();
+      }
+    });
+
+    sort.addEventListener('click', e => {
+      if (!e.target.classList.contains('sort-btn')) return;
+      sort.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      currentSort = e.target.getAttribute('data-sort') || 'default';
+      currentPage = 1;
+      renderList();
+    });
+
+    prevBtn.addEventListener('click', ()=>{ if (currentPage>1){ currentPage--; renderList(); window.scrollTo({top:0,behavior:'smooth'});} });
+    nextBtn.addEventListener('click', ()=> {
+      const filteredTotal = unitKeys.filter(k => {
+        const u = unitDatabase[k];
+        return (currentFilter==='all' || (u.rarity||'').toLowerCase() === currentFilter) && (u.name||'').toLowerCase().includes(searchQuery.toLowerCase());
+      }).length;
+      const maxPage = Math.ceil(filteredTotal / itemsPerPage) || 1;
       if (currentPage < maxPage) { currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }
     });
 
-    // search input at top
-    document.getElementById('search-bar').addEventListener('input', e => {
-      searchQuery = e.target.value || '';
-      currentPage = 1; renderList();
+    // Open picker from + buttons
+    let currentPickerSide = 'left', currentPickerTrait = 'base', currentPickerQty = 1;
+    plusLeft.addEventListener('click', ()=> {
+      currentPickerSide = 'left'; currentPickerTrait = (traitSelectLeft && traitSelectLeft.value) || 'base'; currentPickerQty = (qtyLeft && Number(qtyLeft.value) || 1);
+      // ensure picker UI created
+      createPicker();
+      // reset search + placeholder
+      pickerSearch.value = '';
+      pickerGrid.innerHTML = `<div class="picker-placeholder">Choose a category on the left</div>`;
+      showPicker();
+    });
+    plusRight.addEventListener('click', ()=> {
+      currentPickerSide = 'right'; currentPickerTrait = (traitSelectRight && traitSelectRight.value) || 'base'; currentPickerQty = (qtyRight && Number(qtyRight.value) || 1);
+      createPicker();
+      pickerSearch.value = '';
+      pickerGrid.innerHTML = `<div class="picker-placeholder">Choose a category on the left</div>`;
+      showPicker();
     });
 
-    // picker openers
-    let currentPickerSide = 'left', currentPickerTrait = 'base', currentPickerQty = 1;
-    plusLeft.addEventListener('click', () => { currentPickerSide = 'left'; createPicker(); showPicker(); });
-    plusRight.addEventListener('click', () => { currentPickerSide = 'right'; createPicker(); showPicker(); });
+    // Hidden quick-add buttons (fallback)
+    if (addLeft) addLeft.addEventListener('click', ()=> addToSide('left', unitSelectLeft.value, traitSelectLeft.value, Number(qtyLeft.value || 1)));
+    if (addRight) addRight.addEventListener('click', ()=> addToSide('right', unitSelectRight.value, traitSelectRight.value, Number(qtyRight.value || 1)));
+    if (unitSelectLeft) unitSelectLeft.addEventListener('dblclick', ()=> addToSide('left', unitSelectLeft.value, traitSelectLeft.value, Number(qtyLeft.value || 1)));
+    if (unitSelectRight) unitSelectRight.addEventListener('dblclick', ()=> addToSide('right', unitSelectRight.value, traitSelectRight.value, Number(qtyRight.value || 1)));
 
-    // picker drag/drop handlers (panels accept drops)
-    leftItemsEl.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
-    rightItemsEl.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
-    leftItemsEl.addEventListener('drop', (e) => { e.preventDefault(); const key = e.dataTransfer.getData('text/plain'); if (key) addToSide('left', key, 'base', 1); });
-    rightItemsEl.addEventListener('drop', (e) => { e.preventDefault(); const key = e.dataTransfer.getData('text/plain'); if (key) addToSide('right', key, 'base', 1); });
+    // Close picker on escape
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') hidePicker(); });
 
-    // start: restore trade, render list
+    // Picker overlay click already handled with listener on createPicker (closing when clicking outside)
+
+    // -----------------------
+    // INITIALIZATION
+    // - populate fallback selects
+    // - render main list (default)
+    // - create picker structure, but keep it hidden and placeholder that requires category click
+    // -----------------------
     try {
-      restoreTrade();
+      populateSelects();
       renderList();
       renderThumbs();
       updateTotalsAndVerdict();
+      // create picker structure once
+      createPicker();
     } catch (err) {
-      showFatal('Initialization error: ' + (err && err.message ? err.message : String(err)));
+      showFatal('Initialization failed: ' + (err && err.message ? err.message : String(err)));
     }
 
-    // Expose for debugging in console if needed
-    window._skibidi = { unitDatabase, leftItems, rightItems, renderList, renderThumbs, updateTotalsAndVerdict };
+    // -----------------------
+    // Expose some internals for debugging in console if needed
+    // -----------------------
+    window._skibidi = {
+      parseValue,
+      unitDatabase,
+      leftItems,
+      rightItems,
+      renderList,
+      renderThumbs,
+      updateTotalsAndVerdict
+    };
 
+    // End of script
   })();
   </script>
 </body>
