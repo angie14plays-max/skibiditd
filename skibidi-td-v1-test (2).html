@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-  <title>Skibidi TD Value List (fixed)</title>
+  <title>Skibidi TD Value List (fixed) + Calculator</title>
   <style>
     :root {
       --bg-page: #000000;
@@ -24,14 +24,6 @@
       --hyped: #3b82f6;
       --recovering: #555555;
       --unstable: #9d174d;
-
-      --grad-astral: linear-gradient(60deg, #640081, #7e00a5, #154af0, #00cd82, #11ff46);
-      --grad-cosmic: linear-gradient(80deg, #b800e6, #6cedf0);
-      --grad-divine: linear-gradient(180deg, #c400cf, #2248ff);
-      --grad-godly: linear-gradient(180deg, #7b00e6, #6367ff);
-      --grad-exclusive: linear-gradient(180deg, #2e7dff, #2be7f6);
-      --grad-mythic: linear-gradient(180deg, #ff6d68, #cc1d1b);
-      --grad-legendary: linear-gradient(180deg, #f5a623, #d48c00);
     }
 
     * { font-family: 'Montserrat', sans-serif; letter-spacing: 0.5px; box-sizing: border-box; }
@@ -46,40 +38,22 @@
       align-items: center;
     }
 
-    .status-rising { color: var(--rising); }
-    .status-stable { color: var(--stable); }
-    .status-dropping { color: var(--dropping); }
-    .status-overpaid { color: var(--overpaid); }
-    .status-underpaid { color: var(--underpaid); }
-    .status-hyped { color: var(--hyped); }
-    .status-recovering { color: var(--recovering); }
-    .status-unstable { color: var(--unstable); }
-
-    .rarity-astral { --theme: var(--grad-astral); }
-    .rarity-cosmic { --theme: var(--grad-cosmic); }
-    .rarity-divine { --theme: var(--grad-divine); }
-    .rarity-godly { --theme: var(--grad-godly); }
-    .rarity-exclusive { --theme: var(--grad-exclusive); }
-    .rarity-mythic { --theme: var(--grad-mythic); }
-    .rarity-legendary { --theme: var(--grad-legendary); }
-
     .controls-container {
       width: 100%;
       max-width: 1200px;
-      margin-bottom: 30px;
+      margin-bottom: 18px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 12px;
     }
-
     #search-bar {
       width: 100%;
-      padding: 15px 20px;
+      padding: 12px 14px;
       background: var(--card-bg);
       border: 2px solid var(--border-solid);
       border-radius: 12px;
       color: white;
-      font-size: 16px;
+      font-size: 15px;
       outline: none;
       transition: border-color 0.3s;
     }
@@ -96,12 +70,12 @@
       background: var(--card-bg);
       border: 2px solid var(--border-solid);
       color: var(--text-dim);
-      padding: 10px 20px;
+      padding: 10px 16px;
       cursor: pointer;
       font-weight: bold;
       text-transform: uppercase;
       font-size: 12px;
-      transition: 0.3s;
+      transition: 0.2s;
       border-radius: 8px;
     }
     .tab-btn:hover, .tab-btn.active, .sort-btn:hover, .sort-btn.active {
@@ -111,64 +85,133 @@
     .list-container {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 25px;
+      gap: 18px;
       max-width: 1200px;
       width: 100%;
+      margin-bottom: 26px;
     }
 
     .unit-card {
       background-color: var(--card-bg);
       border: 2px solid var(--border-solid);
-      border-radius: 16px;
-      padding: 20px;
+      border-radius: 12px;
+      padding: 16px;
       text-align: center;
       position: relative;
       display: flex;
       flex-direction: column;
     }
 
-    .header-section { min-height: 60px; margin-bottom: 10px; display:flex; flex-direction:column; justify-content:center; align-items:center; }
-    .unit-title { font-size:16px; font-weight:900; text-transform:uppercase; line-height:1.1; }
-    .second-edition-tag { font-size:10px; font-weight:700; color:var(--gold); text-transform:uppercase; margin-top:4px; letter-spacing:1px; }
-
-    .card-body { display:flex; align-items:center; justify-content:space-between; margin-bottom:25px; gap:10px; }
-    .buff-column { display:flex; flex-direction:column; gap:12px; }
-
-    .icon-slot {
-      width:42px; height:42px; background-color:var(--box-bg);
-      border:2px solid var(--border-solid); border-radius:50%; display:flex; align-items:center; justify-content:center;
-      overflow:hidden; position:relative; cursor:pointer; transition:0.3s; filter:grayscale(1); opacity:.2;
+    /* Calculator UI */
+    .calculator-root {
+      width: 100%;
+      max-width: 1200px;
+      display: none;
+      margin-bottom: 28px;
+      gap: 16px;
     }
-    .icon-slot:hover { opacity:0.6; }
-    .icon-slot.active { filter:grayscale(0); opacity:1; border-color:var(--gold); }
-
-    .icon-img { width:75%; height:75%; background-image:var(--asset-path); background-size:contain; background-repeat:no-repeat; background-position:center; }
-
-    .effect-overlay { position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,#ff000080,#ffff0080,#00ff0080,#0000ff80,#ff000080); background-size:200% auto; display:none;
-      -webkit-mask: var(--asset-path) center/75% no-repeat; mask: var(--asset-path) center/75% no-repeat; }
-    .icon-slot.active .effect-overlay { display:block; animation:move-overlay 3s linear infinite; }
-    @keyframes move-overlay { to { background-position: -200% 50%; } }
-
-    .portrait-frame {
-      width:120px; height:120px; border-radius:50%; background:var(--theme); border:3px solid #000;
-      display:flex; justify-content:center; align-items:center; cursor:pointer; flex-shrink:0;
+    .calc-inner {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      width: 100%;
     }
-    .unit-image { width:130px; height:130px; background-image:var(--unit-img); background-size:cover; background-position:center; }
+    .trade-panel {
+      flex: 1;
+      background: var(--card-bg);
+      border: 2px solid var(--border-solid);
+      border-radius: 12px;
+      padding: 14px;
+      min-height: 320px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .trade-title {
+      text-align:center;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:1px;
+    }
+    .trade-title.you { color:#ff4d4d; }
+    .trade-title.them { color:#6ea0ff; }
 
-    .data-table { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
-    .data-cell { background-color:var(--box-bg); border:1px solid var(--border-solid); padding:10px 2px; border-radius:8px; }
-    .label { display:block; color:var(--text-dim); font-size:9px; font-weight:bold; text-transform:uppercase; margin-bottom:2px; }
-    .val { font-size:12px; font-weight:bold; transition:0.3s; }
-    .highlight-gold { color:var(--gold); }
-    .highlight-purple { color:var(--purple); }
+    .add-row {
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:6px;
+    }
+    .add-row select, .add-row input[type="number"]{
+      background: var(--box-bg);
+      color:var(--text-main);
+      border:1px solid var(--border-solid);
+      padding:8px;
+      border-radius:8px;
+      font-size:14px;
+    }
+    .add-row .btn {
+      background: linear-gradient(90deg,var(--purple),var(--gold));
+      color:black;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:800;
+    }
 
-    .pagination-container { margin-top:40px; display:flex; gap:10px; align-items:center; justify-content:center; padding-bottom:40px; }
-    .pagination-btn { background:var(--card-bg); border:1px solid var(--border-solid); color:white; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.3s; }
-    .pagination-btn:hover:not(:disabled) { border-color:var(--gold); background:var(--box-bg); }
-    .pagination-btn:disabled { opacity:0.3; cursor:not-allowed; }
-    .page-info { font-weight:bold; font-size:14px; color:var(--text-dim); }
+    .items-list {
+      background: rgba(255,255,255,0.01);
+      border:1px solid rgba(255,255,255,0.04);
+      padding:8px;
+      border-radius:8px;
+      min-height:160px;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .trade-item {
+      display:flex;
+      gap:8px;
+      align-items:center;
+      padding:8px;
+      border-radius:8px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.01), transparent);
+      border:1px solid rgba(255,255,255,0.03);
+      justify-content:space-between;
+    }
+    .trade-item .left { display:flex; gap:8px; align-items:center; flex:1; }
+    .trade-item .meta { color:var(--text-dim); font-size:13px; }
+    .trade-item input[type="number"]{ width:110px; padding:6px; background:transparent; border:1px solid rgba(255,255,255,0.04); border-radius:6px; color:var(--text-main); text-align:right; }
+    .remove-btn { background:transparent; color:var(--underpaid); border:0; cursor:pointer; font-weight:700; padding:6px; }
 
-    @media (max-width:1024px) { .list-container { grid-template-columns: repeat(2,1fr); } }
+    .total-row { display:flex; justify-content:space-between; align-items:center; margin-top:6px; }
+    .total-label { font-weight:900; color:var(--text-dim); }
+    .total-value { font-weight:900; background:linear-gradient(90deg,var(--purple),var(--gold)); padding:6px 10px; border-radius:8px; color:#000; }
+
+    .verdict {
+      width:260px;
+      background:var(--card-bg);
+      border:2px solid var(--border-solid);
+      border-radius:12px;
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:center;
+    }
+    .status-text { font-weight:900; font-size:18px; }
+    .status-fair { color:var(--gold); }
+    .status-lose { color:var(--underpaid); }
+    .status-over { color:#ff2d6f; }
+    .status-win { color:var(--rising); }
+    .status-under { color:#12b76a; }
+
+    .balance-bar { width:100%; height:14px; background:rgba(255,255,255,0.03); border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.02); }
+    .balance-fill { height:100%; width:50%; background:linear-gradient(90deg,#22c55e,#6ea0ff); }
+
+    @media (max-width:1024px) { .list-container { grid-template-columns: repeat(2,1fr); } .calc-inner { flex-direction:column; } .verdict { width:100%; } }
     @media (max-width:600px) { .list-container { grid-template-columns: 1fr; } .portrait-frame { width:90px; height:90px; } .unit-image { width:100px; height:100px; } }
   </style>
 </head>
@@ -185,6 +228,8 @@
       <button class="tab-btn" data-rarity="exclusive">Exclusive</button>
       <button class="tab-btn" data-rarity="mythic">Mythic</button>
       <button class="tab-btn" data-rarity="legendary">Legendary</button>
+      <!-- NEW: Calculator tab -->
+      <button class="tab-btn" data-rarity="calculator" id="calculator-tab">Calculator</button>
     </div>
 
     <div class="sort-wrapper" id="sort-container">
@@ -195,6 +240,71 @@
 
   <div id="list-root" class="list-container"></div>
 
+  <!-- Calculator panel (hidden by default) -->
+  <div id="calculator-root" class="calculator-root">
+    <div class="calc-inner">
+      <div class="trade-panel" id="left-panel">
+        <div class="trade-title you">Your Value</div>
+
+        <div class="add-row">
+          <select id="unit-select-left"></select>
+          <select id="trait-select-left">
+            <option value="base">Base</option>
+            <option value="grandmaster">Grandmaster</option>
+            <option value="master">Master</option>
+            <option value="superPayday">Super Payday</option>
+            <option value="sniper">Sniper</option>
+          </select>
+          <input id="qty-left" type="number" min="1" value="1" />
+          <button class="btn" data-side="left" id="add-left">Add</button>
+        </div>
+
+        <div class="items-list" id="left-items"></div>
+
+        <div class="total-row">
+          <div class="total-label">Total</div>
+          <div class="total-value" id="left-total">0</div>
+        </div>
+      </div>
+
+      <div class="trade-panel" id="right-panel">
+        <div class="trade-title them">Their Value</div>
+
+        <div class="add-row">
+          <select id="unit-select-right"></select>
+          <select id="trait-select-right">
+            <option value="base">Base</option>
+            <option value="grandmaster">Grandmaster</option>
+            <option value="master">Master</option>
+            <option value="superPayday">Super Payday</option>
+            <option value="sniper">Sniper</option>
+          </select>
+          <input id="qty-right" type="number" min="1" value="1" />
+          <button class="btn" data-side="right" id="add-right">Add</button>
+        </div>
+
+        <div class="items-list" id="right-items"></div>
+
+        <div class="total-row">
+          <div class="total-label">Total</div>
+          <div class="total-value" id="right-total">0</div>
+        </div>
+      </div>
+
+      <div class="verdict" id="verdict-panel">
+        <div class="status-text" id="verdict-text">No items</div>
+        <div class="balance-bar">
+          <div class="balance-fill" id="balance-fill" style="width:50%"></div>
+        </div>
+        <div class="small muted" id="verdict-details" style="color:var(--text-dim); font-size:13px; text-align:center;">Add units on each side to compare values.</div>
+        <div style="width:100%; display:flex; gap:8px; margin-top:6px;">
+          <button class="btn" id="clear-left" style="flex:1; background:#ef4444; color:#fff;">Clear Yours</button>
+          <button class="btn" id="clear-right" style="flex:1; background:#6ea0ff; color:#000;">Clear Theirs</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="pagination-container">
     <button class="pagination-btn" id="prev-btn">Previous</button>
     <span class="page-info" id="page-info">Page 1 of 1</span>
@@ -204,15 +314,9 @@
   <!-- Your data file should define `unitDatabase` as a global object -->
   <script src="skibidi-td-data.js"></script>
 
-  <!-- Robust script (replaces the inline script you were using). 
-       - Waits for DOMContentLoaded
-       - Validates unitDatabase
-       - Implements rarity ordering exactly: astral, cosmic, godly, divine, mythic, legendary
-       - parseValue handles K=1,000 and M=1,000,000 only when the entire value matches number+suffix
-  -->
+  <!-- Existing renderer script (unchanged) -->
   <script>
   (function () {
-    // Helper overlay for fatal errors
     function showFatal(message) {
       console.error(message);
       let overlay = document.getElementById('debug-overlay');
@@ -229,8 +333,6 @@
       overlay.textContent = message;
     }
 
-    // parseValue: recognizes "1,234", "1.2K", "3M". K=1,000 M=1,000,000.
-    // Suffix recognized only if the entire trimmed string matches the pattern.
     function parseValue(valString) {
       if (valString === 0) return 0;
       if (!valString && valString !== 0) return 0;
@@ -248,11 +350,9 @@
         }
         return num;
       }
-      // fallback (tolerant): pull first numeric sequence
       const numericMatch = s.match(/[\d.]+/);
       return numericMatch ? parseFloat(numericMatch[0].replace(/,/g, '')) : 0;
     }
-    // expose for console testing
     window.parseValue = parseValue;
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -273,8 +373,6 @@
         let currentPage = 1;
         const itemsPerPage = 15;
 
-        // Rarity order EXACT as requested:
-        // astral, cosmic, godly, divine, mythic, legendary
         const rarityOrder = {
           'astral': 1,
           'cosmic': 2,
@@ -282,7 +380,6 @@
           'divine': 4,
           'mythic': 5,
           'legendary': 6,
-          // anything else after the above
           'exclusive': 99
         };
 
@@ -316,14 +413,12 @@
             if (slot.getAttribute('data-trait') === traitKey) slot.classList.add('active');
           });
         }
-        // expose global for onclick handlers inside generated markup
         window.updateUnitStats = updateUnitStats;
 
         function buildTraitIcon(traitKey, unitKey) {
           const meta = traitsMeta[traitKey];
           if (!meta) return '';
           const imgPath = `url('${imageProvider}${meta.id}')`;
-          // note: updateUnitStats is globally available
           return `
             <div class="icon-slot" data-trait="${traitKey}" title="${meta.label}" onclick="updateUnitStats('${unitKey}', '${traitKey}')">
               <div class="icon-img" style="--asset-path: ${imgPath}"></div>
@@ -410,7 +505,7 @@
                       <span class="val val-demand highlight-purple">${unit.baseStats.demand}</span>
                     </div>
                   </div>
-                </div>`;
+                </div>`; 
             }).join('');
           } catch (err) {
             console.error('renderValueList error:', err);
@@ -418,7 +513,6 @@
           }
         }
 
-        // Wire UI (only if elements exist)
         const searchBar = document.getElementById('search-bar');
         if (searchBar) {
           searchBar.addEventListener('input', (e) => {
@@ -435,8 +529,19 @@
               document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
               e.target.classList.add('active');
               currentFilter = e.target.getAttribute('data-rarity') || 'all';
-              currentPage = 1;
-              renderValueList();
+
+              // Show/hide calculator
+              const calcRoot = document.getElementById('calculator-root');
+              const listRoot = document.getElementById('list-root');
+              if (currentFilter === 'calculator') {
+                if (calcRoot) calcRoot.style.display = 'block';
+                if (listRoot) listRoot.style.display = 'none';
+              } else {
+                if (calcRoot) calcRoot.style.display = 'none';
+                if (listRoot) listRoot.style.display = '';
+                currentPage = 1;
+                renderValueList();
+              }
             }
           });
         }
@@ -478,13 +583,6 @@
           }
         });
 
-        // quick parseValue tests in console
-        console.groupCollapsed('parseValue tests (should show numeric values)');
-        console.log('"1.2K" =>', parseValue('1.2K')); // 1200
-        console.log('"3M" =>', parseValue('3M'));     // 3000000
-        console.log('"12,345" =>', parseValue('12,345')); // 12345
-        console.groupEnd();
-
         // initial render
         renderValueList();
 
@@ -494,6 +592,256 @@
       }
     });
   })();
+  </script>
+
+  <!-- Calculator script: uses global unitDatabase and parseValue -->
+  <script>
+    (function () {
+      // Config thresholds (change these if you want different sensitivity)
+      const FAIR_THRESHOLD = 0.02;   // 2% => considered "Fair"
+      const SMALL_DIFF = 0.10;      // <=10% considered small win/lose
+      // Helper formatting
+      function abbr(n) {
+        if (!isFinite(n) || n === 0) return '0';
+        if (n >= 1e6) return +(n / 1e6).toFixed(2) + 'M';
+        if (n >= 1e3) return +(n / 1e3).toFixed(2) + 'K';
+        return Math.round(n).toLocaleString();
+      }
+      function comma(n) {
+        if (!isFinite(n)) return '0';
+        return Math.round(n).toLocaleString();
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        if (typeof unitDatabase === 'undefined') return; // skip if missing
+
+        // Elements
+        const unitSelectLeft = document.getElementById('unit-select-left');
+        const unitSelectRight = document.getElementById('unit-select-right');
+        const traitLeft = document.getElementById('trait-select-left');
+        const traitRight = document.getElementById('trait-select-right');
+        const qtyLeft = document.getElementById('qty-left');
+        const qtyRight = document.getElementById('qty-right');
+        const addLeftBtn = document.getElementById('add-left');
+        const addRightBtn = document.getElementById('add-right');
+        const leftItemsEl = document.getElementById('left-items');
+        const rightItemsEl = document.getElementById('right-items');
+        const leftTotalEl = document.getElementById('left-total');
+        const rightTotalEl = document.getElementById('right-total');
+        const verdictText = document.getElementById('verdict-text');
+        const verdictDetails = document.getElementById('verdict-details');
+        const balanceFill = document.getElementById('balance-fill');
+        const clearLeft = document.getElementById('clear-left');
+        const clearRight = document.getElementById('clear-right');
+
+        // Data stores
+        const unitKeys = Object.keys(unitDatabase).sort((a,b) => (unitDatabase[a].name || '').localeCompare(unitDatabase[b].name || ''));
+        const leftItems = [];
+        const rightItems = [];
+
+        function populateUnitSelects() {
+          const makeOption = (key) => {
+            const u = unitDatabase[key];
+            const display = `${u.name} (${u.rarity || 'unknown'}) — ${u.baseStats.value || 'N/A'}`;
+            return `<option value="${key}">${escapeHtml(display)}</option>`;
+          };
+          unitSelectLeft.innerHTML = unitKeys.map(makeOption).join('');
+          unitSelectRight.innerHTML = unitKeys.map(makeOption).join('');
+        }
+        function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        function readUnitValue(key, trait) {
+          const unit = unitDatabase[key];
+          if (!unit) return 0;
+          if (trait && trait !== 'base' && unit.traits && unit.traits[trait]) {
+            return parseValue(unit.traits[trait].value);
+          }
+          return parseValue(unit.baseStats.value);
+        }
+
+        function addItem(side, key, trait, qty) {
+          qty = Math.max(1, Math.floor(qty) || 1);
+          const numericSingle = readUnitValue(key, trait);
+          const computedValue = numericSingle * qty;
+          const item = {
+            id: `${key}:${trait}:${Date.now()}${Math.random().toString(36).slice(2,6)}`,
+            key, trait, qty, numericSingle, computedValue, override: null
+          };
+          if (side === 'left') leftItems.push(item); else rightItems.push(item);
+          renderLists();
+          computeAndUpdate();
+        }
+
+        function removeItem(side, id) {
+          if (side === 'left') {
+            const idx = leftItems.findIndex(i=>i.id===id);
+            if (idx>=0) leftItems.splice(idx,1);
+          } else {
+            const idx = rightItems.findIndex(i=>i.id===id);
+            if (idx>=0) rightItems.splice(idx,1);
+          }
+          renderLists();
+          computeAndUpdate();
+        }
+
+        function updateOverride(side, id, newVal) {
+          const list = side === 'left' ? leftItems : rightItems;
+          const it = list.find(i => i.id === id);
+          if (!it) return;
+          const nv = parseFloat(newVal);
+          it.override = Number.isFinite(nv) ? nv : null;
+          computeAndUpdate();
+        }
+
+        function renderLists() {
+          leftItemsEl.innerHTML = leftItems.map(itemEl('left')).join('');
+          rightItemsEl.innerHTML = rightItems.map(itemEl('right')).join('');
+          // attach listeners for remove and override inputs
+          attachListListeners();
+        }
+
+        function itemEl(side) {
+          return function (it) {
+            const unit = unitDatabase[it.key];
+            const name = (unit && unit.name) ? unit.name : it.key;
+            const traitLabel = it.trait && it.trait !== 'base' ? ` (${it.trait})` : '';
+            const displayValue = it.override != null ? comma(it.override) : comma(it.computedValue);
+            return `
+              <div class="trade-item" data-id="${it.id}" data-side="${side}">
+                <div class="left">
+                  <div>
+                    <div style="font-weight:800">${escapeHtml(name)}${escapeHtml(traitLabel)}</div>
+                    <div class="meta">qty: ${it.qty} • unit: ${abbr(it.numericSingle)}</div>
+                  </div>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                  <input type="number" class="override-input" data-id="${it.id}" data-side="${side}" value="${it.override != null ? it.override : it.computedValue}" />
+                  <button class="remove-btn" data-id="${it.id}" data-side="${side}">×</button>
+                </div>
+              </div>`;
+          }
+        }
+
+        function attachListListeners() {
+          document.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.removeEventListener('click', removeBtnHandler);
+            btn.addEventListener('click', removeBtnHandler);
+          });
+          document.querySelectorAll('.override-input').forEach(inp => {
+            inp.removeEventListener('input', overrideHandler);
+            inp.addEventListener('input', overrideHandler);
+          });
+        }
+        function removeBtnHandler(e) {
+          const id = e.currentTarget.getAttribute('data-id');
+          const side = e.currentTarget.getAttribute('data-side');
+          removeItem(side, id);
+        }
+        function overrideHandler(e) {
+          const id = e.currentTarget.getAttribute('data-id');
+          const side = e.currentTarget.getAttribute('data-side');
+          const val = parseFloat(e.currentTarget.value) || 0;
+          updateOverride(side, id, val);
+        }
+
+        function sumList(list) {
+          return list.reduce((s,it) => s + (it.override != null ? Number(it.override) : Number(it.computedValue || 0)), 0);
+        }
+
+        function computeAndUpdate() {
+          // recompute computedValue from qty & numericSingle in case override numericSingle changed externally
+          leftItems.forEach(it => it.computedValue = (it.numericSingle || 0) * (it.qty || 1));
+          rightItems.forEach(it => it.computedValue = (it.numericSingle || 0) * (it.qty || 1));
+
+          const leftSum = sumList(leftItems);
+          const rightSum = sumList(rightItems);
+
+          leftTotalEl.innerText = abbr(leftSum);
+          rightTotalEl.innerText = abbr(rightSum);
+
+          // balance fill percent
+          const total = leftSum + rightSum;
+          let leftPct = total === 0 ? 50 : Math.round((leftSum / (total || 1)) * 100);
+          leftPct = Math.max(0, Math.min(100, leftPct));
+          balanceFill.style.width = leftPct + '%';
+
+          // verdict logic
+          let verdict = 'No items';
+          let details = 'Add units on each side to compare values.';
+          let statusClass = '';
+          // if both zero
+          if (leftSum === 0 && rightSum === 0) {
+            verdict = 'No items';
+            statusClass = 'status-fair';
+          } else {
+            // consider equal within FAIR_THRESHOLD
+            if (Math.abs(leftSum - rightSum) <= Math.max(1, FAIR_THRESHOLD * Math.max(leftSum, rightSum))) {
+              verdict = 'Fair';
+              details = `Totals are within ${(FAIR_THRESHOLD*100).toFixed(0)}% of each other.`;
+              statusClass = 'status-fair';
+            } else if (leftSum > rightSum) {
+              // you are giving more than them
+              // if other side is zero or left much larger => Overpaying
+              if (rightSum === 0 || leftSum > rightSum * (1 + SMALL_DIFF)) {
+                verdict = 'Overpaying';
+                details = `You're giving ${formatPercentDifference(leftSum, rightSum)} more than them. Consider lowering your offer.`;
+                statusClass = 'status-over';
+              } else {
+                verdict = 'Lose';
+                details = `You're giving slightly more (${formatPercentDifference(leftSum, rightSum)}).`;
+                statusClass = 'status-lose';
+              }
+            } else { // leftSum < rightSum => you're receiving more value => good for you
+              if (leftSum === 0 || rightSum > leftSum * (1 + SMALL_DIFF)) {
+                verdict = 'Underpaying';
+                details = `You're receiving ${formatPercentDifference(rightSum, leftSum)} more value — great deal for you.`;
+                statusClass = 'status-under';
+              } else {
+                verdict = 'Win';
+                details = `You're getting a better deal (${formatPercentDifference(rightSum, leftSum)}).`;
+                statusClass = 'status-win';
+              }
+            }
+          }
+
+          verdictText.innerText = verdict;
+          // update class colors
+          verdictText.className = 'status-text ' + statusClass;
+          verdictDetails.innerText = details;
+        }
+
+        function formatPercentDifference(a, b) {
+          if (!isFinite(a) || !isFinite(b)) return 'N/A';
+          if (b === 0) return '∞%';
+          const pct = ((a - b) / b) * 100;
+          return Math.abs(pct).toFixed(0) + '%';
+        }
+
+        // Wire add buttons
+        addLeftBtn.addEventListener('click', () => {
+          addItem('left', unitSelectLeft.value, traitLeft.value, Number(qtyLeft.value || 1));
+        });
+        addRightBtn.addEventListener('click', () => {
+          addItem('right', unitSelectRight.value, traitRight.value, Number(qtyRight.value || 1));
+        });
+
+        // clear
+        clearLeft.addEventListener('click', () => { leftItems.splice(0,leftItems.length); renderLists(); computeAndUpdate(); });
+        clearRight.addEventListener('click', () => { rightItems.splice(0,rightItems.length); renderLists(); computeAndUpdate(); });
+
+        // populate selects & initial compute
+        populateUnitSelects();
+        renderLists();
+        computeAndUpdate();
+
+        // small helper to allow the calculator ui to be reachable from keyboard quickly
+        document.getElementById('calculator-tab').addEventListener('click', () => {
+          // focus first select after a short delay
+          setTimeout(()=> unitSelectLeft.focus(), 150);
+        });
+
+      });
+    })();
   </script>
 </body>
 </html>
