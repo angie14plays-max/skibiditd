@@ -38,21 +38,31 @@
     .tab-btn,.sort-btn{background:var(--card);border:2px solid var(--border);padding:10px 16px;border-radius:8px;color:var(--muted);font-weight:900;cursor:pointer;text-transform:uppercase}
     .tab-btn.active,.sort-btn.active{color:#fff;border-color:var(--gold);box-shadow:0 0 0 4px rgba(250,204,21,0.06) inset}
 
-    .list-root{width:100%;max-width:1200px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:12px auto 28px;align-items:start}
-    .unit-card{position:relative;background:var(--card);border-radius:16px;padding:18px;border:2px solid var(--border);display:flex;flex-direction:column;gap:12px;min-height:260px;justify-content:space-between;overflow:hidden}
+    /* smaller gap between unit cards */
+    .list-root{width:100%;max-width:1200px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px auto 28px;align-items:start}
+    .unit-card{position:relative;background:var(--card);border-radius:16px;padding:14px;border:2px solid var(--border);display:flex;flex-direction:column;gap:10px;min-height:180px;align-items:stretch;justify-content:flex-start;overflow:hidden}
     .unit-card > * { position:relative; z-index:2; } /* ensure content above overlay color layer */
 
-    /* stronger, always-visible subtle color overlay on card */
-    .unit-card.rarity-astral::before { content:''; position:absolute; inset:0; background:var(--g-astral); opacity:0.12; pointer-events:none; }
-    .unit-card.rarity-cosmic::before { content:''; position:absolute; inset:0; background:var(--g-cosmic); opacity:0.12; pointer-events:none; }
-    .unit-card.rarity-divine::before { content:''; position:absolute; inset:0; background:var(--g-divine); opacity:0.12; pointer-events:none; }
-    .unit-card.rarity-godly::before { content:''; position:absolute; inset:0; background:var(--g-godly); opacity:0.12; pointer-events:none; }
-    .unit-card.rarity-exclusive::before { content:''; position:absolute; inset:0; background:var(--g-exclusive); opacity:0.12; pointer-events:none; }
-    .unit-card.rarity-mythic::before { content:''; position:absolute; inset:0; background:var(--g-mythic); opacity:0.12; pointer-events:none; }
-    .unit-card.rarity-legendary::before { content:''; position:absolute; inset:0; background:var(--g-legendary); opacity:0.12; pointer-events:none; }
+    /* subtle, always-visible colored overlay on card (keeps original look) */
+    .unit-card.rarity-astral::before { content:''; position:absolute; inset:0; background:var(--g-astral); opacity:0.08; pointer-events:none; border-radius:14px; z-index:1; }
+    .unit-card.rarity-cosmic::before { content:''; position:absolute; inset:0; background:var(--g-cosmic); opacity:0.08; pointer-events:none; border-radius:14px; z-index:1; }
+    .unit-card.rarity-divine::before { content:''; position:absolute; inset:0; background:var(--g-divine); opacity:0.08; pointer-events:none; border-radius:14px; z-index:1; }
+    .unit-card.rarity-godly::before { content:''; position:absolute; inset:0; background:var(--g-godly); opacity:0.08; pointer-events:none; border-radius:14px; z-index:1; }
+    .unit-card.rarity-exclusive::before { content:''; position:absolute; inset:0; background:var(--g-exclusive); opacity:0.08; pointer-events:none; border-radius:14px; z-index:1; }
+    .unit-card.rarity-mythic::before { content:''; position:absolute; inset:0; background:var(--g-mythic); opacity:0.08; pointer-events:none; border-radius:14px; z-index:1; }
+    .unit-card.rarity-legendary::before { content:''; position:absolute; inset:0; background:var(--g-legendary); opacity:0.08; pointer-events:none; border-radius:14px; z-index:1; }
 
-    .header-section{display:flex;flex-direction:column;align-items:center;gap:6px;min-height:56px}
-    .unit-title{font-weight:900;font-size:16px;text-transform:uppercase;text-align:center;line-height:1.1;white-space:normal;word-break:normal;overflow-wrap:break-word}
+    /* add a colored outer frame for each rarity (uses the same gradients) */
+    .unit-card.rarity-astral::after { content:''; position:absolute; inset:-6px; border-radius:20px; background:var(--g-astral); opacity:0.18; pointer-events:none; z-index:0; filter:blur(6px); }
+    .unit-card.rarity-cosmic::after { content:''; position:absolute; inset:-6px; border-radius:20px; background:var(--g-cosmic); opacity:0.18; pointer-events:none; z-index:0; filter:blur(6px); }
+    .unit-card.rarity-divine::after { content:''; position:absolute; inset:-6px; border-radius:20px; background:var(--g-divine); opacity:0.18; pointer-events:none; z-index:0; filter:blur(6px); }
+    .unit-card.rarity-godly::after { content:''; position:absolute; inset:-6px; border-radius:20px; background:var(--g-godly); opacity:0.18; pointer-events:none; z-index:0; filter:blur(6px); }
+    .unit-card.rarity-exclusive::after { content:''; position:absolute; inset:-6px; border-radius:20px; background:var(--g-exclusive); opacity:0.18; pointer-events:none; z-index:0; filter:blur(6px); }
+    .unit-card.rarity-mythic::after { content:''; position:absolute; inset:-6px; border-radius:20px; background:var(--g-mythic); opacity:0.18; pointer-events:none; z-index:0; filter:blur(6px); }
+    .unit-card.rarity-legendary::after { content:''; position:absolute; inset:-6px; border-radius:20px; background:var(--g-legendary); opacity:0.18; pointer-events:none; z-index:0; filter:blur(6px); }
+
+    .header-section{display:flex;flex-direction:column;align-items:center;gap:6px;min-height:48px}
+    .unit-title{font-weight:900;font-size:15px;text-transform:uppercase;text-align:center;line-height:1.1;white-space:normal;word-break:normal;overflow-wrap:break-word}
     .second-edition-tag{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;margin-top:4px;letter-spacing:1px}
 
     .portrait-frame{width:120px;height:120px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;position:relative;border:3px solid rgba(0,0,0,0.8);background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02))}
@@ -65,8 +75,8 @@
     .portrait-frame.rarity-mythic::after { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-mythic); z-index:-1; opacity:0.95 }
     .portrait-frame.rarity-legendary::after { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-legendary); z-index:-1; opacity:0.95 }
 
-    .data-table{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
-    .data-cell{background:var(--panel);border-radius:10px;border:1px solid var(--border);padding:10px;text-align:center;min-height:56px;display:flex;flex-direction:column;justify-content:center}
+    .data-table{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+    .data-cell{background:var(--panel);border-radius:10px;border:1px solid var(--border);padding:8px;text-align:center;min-height:48px;display:flex;flex-direction:column;justify-content:center}
     .data-cell .label{color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;margin-bottom:6px}
     .data-cell .val{font-weight:900}
     .highlight-gold{color:var(--gold)}
@@ -86,7 +96,7 @@
 
     .items-list{border-radius:10px;padding:6px;display:grid;grid-template-columns:repeat(auto-fill,76px);grid-auto-rows:76px;gap:4px;align-content:start;justify-content:start;min-height:180px;border:2px solid rgba(255,255,255,0.03);background:rgba(0,0,0,0.01)}
     .calc-thumb{width:76px;height:76px;border-radius:10px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;background:var(--box);border:3px solid rgba(255,255,255,0.04)}
-    .calc-thumb .img{width:100%;height:100%;background-size:cover;background-position:center}
+    .calc-thumb .img{Width:100%;height:100%;background-size:cover;background-position:center}
     .calc-thumb .remove{position:absolute;left:6px;top:6px;background:rgba(0,0,0,0.6);color:#fff;border-radius:6px;padding:2px 6px;cursor:pointer;font-weight:900}
 
     .calc-thumb.rarity-astral{box-shadow:0 0 0 4px rgba(100,0,129,0.16) inset;border-color:rgba(100,0,129,0.3)}
@@ -243,7 +253,7 @@
     const rarityOrder={ astral:1, cosmic:2, godly:3, divine:4, mythic:5, legendary:6, exclusive:99 };
     const unitKeys=Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
 
-    const leftItems=[], rightItems=[];
+    const leftItems=[], rightItems[];
 
     function rarityClass(u){ return u && u.rarity ? 'rarity-'+String(u.rarity).toLowerCase().replace(/\s+/g,'-') : ''; }
 
