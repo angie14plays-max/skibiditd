@@ -3,522 +3,445 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Skibidi TD — Value List + Calculator (v1 test)</title>
+  <title>Skibidi TD — Fixed Picker, Persistent Rarity Colors, Calculator Isolation</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    /* ===== your original CSS, unchanged ===== */
     :root{
-      --bg:#050506;
-      --card:#0f0f11;
-      --panel:#111214;
-      --box:#141618;
-      --border:#232529;
-      --muted:#9aa0a5;
+      --bg:#000;
+      --card:#0f0f0f;
+      --panel:#121212;
+      --box:#151515;
+      --border:#2f2f2f;
+      --muted:#8a8a8a;
+      --gold:#facc15;
+      --purple:#a855f7;
+      --accent-grad: linear-gradient(90deg,#8b4bff,#ff2d6f);
       --text:#ffffff;
-      --radius:12px;
 
-      --g-astral: linear-gradient(90deg,#7f00ff,#00ffd5);
-      --g-cosmic: linear-gradient(90deg,#b800e6,#6cedf0);
-      --g-divine: linear-gradient(90deg,#ff00c8,#2248ff);
-      --g-godly: linear-gradient(90deg,#7b00e6,#6367ff);
-      --g-exclusive: linear-gradient(90deg,#00d1ff,#4fe0a3);
-      --g-mythic: linear-gradient(90deg,#ff6d68,#ffb86b);
-      --g-legendary: linear-gradient(90deg,#ffd54a,#ff7a00);
+      --g-astral: linear-gradient(135deg,#640081,#7e00a5,#154af0,#00cd82,#11ff46);
+      --g-cosmic: linear-gradient(135deg,#b800e6,#6cedf0);
+      --g-divine: linear-gradient(135deg,#c400cf,#2248ff);
+      --g-godly: linear-gradient(135deg,#7b00e6,#6367ff);
+      --g-exclusive: linear-gradient(135deg,#2e7dff,#2be7f6);
+      --g-mythic: linear-gradient(135deg,#ff6d68,#cc1d1b);
+      --g-legendary: linear-gradient(135deg,#f5a623,#d48c00);
     }
 
-    *{box-sizing:border-box;font-family:"Montserrat",sans-serif}
+    *{box-sizing:border-box;font-family:'Montserrat',sans-serif;-webkit-font-smoothing:antialiased}
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text)}
-    body{padding:20px;display:flex;flex-direction:column;align-items:center;gap:18px}
+    body{padding:22px;display:flex;flex-direction:column;align-items:center;gap:18px}
+    #debug-overlay{display:none;position:fixed;left:0;right:0;top:0;padding:12px;background:#b91c1c;color:white;z-index:99999;text-align:center;font-family:sans-serif}
 
-    .container{width:100%;max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:12px;align-items:center}
+    .controls{width:100%;max-width:1200px;margin:0 auto 12px;display:flex;flex-direction:column;gap:12px}
+    #search-bar{width:100%;padding:14px;border-radius:12px;background:var(--card);border:2px solid var(--border);color:var(--text);outline:none}
+    .tabs,.sort{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+    .tab-btn,.sort-btn{background:var(--card);border:2px solid var(--border);padding:10px 16px;border-radius:8px;color:var(--muted);font-weight:900;cursor:pointer;text-transform:uppercase}
+    .tab-btn.active,.sort-btn.active{color:#fff;border-color:var(--gold);box-shadow:0 0 0 4px rgba(250,204,21,0.06) inset}
 
-    /* search + menu row */
-    .top-row{width:100%;display:flex;align-items:center;gap:12px;justify-content:space-between}
-    #search-bar{flex:1;padding:12px 16px;border-radius:22px;background:var(--card);border:1px solid var(--border);color:var(--text);outline:none}
-    .menu-btn{width:44px;height:44px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer}
-    .menu-btn .dots{width:6px;height:6px;background:var(--muted);border-radius:50%;box-shadow:0 -10px 0 0 var(--muted),0 10px 0 0 var(--muted)}
+    .list-root{width:100%;max-width:1200px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:12px auto 28px;align-items:start}
+    .unit-card{position:relative;background:var(--card);border-radius:16px;padding:18px;border:2px solid var(--border);display:flex;flex-direction:column;gap:12px;min-height:260px;justify-content:space-between;overflow:hidden}
+    .unit-card > * { position:relative; z-index:2; } /* ensure content above overlay color layer */
 
-    /* menu panel (chrome-like) */
-    .menu-panel{position:absolute;right:22px;top:78px;min-width:260px;background:#fff;color:#000;border-radius:10px;box-shadow:0 24px 60px rgba(0,0,0,0.6);border:1px solid rgba(0,0,0,0.06);display:none;z-index:9999;overflow:hidden}
-    .menu-section{padding:8px;border-bottom:1px solid rgba(0,0,0,0.04)}
-    .menu-item{display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;cursor:pointer}
-    .menu-item:hover{background:rgba(0,0,0,0.04)}
-    .menu-label{font-weight:700;text-transform:uppercase}
+    /* stronger, always-visible subtle color overlay on card */
+    .unit-card.rarity-astral::before { content:''; position:absolute; inset:0; background:var(--g-astral); opacity:0.12; pointer-events:none; }
+    .unit-card.rarity-cosmic::before { content:''; position:absolute; inset:0; background:var(--g-cosmic); opacity:0.12; pointer-events:none; }
+    .unit-card.rarity-divine::before { content:''; position:absolute; inset:0; background:var(--g-divine); opacity:0.12; pointer-events:none; }
+    .unit-card.rarity-godly::before { content:''; position:absolute; inset:0; background:var(--g-godly); opacity:0.12; pointer-events:none; }
+    .unit-card.rarity-exclusive::before { content:''; position:absolute; inset:0; background:var(--g-exclusive); opacity:0.12; pointer-events:none; }
+    .unit-card.rarity-mythic::before { content:''; position:absolute; inset:0; background:var(--g-mythic); opacity:0.12; pointer-events:none; }
+    .unit-card.rarity-legendary::before { content:''; position:absolute; inset:0; background:var(--g-legendary); opacity:0.12; pointer-events:none; }
 
-    /* controls row (visible chips) */
-    .controls-row { width:100%; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-    /* unified button size */
-    .chip, .sort-btn {
-      padding:12px 20px;
-      border-radius:14px;
-      font-weight:900;
-      text-transform:uppercase;
-      background:var(--card);
-      color:var(--text);
-      border:1px solid var(--border);
-      min-width:120px;
-      text-align:center;
-      cursor:pointer;
-    }
-    .chip.active{border-color:#ffd54a;box-shadow:0 10px 40px rgba(0,0,0,0.6);}
+    .header-section{display:flex;flex-direction:column;align-items:center;gap:6px;min-height:56px}
+    .unit-title{font-weight:900;font-size:16px;text-transform:uppercase;text-align:center;line-height:1.1;white-space:normal;word-break:normal;overflow-wrap:break-word}
+    .second-edition-tag{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;margin-top:4px;letter-spacing:1px}
 
-    /* layout: centered list */
-    .list-root{width:100%;max-width:1200px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:12px}
+    .portrait-frame{width:120px;height:120px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;position:relative;border:3px solid rgba(0,0,0,0.8);background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02))}
+    .unit-image{width:110px;height:110px;border-radius:50%;background-size:cover;background-position:center}
+    .portrait-frame.rarity-astral::after { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-astral); z-index:-1; opacity:0.95 }
+    .portrait-frame.rarity-cosmic::after { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-cosmic); z-index:-1; opacity:0.95 }
+    .portrait-frame.rarity-divine::after { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-divine); z-index:-1; opacity:0.95 }
+    .portrait-frame.rarity-godly::after { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-godly); z-index:-1; opacity:0.95 }
+    .portrait-frame.rarity-exclusive::after { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-exclusive); z-index:-1; opacity:0.95 }
+    .portrait-frame.rarity-mythic::after { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-mythic); z-index:-1; opacity:0.95 }
+    .portrait-frame.rarity-legendary::after { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-legendary); z-index:-1; opacity:0.95 }
 
-    /* unit card */
-    .unit-card{position:relative;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));border-radius:var(--radius);padding:18px;border:1px solid var(--border);min-height:360px;display:flex;flex-direction:column;justify-content:space-between;overflow:visible}
-    /* header area fixed to align cards */
-    .card-header{height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
-    .unit-title{font-weight:900;text-transform:uppercase;font-size:16px;letter-spacing:0.6px;text-align:center}
+    .data-table{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+    .data-cell{background:var(--panel);border-radius:10px;border:1px solid var(--border);padding:10px;text-align:center;min-height:56px;display:flex;flex-direction:column;justify-content:center}
+    .data-cell .label{color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;margin-bottom:6px}
+    .data-cell .val{font-weight:900}
+    .highlight-gold{color:var(--gold)}
+    .highlight-purple{color:var(--purple)}
 
-    /* portrait frame (rounded square behind circle) */
-    .portrait-frame{width:132px;height:132px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.03));display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.03);position:relative}
-    .portrait-circle{width:110px;height:110px;border-radius:50%;background:var(--box);display:flex;align-items:center;justify-content:center;border:3px solid rgba(0,0,0,0.6)}
-    .portrait-circle .img{width:98px;height:98px;border-radius:50%;background-size:cover;background-position:center}
+    .pagination{width:100%;max-width:1200px;display:flex;gap:12px;justify-content:center;align-items:center;margin:22px auto}
+    .pagination-btn{background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;color:var(--muted);font-weight:900}
+    .pagination-btn:disabled{opacity:0.35;cursor:not-allowed}
+    .page-info{color:var(--muted);font-weight:900}
 
-    /* rarity halo behind frame */
-    .unit-card.rarity-astral .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-astral);z-index:-1;opacity:0.95;filter:blur(8px)}
-    .unit-card.rarity-cosmic .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-cosmic);z-index:-1;opacity:0.95;filter:blur(8px)}
-    .unit-card.rarity-divine .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-divine);z-index:-1;opacity:0.95;filter:blur(8px)}
-    .unit-card.rarity-godly .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-godly);z-index:-1;opacity:0.95;filter:blur(8px)}
-    .unit-card.rarity-exclusive .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-exclusive);z-index:-1;opacity:0.95;filter:blur(8px)}
-    .unit-card.rarity-mythic .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-mythic);z-index:-1;opacity:0.95;filter:blur(8px)}
-    .unit-card.rarity-legendary .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-legendary);z-index:-1;opacity:0.95;filter:blur(8px)}
+    .calculator-root{width:100%;max-width:1200px;margin:0 auto 12px;display:none}
+    .calc-row{display:flex;gap:28px;align-items:flex-start;justify-content:center}
+    .trade-panel{width:46%;min-height:380px;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.006));border:2px solid rgba(255,255,255,0.06);box-shadow:0 0 28px rgba(255,255,255,0.03),0 0 36px rgba(255,50,80,0.06) inset}
+    .trade-title{text-align:center;font-weight:900;text-transform:uppercase}
+    .plus-wrap{display:flex;justify-content:center}
+    .plus-btn{width:56px;height:56px;border-radius:12px;background:var(--accent-grad);display:grid;place-items:center;font-size:28px;color:#fff;cursor:pointer;border:3px solid rgba(255,255,255,0.06);box-shadow:0 12px 36px rgba(255,50,80,0.14)}
 
-    /* info row */
-    .info-row{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:12px}
-    .info-box{min-width:120px;background:var(--panel);border-radius:10px;padding:12px 14px;text-align:center;border:1px solid var(--border)}
-    .info-box .label{display:block;color:var(--muted);font-weight:800;font-size:11px;text-transform:uppercase}
-    .info-box .value{display:block;font-weight:900;margin-top:6px}
+    .items-list{border-radius:10px;padding:6px;display:grid;grid-template-columns:repeat(auto-fill,76px);grid-auto-rows:76px;gap:4px;align-content:start;justify-content:start;min-height:180px;border:2px solid rgba(255,255,255,0.03);background:rgba(0,0,0,0.01)}
+    .calc-thumb{width:76px;height:76px;border-radius:10px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;background:var(--box);border:3px solid rgba(255,255,255,0.04)}
+    .calc-thumb .img{width:100%;height:100%;background-size:cover;background-position:center}
+    .calc-thumb .remove{position:absolute;left:6px;top:6px;background:rgba(0,0,0,0.6);color:#fff;border-radius:6px;padding:2px 6px;cursor:pointer;font-weight:900}
 
-    /* neutral badges kept (no colored gradients) */
-    .status-badge,.demand-pill{background:var(--panel);color:var(--muted);padding:6px 10px;border-radius:8px;font-weight:900;text-transform:uppercase;border:1px solid var(--border)}
+    .calc-thumb.rarity-astral{box-shadow:0 0 0 4px rgba(100,0,129,0.16) inset;border-color:rgba(100,0,129,0.3)}
+    .calc-thumb.rarity-cosmic{box-shadow:0 0 0 4px rgba(184,0,230,0.16) inset;border-color:rgba(184,0,230,0.3)}
+    .calc-thumb.rarity-divine{box-shadow:0 0 0 4px rgba(196,0,207,0.16) inset;border-color:rgba(196,0,207,0.3)}
+    .calc-thumb.rarity-godly{box-shadow:0 0 0 4px rgba(123,0,230,0.16) inset;border-color:rgba(123,0,230,0.3)}
+    .calc-thumb.rarity-exclusive{box-shadow:0 0 0 4px rgba(46,125,255,0.16) inset;border-color:rgba(46,125,255,0.3)}
+    .calc-thumb.rarity-mythic{box-shadow:0 0 0 4px rgba(255,109,104,0.16) inset;border-color:rgba(255,109,104,0.3)}
+    .calc-thumb.rarity-legendary{box-shadow:0 0 0 4px rgba(245,166,35,0.16) inset;border-color:rgba(245,166,35,0.3)}
 
-    /* calculator thumbnails */
-    .calc-thumb{width:76px;height:76px;border-radius:10px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,0.04);background:var(--panel)}
-    .calc-thumb .img{width:100%;height:100%;background-size:cover;background-position:center;border-radius:8px}
-    .calc-thumb::before{content:'';position:absolute;inset:-6px;border-radius:12px;z-index:-1;opacity:0.98}
-    .calc-thumb.rarity-astral::before{background:var(--g-astral)}
-    .calc-thumb.rarity-cosmic::before{background:var(--g-cosmic)}
-    .calc-thumb.rarity-divine::before{background:var(--g-divine)}
-    .calc-thumb.rarity-godly::before{background:var(--g-godly)}
-    .calc-thumb.rarity-exclusive::before{background:var(--g-exclusive)}
-    .calc-thumb.rarity-mythic::before{background:var(--g-mythic)}
-    .calc-thumb.rarity-legendary::before{background:var(--g-legendary)}
+    .total-box{display:flex;justify-content:center;margin-top:auto}
+    .total-value{background:linear-gradient(90deg,#7b00e6,#ff2d6f);padding:10px 18px;border-radius:10px;color:#000;font-weight:900}
 
-    .soap-badge{position:absolute;right:6px;top:6px;padding:4px 6px;border-radius:8px;background:linear-gradient(90deg,#fff7cc,#fff1a8);color:#3b2f00;font-weight:900;font-size:11px;z-index:4}
+    .verdict-wrap{width:100%;max-width:1200px;display:flex;justify-content:center;margin-top:12px}
+    .verdict{width:520px;padding:12px;border-radius:12px;border:2px solid rgba(255,255,255,0.03);display:flex;justify-content:center;background:transparent}
+    .verdict-text{font-weight:900;font-size:32px;color:#6ea0ff;text-transform:uppercase;letter-spacing:2px}
 
-    /* picker (scrollable on mobile) */
-    .picker-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);z-index:9999;padding:12px}
-    .picker-box{width:100%;max-width:1180px;max-height:90vh;border-radius:12px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,0.006),rgba(255,255,255,0.003));border:1px solid var(--border);display:flex;gap:12px;overflow:hidden}
-    .picker-sidebar{width:160px;display:flex;flex-direction:column;gap:10px;overflow:auto;padding:6px}
-    .picker-cat{padding:12px;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-weight:900;cursor:pointer}
-    .picker-cat.active{outline:2px solid rgba(255,255,255,0.03);color:#fff}
-    .picker-grid{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,78px);gap:12px}
+    .picker-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);z-index:9999;padding:18px}
+    .picker-box{width:100%;max-width:1180px;min-height:520px;border-radius:12px;padding:12px;display:flex;gap:12px;background:linear-gradient(180deg,rgba(255,255,255,0.006),rgba(255,255,255,0.003));border:3px solid rgba(255,255,255,0.03);box-shadow:0 30px 80px rgba(0,0,0,0.75)}
+    .picker-sidebar{width:160px;display:flex;flex-direction:column;gap:12px;padding:6px;overflow:auto}
+    .picker-cat{padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.03);color:var(--muted);font-weight:900;cursor:pointer;text-transform:uppercase}
+    .picker-cat.active{color:#fff;border-color:var(--gold);box-shadow:0 0 0 4px rgba(250,204,21,0.05) inset}
+    .picker-main{flex:1;display:flex;flex-direction:column;gap:10px;padding:6px}
+    .picker-search input{width:100%;padding:12px;border-radius:12px;background:var(--box);border:2px solid var(--border);color:var(--text);outline:none}
+    .picker-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,78px);gap:12px;overflow:auto;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);background:transparent}
+    .picker-thumb{width:78px;height:78px;border-radius:10px;overflow:hidden;border:3px solid rgba(255,255,255,0.04);background:var(--box);display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
+    .picker-thumb .img{width:100%;height:100%;background-size:cover;background-position:center}
+    .picker-thumb:hover{transform:translateY(-6px);transition:transform .12s ease;box-shadow:0 8px 20px rgba(0,0,0,0.6)}
+    .picker-thumb.rarity-astral::after{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-astral);z-index:-1;opacity:0.95}
+    .picker-thumb.rarity-cosmic::after{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-cosmic);z-index:-1;opacity:0.95}
+    .picker-thumb.rarity-divine::after{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-divine);z-index:-1;opacity:0.95}
+    .picker-thumb.rarity-godly::after{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-godly);z-index:-1;opacity:0.95}
+    .picker-thumb.rarity-exclusive::after{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-exclusive);z-index:-1;opacity:0.95}
+    .picker-thumb.rarity-mythic::after{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-mythic);z-index:-1;opacity:0.95}
+    .picker-thumb.rarity-legendary::after{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-legendary);z-index:-1;opacity:0.95}
 
-    @media (max-width:1024px){ .list-root{grid-template-columns:repeat(2,1fr)} .picker-box{flex-direction:column} .picker-sidebar{width:100%;flex-direction:row;overflow:auto} }
-    @media (max-width:600px){ .list-root{grid-template-columns:1fr} .card-header{height:170px} .portrait-frame{width:118px;height:118px} }
+    @media (max-width:1024px){ .list-root{grid-template-columns:repeat(2,1fr)} .calc-row{flex-direction:column} .trade-panel{width:100%} .picker-box{flex-direction:column;min-height:560px} .picker-sidebar{width:100%;display:flex;overflow:auto} .picker-grid{grid-template-columns:repeat(auto-fill,86px)} }
+    @media (max-width:600px){ .list-root{grid-template-columns:1fr} .portrait-frame{width:96px;height:96px} .unit-image{width:86px;height:86px} .picker-grid{grid-template-columns:repeat(auto-fill,86px)} .items-list{grid-template-columns:repeat(auto-fill,64px);grid-auto-rows:64px;gap:6px} }
   </style>
-
-  <!-- Keep original page HTML unchanged -->
 </head>
 <body>
-  <div class="container">
-    <div class="top-row" style="position:relative">
-      <input id="search-bar" placeholder="Search unit..." aria-label="Search units" />
-      <div style="display:flex;gap:12px;align-items:center">
-        <div class="menu-btn" id="menu-btn" title="Menu" aria-haspopup="true" aria-expanded="false"><div class="dots" aria-hidden="true"></div></div>
-      </div>
+  <div id="debug-overlay" role="alert" aria-live="assertive"></div>
 
-      <div class="menu-panel" id="menu-panel" aria-hidden="true">
-        <div class="menu-section">
-          <div class="menu-item" data-key="calculator"><div class="menu-label">Calculator</div></div>
-        </div>
-        <div class="menu-section">
-          <div class="menu-item" data-key="all"><div class="menu-label">All</div></div>
-          <div class="menu-item" data-key="astral"><div class="menu-label">Astral</div></div>
-          <div class="menu-item" data-key="cosmic"><div class="menu-label">Cosmic</div></div>
-          <div class="menu-item" data-key="divine"><div class="menu-label">Divine</div></div>
-          <div class="menu-item" data-key="godly"><div class="menu-label">Godly</div></div>
-          <div class="menu-item" data-key="exclusive"><div class="menu-label">Exclusive</div></div>
-          <div class="menu-item" data-key="mythic"><div class="menu-label">Mythic</div></div>
-          <div class="menu-item" data-key="legendary"><div class="menu-label">Legendary</div></div>
-        </div>
-      </div>
+  <div class="controls">
+    <input id="search-bar" placeholder="Search unit..." aria-label="Search units" />
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-rarity="all">All</button>
+      <button class="tab-btn" data-rarity="astral">Astral</button>
+      <button class="tab-btn" data-rarity="cosmic">Cosmic</button>
+      <button class="tab-btn" data-rarity="divine">Divine</button>
+      <button class="tab-btn" data-rarity="godly">Godly</button>
+      <button class="tab-btn" data-rarity="exclusive">Exclusive</button>
+      <button class="tab-btn" data-rarity="mythic">Mythic</button>
+      <button class="tab-btn" data-rarity="legendary">Legendary</button>
+      <button class="tab-btn" data-rarity="calculator" id="calculator-tab">Calculator</button>
     </div>
 
-    <div class="controls-row">
-      <div class="chip active" data-rarity="all">All</div>
-      <div class="chip" data-rarity="astral">Astral</div>
-      <div class="chip" data-rarity="cosmic">Cosmic</div>
-      <div class="chip" data-rarity="divine">Divine</div>
-      <div class="chip" data-rarity="godly">Godly</div>
-      <div class="chip" data-rarity="exclusive">Exclusive</div>
-      <div class="chip" data-rarity="mythic">Mythic</div>
-      <div class="chip" data-rarity="legendary">Legendary</div>
-    </div>
-
-    <div style="display:flex;gap:12px">
+    <div class="sort" id="sort">
       <button class="sort-btn active" data-sort="default">Default Sort</button>
       <button class="sort-btn" data-sort="value-desc">High Value</button>
     </div>
+  </div>
 
-    <div id="list-root" class="list-root"></div>
-
-    <div style="display:flex;gap:12px;justify-content:center;align-items:center;margin-top:12px" id="pagination">
-      <button id="prev-btn" class="chip" style="min-width:120px">Previous</button>
-      <div id="page-info" style="color:var(--muted)">Page 1 of 1</div>
-      <button id="next-btn" class="chip" style="min-width:120px">Next</button>
-    </div>
-
-    <!-- Calculator area (kept in page) -->
-    <div id="calculator-root" style="display:block;width:100%;max-width:1200px;margin-top:12px">
-      <div style="display:flex;gap:18px;flex-wrap:wrap;justify-content:center;align-items:flex-start">
-        <div style="width:46%;min-width:260px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.01));padding:18px;border-radius:12px;border:1px solid var(--border)">
-          <div style="text-align:center;font-weight:900">YOUR VALUE</div>
-          <div style="display:flex;gap:12px;align-items:center;margin:12px 0">
-            <div class="picker-cat" style="width:120px;text-align:left;padding:12px;border-radius:10px;background:var(--card);border:1px solid var(--border)">Astral</div>
-            <input placeholder="SEARCH UNITS..." style="flex:1;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text)" />
-          </div>
-          <div id="left-items" style="display:grid;grid-template-columns:repeat(auto-fill,76px);gap:8px;min-height:120px;border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.03);background:rgba(0,0,0,0.02)"></div>
-          <div style="text-align:center;margin-top:12px"><span id="left-total" style="padding:8px 12px;border-radius:10px;background:linear-gradient(90deg,#7b00e6,#ff2d6f);color:#000;font-weight:900">TOTAL VALUE: 0</span></div>
-        </div>
-
-        <div style="width:46%;min-width:260px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.01));padding:18px;border-radius:12px;border:1px solid var(--border)">
-          <div style="text-align:center;font-weight:900">THEIR VALUE</div>
-          <div style="display:flex;justify-content:center;margin:12px 0"><button id="plus-right" class="chip" style="min-width:56px;height:56px;border-radius:12px">+</button></div>
-          <div id="right-items" style="display:grid;grid-template-columns:repeat(auto-fill,76px);gap:8px;min-height:120px"></div>
-          <div style="text-align:center;margin-top:12px"><span id="right-total" style="padding:8px 12px;border-radius:10px;background:linear-gradient(90deg,#7b00e6,#ff2d6f);color:#000;font-weight:900">TOTAL VALUE: 0</span></div>
-        </div>
+  <div id="calculator-root" class="calculator-root" aria-hidden="true" style="display:none">
+    <div class="calc-row">
+      <div class="trade-panel" id="left-panel" aria-label="Your value">
+        <div class="trade-title you">YOUR VALUE</div>
+        <div class="plus-wrap"><div class="plus-btn" id="plus-left">+</div></div>
+        <div style="display:none" aria-hidden="true"><div class="controls-row"><select id="unit-select-left" class="unit-select"></select><select id="trait-select-left"><option value="base">Base</option><option value="grandmaster">Grandmaster</option><option value="master">Master</option><option value="superPayday">Super Payday</option><option value="sniper">Sniper</option></select><input id="qty-left" type="number" min="1" value="1" style="width:80px"><button id="add-left" class="add-small">Add</button></div></div>
+        <div id="left-items" class="items-list" aria-live="polite"></div>
+        <div class="total-box"><div id="left-total" class="total-value">TOTAL VALUE: 0</div></div>
       </div>
-      <div style="display:flex;justify-content:center;margin-top:12px"><div id="verdict-text" style="padding:10px 14px;border-radius:10px;border:1px solid var(--border);font-weight:900;color:#6ea0ff">NO ITEMS</div></div>
-    </div>
 
-    <!-- Picker + modal containers -->
-    <div class="picker-overlay" id="picker-overlay" style="display:none">
-      <div class="picker-box">
-        <div id="picker-sidebar" class="picker-sidebar"></div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:10px">
-          <input id="picker-search-input" placeholder="SEARCH UNITS..." style="padding:8px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--text)"/>
-          <div id="picker-grid" class="picker-grid"></div>
-        </div>
+      <div class="trade-panel" id="right-panel" aria-label="Their value">
+        <div class="trade-title them">THEIR VALUE</div>
+        <div class="plus-wrap"><div class="plus-btn" id="plus-right">+</div></div>
+        <div style="display:none" aria-hidden="true"><div class="controls-row"><select id="unit-select-right" class="unit-select"></select><select id="trait-select-right"><option value="base">Base</option><option value="grandmaster">Grandmaster</option><option value="master">Master</option><option value="superPayday">Super Payday</option><option value="sniper">Sniper</option></select><input id="qty-right" type="number" min="1" value="1" style="width:80px"><button id="add-right" class="add-small">Add</button></div></div>
+        <div id="right-items" class="items-list" aria-live="polite"></div>
+        <div class="total-box"><div id="right-total" class="total-value">TOTAL VALUE: 0</div></div>
       </div>
     </div>
 
-    <div id="trait-overlay" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:10010"></div>
+    <div class="verdict-wrap"><div class="verdict"><div id="verdict-text" class="verdict-text">NO ITEMS</div></div></div>
+  </div>
 
-  </div><!-- container -->
+  <div id="picker-overlay" class="picker-overlay" style="display:none" role="dialog" aria-modal="true">
+    <div class="picker-box" role="document" aria-label="Unit picker">
+      <div id="picker-sidebar" class="picker-sidebar"></div>
+      <div class="picker-main">
+        <div class="picker-search"><input id="picker-search-input" placeholder="SEARCH UNITS..." aria-label="Picker search"></div>
+        <div id="picker-grid" class="picker-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="list-root" class="list-root" aria-live="polite"></div>
+
+  <div class="pagination" id="pagination">
+    <button id="prev-btn" class="pagination-btn">Previous</button>
+    <div id="page-info" class="page-info">Page 1 of 1</div>
+    <button id="next-btn" class="pagination-btn">Next</button>
+  </div>
 
   <script src="skibidi-td-data.js"></script>
 
-  <!-- ===================== Integrated script: adds trait buttons into unit cards + full calculator ===================== -->
   <script>
   (function(){
     'use strict';
+    function showFatal(m){ console.error(m); const o=document.getElementById('debug-overlay'); if(o){ o.style.display='block'; o.textContent='Fatal: '+m; } else alert(m); }
 
-    // small helpers
-    const imageProvider = "https://corsproxy.io/?https://drive.google.com/thumbnail?id=";
-    const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const parseValue = v => { if (v === 0) return 0; if(!v && v!==0) return 0; let s=String(v).trim().replace(/[\$\€\£\¥\₹]/g,'').replace(/\s+/g,''); const m=s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/); if(m){ let n=parseFloat(m[1].replace(/,/g,''))||0; const sx=m[2]; if(sx){ if(sx.toLowerCase()==='k') n*=1e3; if(sx.toLowerCase()==='m') n*=1e6;} return n;} const f=s.match(/[\d.]+/); return f?parseFloat(f[0].replace(/,/g,'')):0; };
-    const abbr = n => { if(!isFinite(n)||n===0) return '0'; if(n>=1e6) return (n/1e6).toFixed(2)+'M+'; if(n>=1e3) return (n/1e3).toFixed(2)+'K'; return Math.round(n).toLocaleString(); };
-    const SOAP_SVG_DATAURL = "data:image/svg+xml;utf8," + encodeURIComponent('<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"><rect width="24" height="24" rx="6" fill="#fff"/><path fill="#4b7aff" d="M12 2a3 3 0 0 1 3 3v1h-2V5a1 1 0 0 0-1-1 1 1 0 0 0-1 1v1H9V5a3 3 0 0 1 3-3z"/><circle cx="8" cy="15" r="3" fill="#4b7aff"/><circle cx="16" cy="15" r="3" fill="#4b7aff"/></svg>');
+    function parseValue(v){ if(v===0) return 0; if(!v && v!==0) return 0; let s=String(v).trim(); s=s.replace(/[\$\€\£\¥\₹]/g,'').replace(/\s+/g,''); const m=s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/); if(m){ let n=parseFloat(m[1].replace(/,/g,''))||0; const sx=m[2]; if(sx){ if(sx.toLowerCase()==='k') n*=1e3; if(sx.toLowerCase()==='m') n*=1e6; } return n; } const f=s.match(/[\d.]+/); return f?parseFloat(f[0].replace(/,/g,'')):0; }
+    window.parseValue = parseValue;
+    function abbr(n){ if(!isFinite(n)||n===0) return '0'; if(n>=1e6) return (n/1e6).toFixed(2)+'M+'; if(n>=1e3) return (n/1e3).toFixed(2)+'K'; return Math.round(n).toLocaleString(); }
+    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    // Trait icon IDs you provided earlier
-    const TRAIT_ICONS = {
-      gm: '1vAZZgMrtVNtV3_EGpCmtH01DNSS5NW4H',
-      ms: '13nyhqIwm-1w_-6t6imnKz7x9ShownI92',
-      sp: '1y2l5qpi5WmFE9cmcMSRZwRijpfos4VYT',
-      spd: '1URYMM6bvJyunpdUefQdOnLjS5LyAyblO'
-    };
+    // refs
+    const debugOverlay=document.getElementById('debug-overlay');
+    const listRoot=document.getElementById('list-root');
+    const pickerOverlay=document.getElementById('picker-overlay');
+    const pickerSidebar=document.getElementById('picker-sidebar');
+    const pickerGrid=document.getElementById('picker-grid');
+    const pickerSearch=document.getElementById('picker-search-input');
 
-    function iconUrlFor(name){
-      if (name === 'clean') return SOAP_SVG_DATAURL;
-      if (name === 'gm') return imageProvider + TRAIT_ICONS.gm;
-      if (name === 'ms') return imageProvider + TRAIT_ICONS.ms;
-      if (name === 'sp') return imageProvider + TRAIT_ICONS.sp;
-      if (name === 'spd') return imageProvider + TRAIT_ICONS.spd;
-      return '';
-    }
+    const searchBar=document.getElementById('search-bar');
+    const tabs=document.getElementById('tabs');
+    const sort=document.getElementById('sort');
+    const pageInfo=document.getElementById('page-info');
+    const prevBtn=document.getElementById('prev-btn');
+    const nextBtn=document.getElementById('next-btn');
+    const pagination=document.getElementById('pagination');
 
-    if (typeof unitDatabase === 'undefined') { console.error('unitDatabase missing'); return; }
+    const calculatorRoot=document.getElementById('calculator-root');
+    const plusLeft=document.getElementById('plus-left');
+    const plusRight=document.getElementById('plus-right');
+    const leftItemsEl=document.getElementById('left-items');
+    const rightItemsEl=document.getElementById('right-items');
+    const leftTotal=document.getElementById('left-total');
+    const rightTotal=document.getElementById('right-total');
+    const verdictText=document.getElementById('verdict-text');
 
-    // Reuse your existing renderValueList but inject trait buttons
-    const listRoot = document.getElementById('list-root');
-    const searchInput = document.getElementById('search-bar');
-    const tabs = document.getElementById('tabs-container');
-    const sortWrap = document.getElementById('sort-container');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-    const pageInfo = document.getElementById('page-info');
+    const unitSelectLeft=document.getElementById('unit-select-left');
+    const unitSelectRight=document.getElementById('unit-select-right');
+    const traitSelectLeft=document.getElementById('trait-select-left');
+    const traitSelectRight=document.getElementById('trait-select-right');
+    const qtyLeft=document.getElementById('qty-left');
+    const qtyRight=document.getElementById('qty-right');
+    const addLeft=document.getElementById('add-left');
+    const addRight=document.getElementById('add-right');
 
-    let currentFilter = 'all', searchQuery = '', currentSort = 'default', currentPage = 1;
-    const itemsPerPage = 15;
-    const rarityOrder = { astral:1, cosmic:2, divine:3, godly:4, exclusive:5, mythic:6, legendary:7 };
+    if(typeof unitDatabase==='undefined' || !unitDatabase || typeof unitDatabase!=='object'){ showFatal('unitDatabase not found. Make sure skibidi-td-data.js is included.'); return; }
 
-    // Calculator internal state (we provide full calculator so it works even if original was removed)
-    const LS_KEY = 'skibidi_td_calc_state_v1';
-    let leftItems = [], rightItems = [];
-    const leftItemsEl = document.getElementById('left-items');
-    const rightItemsEl = document.getElementById('right-items');
-    const leftTotalEl = document.getElementById('left-total');
-    const rightTotalEl = document.getElementById('right-total');
-    const verdictText = document.getElementById('verdict-text');
-    let currentPickerSide = 'left';
+    let currentFilter='all', searchQuery='', currentSort='default', currentPage=1;
+    const itemsPerPage=15;
+    const rarityOrder={ astral:1, cosmic:2, godly:3, divine:4, mythic:5, legendary:6, exclusive:99 };
+    const unitKeys=Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
 
-    // small helpers for calculator
-    function addToSideLocal(side,key,trait,qty){
-      qty = Math.max(1,Math.floor(qty)||1);
-      const u = unitDatabase[key];
-      const single = (trait && trait!=='normal' && trait!=='clean' && u.traits && u.traits[trait]) ? parseValue(u.traits[trait].value) : parseValue(u.baseStats.value);
-      const arr = (side==='left') ? leftItems : rightItems;
-      const found = arr.find(x=> x.key===key && String(x.trait)===String(trait));
-      if (found) {
-        found.qty += qty;
-        found.computed = (found.single||single) * found.qty;
-      } else {
-        const it = { id:`${key}:${trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key, trait, qty, single, computed: single*qty, clean: trait==='clean' };
-        arr.push(it);
-      }
-      persistCalc();
-      renderCalcThumbs();
-      updateTotals();
-    }
+    const leftItems=[], rightItems=[];
 
-    // try to call existing external addToSide when available, else fallback to local
-    function addToSideUnified(side,key,trait,qty){
-      // Try user-provided functions first (keeps original behavior if present)
-      if (window._skibidi && typeof window._skibidi.addToSide === 'function') {
-        try { window._skibidi.addToSide(side,key,trait,qty); return; } catch(e){ console.warn(e); }
-      }
-      if (window._skibidi_calc && typeof window._skibidi_calc.addToSide === 'function') {
-        try { window._skibidi_calc.addToSide(side,key,trait,qty); return; } catch(e){ console.warn(e); }
-      }
-      if (typeof addToSide === 'function') {
-        try { addToSide(side,key,trait,qty); return; } catch(e){ console.warn(e); }
-      }
-      // fallback to local impl
-      addToSideLocal(side,key,trait,qty);
-    }
+    function rarityClass(u){ return u && u.rarity ? 'rarity-'+String(u.rarity).toLowerCase().replace(/\s+/g,'-') : ''; }
 
-    function persistCalc(){ try { localStorage.setItem(LS_KEY, JSON.stringify({left:leftItems.map(i=>({key:i.key,trait:i.trait,qty:i.qty})), right:rightItems.map(i=>({key:i.key,trait:i.trait,qty:i.qty})) })); } catch(e){console.warn(e);} }
-    function restoreCalc(){ try { const raw = localStorage.getItem(LS_KEY); if(!raw) return; const p = JSON.parse(raw); leftItems = (p.left||[]).map(it=>{ const u=unitDatabase[it.key]||{}; const single = (it.trait && it.trait!=='normal' && it.trait!=='clean' && u.traits && u.traits[it.trait])?parseValue(u.traits[it.trait].value):parseValue((u.baseStats&&u.baseStats.value)||0); return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single*(it.qty||1), clean:!!(it.trait==='clean') }; }); rightItems = (p.right||[]).map(it=>{ const u=unitDatabase[it.key]||{}; const single = (it.trait && it.trait!=='normal' && it.trait!=='clean' && u.traits && u.traits[it.trait])?parseValue(u.traits[it.trait].value):parseValue((u.baseStats&&u.baseStats.value)||0); return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single*(it.qty||1), clean:!!(it.trait==='clean') }; }); } catch(e){ console.warn(e); } }
-
-    function calcThumbHtml(it){
-      const u = unitDatabase[it.key]||{};
-      const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
-      const rcls = (u.rarity||'').toLowerCase().replace(/\s+/g,'-');
-      const traitIcon = (it.trait==='clean') ? SOAP_SVG_DATAURL : ( /grand/i.test(it.trait)? imageProvider+TRAIT_ICONS.gm : /master/i.test(it.trait) ? imageProvider+TRAIT_ICONS.ms : /snip/i.test(it.trait)? imageProvider+TRAIT_ICONS.sp : /super/i.test(it.trait) ? imageProvider+TRAIT_ICONS.spd : '' );
-      const demand = (u.baseStats && u.baseStats.demand) ? u.baseStats.demand : '';
-      const soap = it.clean ? '<div class="soap-badge">SOAP</div>' : '';
-      return `<div class="calc-thumb rarity-${rcls}" data-id="${it.id}">
-        ${soap}
-        <div class="img" style="background-image:${p}"></div>
-        ${ traitIcon ? `<img src="${traitIcon}" alt="" style="position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:4px;"/>` : '' }
-        <div style="position:absolute;bottom:6px;right:6px;background:#000;color:#fff;padding:2px 6px;border-radius:8px;font-weight:900">x${it.qty}</div>
-        <div style="position:absolute;bottom:6px;left:6px;background:var(--panel);color:#fff;padding:2px 6px;border-radius:8px;font-weight:700;font-size:11px">${esc(demand)}</div>
-      </div>`;
-    }
-    function renderCalcThumbs(){ leftItemsEl.innerHTML = leftItems.map(calcThumbHtml).join(''); rightItemsEl.innerHTML = rightItems.map(calcThumbHtml).join(''); }
-
-    function updateTotals(){
-      leftItems.forEach(i=> i.computed = (i.single||0)*(i.qty||1));
-      rightItems.forEach(i=> i.computed = (i.single||0)*(i.qty||1));
-      const leftSum = leftItems.reduce((s,i)=>s+Number(i.computed||0),0);
-      const rightSum = rightItems.reduce((s,i)=>s+Number(i.computed||0),0);
-      leftTotalEl.textContent = `TOTAL VALUE: ${abbr(leftSum)}`;
-      rightTotalEl.textContent = `TOTAL VALUE: ${abbr(rightSum)}`;
-      const FAIR=0.02, SMALL=0.10;
-      let verdict='NO ITEMS';
-      if (leftSum===0 && rightSum===0) verdict='NO ITEMS';
-      else if (Math.abs(leftSum-rightSum) <= Math.max(1,FAIR*Math.max(leftSum,rightSum))) verdict='FAIR';
-      else if (leftSum>rightSum){ if (rightSum===0 || leftSum>rightSum*(1+SMALL)) verdict='OVERPAYING'; else verdict='LOSE'; }
-      else { if (leftSum===0 || rightSum>leftSum*(1+SMALL)) verdict='UNDERPAYING'; else verdict='WIN'; }
-      verdictText.textContent = verdict.toUpperCase();
-    }
-
-    // picker + trait modal (preselected trait when clicking trait button)
-    const pickerOverlay = document.getElementById('picker-overlay');
-    const pickerSidebar = document.getElementById('picker-sidebar');
-    const pickerGrid = document.getElementById('picker-grid');
-    const pickerSearch = document.getElementById('picker-search-input');
-    const traitOverlay = document.getElementById('trait-overlay');
-
-    function createPicker(){
-      const cats = ['Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
-      pickerSidebar.innerHTML = cats.map(c=>`<div class="picker-cat" data-cat="${c.toLowerCase()}">${c}</div>`).join('');
-      const def = pickerSidebar.querySelector('[data-cat="astral"]'); if(def) def.classList.add('active');
-      renderPickerGrid('astral','','','astral','');
-      pickerSidebar.querySelectorAll('.picker-cat').forEach(btn=>{ btn.addEventListener('click', ()=>{ pickerSidebar.querySelectorAll('.picker-cat').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); renderPickerGrid(btn.getAttribute('data-cat')||'astral','','',btn.getAttribute('data-cat')||'astral'); }); });
-      pickerSearch.value=''; pickerSearch.removeEventListener('input', onPickerSearch); pickerSearch.addEventListener('input', onPickerSearch);
-      pickerOverlay.addEventListener('click', ev => { if (ev.target===pickerOverlay) hidePicker(); });
-    }
-    function onPickerSearch(e){ const active = pickerSidebar.querySelector('.picker-cat.active'); const cat = active?active.getAttribute('data-cat'):'astral'; renderPickerGrid(cat,'','',cat,e.target.value||''); }
-    function renderPickerGrid(side,trait,qty,category,q){ category=(category||'astral').toLowerCase(); q=(q||'').toLowerCase(); const keys = unitKeys.filter(k=>{ const u=unitDatabase[k]; if(!u) return false; if((u.rarity||'').toLowerCase()!==category) return false; if(q && !(u.name||'').toLowerCase().includes(q)) return false; return true; }); if(!keys.length){ pickerGrid.innerHTML=''; return; } pickerGrid.innerHTML = keys.map(k=>{ const u=unitDatabase[k]; const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : ''; const rcls=(u.rarity||'').toLowerCase().replace(/\s+/g,'-'); return `<div class="picker-thumb rarity-${rcls}" data-key="${k}"><div style="width:68px;height:68px;border-radius:8px;background-image:${p};background-size:cover;background-position:center"></div></div>`; }).join(''); pickerGrid.querySelectorAll('.picker-thumb').forEach(t=>{ t.removeEventListener('click', onPickerClick); t.addEventListener('click', onPickerClick); }); }
-    function showPicker(){ pickerOverlay.style.display='flex'; document.body.style.overflow='hidden'; }
-    function hidePicker(){ pickerOverlay.style.display='none'; document.body.style.overflow=''; }
-    function onPickerClick(e){ const key = e.currentTarget.getAttribute('data-key'); if(!key) return; openTraitModalForKey(key); }
-
-    // modal opened preselected to trait param (if provided)
-    function openTraitModalForKey(key, preTrait){
-      const u = unitDatabase[key]; if(!u) return;
-      const base = [{id:'clean',label:'Clean'},{id:'normal',label:'Normal'}];
-      const extra = u.traits ? Object.keys(u.traits) : [];
-      const all = base.concat(extra.map(t=>({id:t,label:t})));
-      // build icons and radios
-      const radios = all.map(t=>{
-        const label = t.label;
-        const id = 'sk_trait_'+Math.random().toString(36).slice(2,8);
-        const checked = (preTrait && preTrait===t.id) || (!preTrait && t.id==='normal') ? 'checked' : '';
-        const icon = (t.id==='clean') ? SOAP_SVG_DATAURL : ( /grand/i.test(t.id) ? imageProvider+TRAIT_ICONS.gm : /master/i.test(t.id) ? imageProvider+TRAIT_ICONS.ms : /snip/i.test(t.id) ? imageProvider+TRAIT_ICONS.sp : /super/i.test(t.id) ? imageProvider+TRAIT_ICONS.spd : '' );
-        const valueText = (u.traits && u.traits[t.id] && u.traits[t.id].value) ? u.traits[t.id].value : u.baseStats.value;
-        return `<label style="display:flex;align-items:center;gap:8px;margin:6px 8px;cursor:pointer"><input type="radio" name="sk_trait" value="${esc(t.id)}" ${checked}/> ${ icon ? `<img src="${icon}" style="width:20px;height:20px;border-radius:4px;object-fit:cover" />` : '' } <span style="font-weight:900;color:#fff">${esc(label)} - <span style="color:#ffd">${esc(valueText)}</span></span></label>`;
-      }).join('');
-      const demand = (u.baseStats && u.baseStats.demand) ? u.baseStats.demand : '';
-      traitOverlay.innerHTML = `<div style="width:100%;max-width:520px;padding:14px;background:var(--card);border-radius:10px;border:1px solid var(--border)">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div style="font-weight:900;font-size:18px;text-transform:uppercase;color:#fff">Enter Quantity</div>
-          <button id="sk_close" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer">×</button>
-        </div>
-        <div style="margin-bottom:10px">
-          <input id="sk_qty" type="number" min="1" value="1" placeholder="Quantity" style="width:100%;padding:12px;border-radius:10px;border:2px solid #552aa8;background:#000;color:#fff;font-weight:900"/>
-        </div>
-        <div style="font-weight:900;color:#fff;margin-bottom:8px">Traits</div>
-        <div id="sk_traits" style="margin-bottom:12px">${radios}</div>
-        <div style="margin-bottom:12px;color:#ddd;font-weight:700">Demand: <span id="sk_demand">${esc(demand)}</span></div>
-        <div style="display:flex;justify-content:center"><button id="sk_add" style="padding:12px 18px;border-radius:10px;background:linear-gradient(90deg,#7b00e6,#ff2d6f);border:2px solid rgba(255,255,255,0.04);color:#000;font-weight:900;cursor:pointer">Add</button></div>
-      </div>`;
-      traitOverlay.style.display='flex'; traitOverlay.style.alignItems='center'; traitOverlay.style.justifyContent='center';
-      document.getElementById('sk_close').addEventListener('click', ()=> traitOverlay.style.display='none');
-      traitOverlay.addEventListener('click', function out(e){ if(e.target===traitOverlay){ traitOverlay.style.display='none'; traitOverlay.removeEventListener('click', out); }});
-      document.getElementById('sk_add').addEventListener('click', ()=>{
-        const qty = Number(document.getElementById('sk_qty').value) || 1;
-        const sel = traitOverlay.querySelector('input[name="sk_trait"]:checked');
-        const trait = sel ? sel.value : 'normal';
-        addToSideUnified(currentPickerSide, key, trait, qty);
-        traitOverlay.style.display='none';
-      });
-    }
-
-    // ===== trait buttons inside unit card + render function (uses your original render but modifies) =====
-    const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
-    function formatStatusClass(status){ return String(status||'').toLowerCase().replace(/\s+/g,'-'); }
-
-    function buildTraitButtonsForUnit(key, unit){
-      // show Clean + Normal + unit.traits keys (if any). Each button shows the trait value (trait.value or baseStats.value)
-      const traits = ['clean','normal'];
-      if (unit.traits) traits.push(...Object.keys(unit.traits));
-      // create buttons with rarity-accent border
-      const rarity = (unit.rarity||'').toLowerCase();
-      const color = getComputedStyle(document.documentElement).getPropertyValue('--g-'+rarity) || 'transparent';
-      return traits.map(t=>{
-        const display = (t==='clean') ? 'Clean' : (t==='normal') ? 'Normal' : t;
-        const value = (unit.traits && unit.traits[t] && unit.traits[t].value) ? unit.traits[t].value : unit.baseStats.value;
-        // clicking opens modal preselected to this trait (option B)
-        return `<button class="trait-btn" data-unit="${key}" data-trait="${esc(t)}" style="margin:6px;padding:8px 10px;border-radius:10px;border:2px solid rgba(255,255,255,0.03);background:var(--card);color:#fff;font-weight:900;cursor:pointer">
-          <span style="display:inline-block;font-size:12px;margin-right:8px">${esc(display)}</span>
-          <span style="background:transparent;color:#ffd;font-weight:900">${esc(value)}</span>
-        </button>`;
-      }).join('');
-    }
-
-    function renderValueList(){
-      const keys = Object.keys(unitDatabase).filter(k=>{
-        const u = unitDatabase[k];
-        const r = (u.rarity||'').toLowerCase();
-        if (currentFilter !== 'all' && r !== currentFilter) return false;
-        if (searchQuery && !(u.name||'').toLowerCase().includes(searchQuery.toLowerCase())) return false;
-        return true;
+    function renderList(){
+      const keys=unitKeys.filter(k=>{
+        const u=unitDatabase[k];
+        const r=(u.rarity||'').toLowerCase();
+        const matchesRarity=currentFilter==='all' || r===currentFilter;
+        const matchesSearch=(u.name||'').toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesRarity && matchesSearch;
       });
 
       keys.sort((a,b)=>{
-        if (currentSort === 'value-desc') return parseValue(unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats.value);
-        const wa = rarityOrder[(unitDatabase[a].rarity||'').toLowerCase()]||99;
-        const wb = rarityOrder[(unitDatabase[b].rarity||'').toLowerCase()]||99;
-        if (wa !== wb) return wa - wb;
+        if(currentSort==='value-desc') return parseValue(unitDatabase[b].baseStats.value)-parseValue(unitDatabase[a].baseStats.value);
+        const wa=rarityOrder[(unitDatabase[a].rarity||'').toLowerCase()]||999;
+        const wb=rarityOrder[(unitDatabase[b].rarity||'').toLowerCase()]||999;
+        if(wa!==wb) return wa-wb;
         return (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||'');
       });
 
-      const totalPages = Math.max(1, Math.ceil(keys.length/itemsPerPage));
-      if (currentPage > totalPages) currentPage = totalPages;
-      const startIndex = (currentPage-1)*itemsPerPage;
-      const pageKeys = keys.slice(startIndex, startIndex+itemsPerPage);
+      const totalPages=Math.max(1, Math.ceil(keys.length/itemsPerPage));
+      if(currentPage>totalPages) currentPage=totalPages;
+      const start=(currentPage-1)*itemsPerPage;
+      const pageKeys=keys.slice(start,start+itemsPerPage);
+      pageInfo.innerText=`Page ${currentPage} of ${totalPages}`;
+      prevBtn.disabled=currentPage===1;
+      nextBtn.disabled=currentPage===totalPages;
 
-      pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
-      prevBtn.disabled = currentPage === 1;
-      nextBtn.disabled = currentPage === totalPages;
-
-      listRoot.innerHTML = pageKeys.map(k=>{
-        const u = unitDatabase[k];
-        const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
-        const rcls = (u.rarity||'').toLowerCase().replace(/\s+/g,'-');
-        const stClass = formatStatusClass(u.baseStats.status);
-        const second = u.secondEdition && String(u.secondEdition).toLowerCase()==='yes' ? `<div class="second-edition-tag">2nd Edition</div>` : '';
-        const traitButtonsHtml = buildTraitButtonsForUnit(k,u);
-        return `
-          <div class="unit-card ${rcls}" data-unit="${k}">
-            <div class="card-header">
-              <div class="unit-title">${esc(u.name)}</div>
-              <div class="portrait-frame ${rcls}">
-                <div class="portrait-circle ${rcls}">
-                  <div class="img" style="background-image:${portrait}"></div>
-                </div>
-              </div>
-              ${second}
-            </div>
-
-            <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
-              <div style="width:100%;display:flex;justify-content:center;flex-wrap:wrap">${traitButtonsHtml}</div>
-            </div>
-
-            <div class="info-row">
-              <div class="info-box">
-                <div class="label">Value</div>
-                <div class="val val-value highlight-gold">${esc(u.baseStats.value)}</div>
-              </div>
-              <div class="info-box">
-                <div class="label">Status</div>
-                <div class="val val-status status-${stClass}">${esc(u.baseStats.status)}</div>
-              </div>
-              <div class="info-box">
-                <div class="label">Demand</div>
-                <div class="val val-demand highlight-purple">${esc(u.baseStats.demand)}</div>
-              </div>
-            </div>
+      listRoot.innerHTML=pageKeys.map(k=>{
+        const u=unitDatabase[k];
+        const p=u.unitId?`url('https://corsproxy.io/?https://drive.google.com/thumbnail?id=${u.unitId}')`:'';
+        const rcls=rarityClass(u);
+        const second=u.secondEdition && String(u.secondEdition).toLowerCase()==='yes'?`<div class="second-edition-tag">2nd Edition</div>`:'';
+        return `<div class="unit-card ${rcls}" data-unit="${k}">
+          <div class="header-section">
+            <div class="unit-title">${esc(u.name)}</div>${second}
           </div>
-        `;
+          <div style="display:flex;align-items:center;justify-content:center">
+            <div class="portrait-frame ${rcls}"><div class="unit-image" style="background-image:${p}"></div></div>
+          </div>
+          <div class="data-table">
+            <div class="data-cell"><div class="label">Value</div><div class="val highlight-gold">${esc(u.baseStats.value)}</div></div>
+            <div class="data-cell"><div class="label">Status</div><div class="val">${esc(u.baseStats.status)}</div></div>
+            <div class="data-cell"><div class="label">Demand</div><div class="val highlight-purple">${esc(u.baseStats.demand)}</div></div>
+          </div>
+        </div>`;
       }).join('');
-      // after rendering, wire trait buttons to open preselected modal
-      document.querySelectorAll('.trait-btn').forEach(btn=>{
-        btn.removeEventListener('click', onTraitBtnClick);
-        btn.addEventListener('click', onTraitBtnClick);
+    }
+
+    function populateSelects(){
+      const opts=unitKeys.map(k=>`<option value="${k}">${esc(unitDatabase[k].name)} (${esc(unitDatabase[k].rarity||'n/a')}) — ${esc(unitDatabase[k].baseStats.value||'N/A')}</option>`).join('');
+      unitSelectLeft && (unitSelectLeft.innerHTML=opts);
+      unitSelectRight && (unitSelectRight.innerHTML=opts);
+    }
+
+    function renderThumbs(){
+      leftItemsEl.innerHTML = leftItems.map(it => thumbHTML(it)).join('');
+      rightItemsEl.innerHTML = rightItems.map(it => thumbHTML(it)).join('');
+      document.querySelectorAll('.thumb-remove').forEach(btn => { btn.removeEventListener('click', thumbRemoveHandler); btn.addEventListener('click', thumbRemoveHandler); });
+    }
+    function thumbHTML(it){
+      const u=unitDatabase[it.key]||{};
+      const p=u.unitId?`url('https://corsproxy.io/?https://drive.google.com/thumbnail?id=${u.unitId}')`:'';
+      const rcls=(u.rarity||'').toLowerCase().replace(/\s+/g,'-');
+      return `<div class="calc-thumb rarity-${rcls}" data-id="${it.id}" title="${esc(u.name)}"><div class="img" style="background-image:${p}"></div><div class="remove thumb-remove" data-id="${it.id}">×</div></div>`;
+    }
+    function thumbRemoveHandler(e){
+      const id=e.currentTarget.getAttribute('data-id');
+      let i=leftItems.findIndex(x=>x.id===id); if(i>=0) leftItems.splice(i,1);
+      i=rightItems.findIndex(x=>x.id===id); if(i>=0) rightItems.splice(i,1);
+      renderThumbs(); updateTotalsAndVerdict();
+    }
+
+    function addToSide(side,key,trait,qty){
+      if(!key||!unitDatabase[key])return;
+      qty=Math.max(1, Math.floor(qty)||1);
+      const u=unitDatabase[key];
+      const single=(trait&&trait!=='base'&&u.traits&&u.traits[trait])?parseValue(u.traits[trait].value):parseValue(u.baseStats.value);
+      const item={id:`${key}:${trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`,key,trait,qty,single,computed:single*qty};
+      if(side==='left') leftItems.push(item); else rightItems.push(item);
+      renderThumbs(); updateTotalsAndVerdict();
+    }
+
+    function updateTotalsAndVerdict(){
+      leftItems.forEach(i=>i.computed=(i.single||0)*(i.qty||1));
+      rightItems.forEach(i=>i.computed=(i.single||0)*(i.qty||1));
+      const leftSum=leftItems.reduce((s,i)=>s+Number(i.computed||0),0);
+      const rightSum=rightItems.reduce((s,i)=>s+Number(i.computed||0),0);
+      leftTotal.innerText=`TOTAL VALUE: ${abbr(leftSum)}`;
+      rightTotal.innerText=`TOTAL VALUE: ${abbr(rightSum)}`;
+      const FAIR=0.02, SMALL=0.10;
+      let verdict='NO ITEMS';
+      if(leftSum===0 && rightSum===0) verdict='NO ITEMS';
+      else if(Math.abs(leftSum-rightSum) <= Math.max(1, FAIR*Math.max(leftSum,rightSum))) verdict='FAIR';
+      else if(leftSum>rightSum) { if(rightSum===0 || leftSum>rightSum*(1+SMALL)) verdict='OVERPAYING'; else verdict='LOSE'; }
+      else { if(leftSum===0 || rightSum>leftSum*(1+SMALL)) verdict='UNDERPAYING'; else verdict='WIN'; }
+      verdictText.innerText=verdict.toUpperCase();
+    }
+
+    // Picker: fixed frame + internal scroll, empty grid until category chosen
+    function createPicker(){
+      const cats=['All','Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
+      pickerSidebar.innerHTML=cats.map(c=>`<div class="picker-cat" data-cat="${c.toLowerCase()}">${c}</div>`).join('');
+      pickerGrid.innerHTML=''; // empty until category or search
+
+      pickerSidebar.querySelectorAll('.picker-cat').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          pickerSidebar.querySelectorAll('.picker-cat').forEach(x=>x.classList.remove('active'));
+          btn.classList.add('active');
+          const cat=btn.getAttribute('data-cat')||'all';
+          renderPickerGrid(currentPickerSide,currentPickerTrait,currentPickerQty,cat,pickerSearch.value||'');
+        });
+      });
+
+      pickerSearch.addEventListener('input', e=>{
+        const active=pickerSidebar.querySelector('.picker-cat.active');
+        const cat=active?active.getAttribute('data-cat'):'all';
+        renderPickerGrid(currentPickerSide,currentPickerTrait,currentPickerQty,cat,e.target.value||'');
+      });
+
+      // close when clicking outside
+      pickerOverlay.addEventListener('click', ev=>{ if(ev.target===pickerOverlay) hidePicker(); });
+    }
+
+    function renderPickerGrid(side, trait, qty, category, q){
+      category=(category||'all').toLowerCase(); q=(q||'').toLowerCase();
+      const keys=unitKeys.filter(k=>{
+        const u=unitDatabase[k];
+        if(!u) return false;
+        if(q && !(u.name||'').toLowerCase().includes(q)) return false;
+        if(category==='all') return true;
+        return (u.rarity||'').toLowerCase()===category;
+      });
+
+      if(!keys.length){ pickerGrid.innerHTML=''; return; }
+
+      pickerGrid.innerHTML=keys.map(k=>{
+        const u=unitDatabase[k];
+        const p=u.unitId?`url('https://corsproxy.io/?https://drive.google.com/thumbnail?id=${u.unitId}')`:'';
+        const rcls=(u.rarity||'').toLowerCase().replace(/\s+/g,'-');
+        return `<div class="picker-thumb rarity-${rcls}" data-key="${k}" title="${esc(u.name)}"><div class="img" style="background-image:${p}"></div></div>`;
+      }).join('');
+
+      // attach handlers
+      pickerGrid.querySelectorAll('.picker-thumb').forEach(t=>{
+        t.addEventListener('click', ()=>{ const k=t.getAttribute('data-key'); addToSide(currentPickerSide,k,currentPickerTrait,currentPickerQty); hidePicker(); });
       });
     }
 
-    function onTraitBtnClick(e){
-      const btn = e.currentTarget;
-      const unitKey = btn.getAttribute('data-unit');
-      const trait = btn.getAttribute('data-trait');
-      currentPickerSide = (window.currentPickerSide) ? window.currentPickerSide : currentPickerSide;
-      openTraitModalForKey(unitKey, trait); // opens modal preselected per Option B
-    }
+    function showPicker(){ pickerOverlay.style.display='flex'; document.body.style.overflow='hidden'; } // prevent background scroll
+    function hidePicker(){ pickerOverlay.style.display='none'; document.body.style.overflow=''; }
 
-    // attach controls
-    document.getElementById('search-bar').addEventListener('input', (e)=>{ searchQuery = e.target.value || ''; currentPage = 1; renderValueList(); });
-    document.getElementById('tabs-container').addEventListener('click', (e)=>{ if(e.target.classList.contains('tab-btn')){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); currentFilter = e.target.getAttribute('data-rarity'); currentPage=1; renderValueList(); }});
-    document.getElementById('sort-container').addEventListener('click', (e)=>{ if(e.target.classList.contains('sort-btn')){ document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); currentSort = e.target.getAttribute('data-sort'); currentPage=1; renderValueList(); }});
-    prevBtn.addEventListener('click', ()=>{ if(currentPage>1){ currentPage--; renderValueList(); window.scrollTo({top:0,behavior:'smooth'}); }});
-    nextBtn.addEventListener('click', ()=>{ const filteredTotal = Object.keys(unitDatabase).filter(key=>{ const u=unitDatabase[key]; return (currentFilter==='all' || u.rarity===currentFilter) && u.name.toLowerCase().includes(searchQuery.toLowerCase()); }).length; const maxPage = Math.ceil(filteredTotal/itemsPerPage); if(currentPage<maxPage){ currentPage++; renderValueList(); window.scrollTo({top:0,behavior:'smooth'}); }});
+    // event wiring
+    searchBar.addEventListener('input', e=>{ searchQuery=e.target.value||''; currentPage=1; renderList(); });
 
-    // Initialize page list and calculator
-    (function init(){
-      try { restoreCalc(); renderValueList(); renderCalcThumbs(); updateTotals(); } catch(e){ console.error(e); }
-    })();
+    tabs.addEventListener('click', e=>{
+      if(!e.target.classList.contains('tab-btn')) return;
+      tabs.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      e.target.classList.add('active');
+      const sel=e.target.getAttribute('data-rarity')||'all';
+      currentFilter=sel;
+      if(currentFilter==='calculator'){
+        calculatorRoot.style.display='block'; calculatorRoot.setAttribute('aria-hidden','false'); listRoot.style.display='none'; pagination.style.display='none';
+      } else {
+        calculatorRoot.style.display='none'; calculatorRoot.setAttribute('aria-hidden','true'); listRoot.style.display=''; pagination.style.display='flex'; currentPage=1; renderList();
+      }
+    });
 
-    // expose for debug
-    window._skibidi_calc = { addToSide: addToSideUnified, leftItems, rightItems, renderCalcThumbs, updateTotals };
+    sort.addEventListener('click', e=>{ if(!e.target.classList.contains('sort-btn')) return; sort.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); currentSort=e.target.getAttribute('data-sort')||'default'; currentPage=1; renderList(); });
+
+    prevBtn.addEventListener('click', ()=>{ if(currentPage>1){ currentPage--; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }});
+    nextBtn.addEventListener('click', ()=>{
+      const filteredTotal=unitKeys.filter(k=>{ const u=unitDatabase[k]; return (currentFilter==='all'||(u.rarity||'').toLowerCase()===currentFilter) && (u.name||'').toLowerCase().includes(searchQuery.toLowerCase()); }).length;
+      const maxPage=Math.ceil(filteredTotal/itemsPerPage)||1; if(currentPage<maxPage){ currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }
+    });
+
+    let currentPickerSide='left', currentPickerTrait='base', currentPickerQty=1;
+    plusLeft.addEventListener('click', ()=>{ currentPickerSide='left'; currentPickerTrait=(traitSelectLeft && traitSelectLeft.value)||'base'; currentPickerQty=(qtyLeft&&Math.max(1,Number(qtyLeft.value||1)))||1; pickerSearch.value=''; createPicker(); pickerGrid.innerHTML=''; showPicker(); });
+    plusRight.addEventListener('click', ()=>{ currentPickerSide='right'; currentPickerTrait=(traitSelectRight&&traitSelectRight.value)||'base'; currentPickerQty=(qtyRight&&Math.max(1,Number(qtyRight.value||1)))||1; pickerSearch.value=''; createPicker(); pickerGrid.innerHTML=''; showPicker(); });
+
+    addLeft && addLeft.addEventListener('click', ()=> addToSide('left',unitSelectLeft.value,traitSelectLeft.value,Number(qtyLeft.value||1)));
+    addRight && addRight.addEventListener('click', ()=> addToSide('right',unitSelectRight.value,traitSelectRight.value,Number(qtyRight.value||1)));
+    unitSelectLeft && unitSelectLeft.addEventListener('dblclick', ()=> addToSide('left',unitSelectLeft.value,traitSelectLeft.value,Number(qtyLeft.value||1)));
+    unitSelectRight && unitSelectRight.addEventListener('dblclick', ()=> addToSide('right',unitSelectRight.value,traitSelectRight.value,Number(qtyRight.value||1)));
+
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') hidePicker(); });
+
+    // init
+    try{
+      populateSelects();
+      renderList();
+      renderThumbs();
+      updateTotalsAndVerdict();
+    }catch(err){ showFatal('Init error: '+(err && err.message?err.message:String(err))); }
+
+    window._skibidi={unitDatabase,leftItems,rightItems,renderList,renderThumbs,updateTotalsAndVerdict};
 
   })();
   </script>
-
 </body>
 </html>
