@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Skibidi TD — Centered UI, Frames, 3-dot Menu</title>
+  <title>Skibidi TD — Value List + Calculator (v1 test)</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    /* --- YOUR ORIGINAL CSS (unchanged) --- */
+    /* ===== your original CSS, unchanged ===== */
     :root{
       --bg:#050506;
       --card:#0f0f11;
@@ -119,9 +119,10 @@
     @media (max-width:1024px){ .list-root{grid-template-columns:repeat(2,1fr)} .picker-box{flex-direction:column} .picker-sidebar{width:100%;flex-direction:row;overflow:auto} }
     @media (max-width:600px){ .list-root{grid-template-columns:1fr} .card-header{height:170px} .portrait-frame{width:118px;height:118px} }
   </style>
+
+  <!-- Keep original page HTML unchanged -->
 </head>
 <body>
-  <!-- --- YOUR ORIGINAL PAGE HTML (unchanged) --- -->
   <div class="container">
     <div class="top-row" style="position:relative">
       <input id="search-bar" placeholder="Search unit..." aria-label="Search units" />
@@ -129,7 +130,6 @@
         <div class="menu-btn" id="menu-btn" title="Menu" aria-haspopup="true" aria-expanded="false"><div class="dots" aria-hidden="true"></div></div>
       </div>
 
-      <!-- 3-dot menu panel -->
       <div class="menu-panel" id="menu-panel" aria-hidden="true">
         <div class="menu-section">
           <div class="menu-item" data-key="calculator"><div class="menu-label">Calculator</div></div>
@@ -171,13 +171,16 @@
       <button id="next-btn" class="chip" style="min-width:120px">Next</button>
     </div>
 
-    <!-- Calculator -->
-    <div id="calculator-root" style="display:none;width:100%;max-width:1200px;margin-top:12px">
-      <div style="display:flex;gap:18px;flex-wrap:wrap;justify-content:center">
+    <!-- Calculator area (kept in page) -->
+    <div id="calculator-root" style="display:block;width:100%;max-width:1200px;margin-top:12px">
+      <div style="display:flex;gap:18px;flex-wrap:wrap;justify-content:center;align-items:flex-start">
         <div style="width:46%;min-width:260px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.01));padding:18px;border-radius:12px;border:1px solid var(--border)">
           <div style="text-align:center;font-weight:900">YOUR VALUE</div>
-          <div style="display:flex;justify-content:center;margin:12px 0"><button id="plus-left" class="chip" style="min-width:56px;height:56px;border-radius:12px">+</button></div>
-          <div id="left-items" style="display:grid;grid-template-columns:repeat(auto-fill,76px);gap:8px;min-height:120px"></div>
+          <div style="display:flex;gap:12px;align-items:center;margin:12px 0">
+            <div class="picker-cat" style="width:120px;text-align:left;padding:12px;border-radius:10px;background:var(--card);border:1px solid var(--border)">Astral</div>
+            <input placeholder="SEARCH UNITS..." style="flex:1;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text)" />
+          </div>
+          <div id="left-items" style="display:grid;grid-template-columns:repeat(auto-fill,76px);gap:8px;min-height:120px;border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.03);background:rgba(0,0,0,0.02)"></div>
           <div style="text-align:center;margin-top:12px"><span id="left-total" style="padding:8px 12px;border-radius:10px;background:linear-gradient(90deg,#7b00e6,#ff2d6f);color:#000;font-weight:900">TOTAL VALUE: 0</span></div>
         </div>
 
@@ -191,7 +194,7 @@
       <div style="display:flex;justify-content:center;margin-top:12px"><div id="verdict-text" style="padding:10px 14px;border-radius:10px;border:1px solid var(--border);font-weight:900;color:#6ea0ff">NO ITEMS</div></div>
     </div>
 
-    <!-- Picker -->
+    <!-- Picker + modal containers -->
     <div class="picker-overlay" id="picker-overlay" style="display:none">
       <div class="picker-box">
         <div id="picker-sidebar" class="picker-sidebar"></div>
@@ -202,195 +205,109 @@
       </div>
     </div>
 
-    <!-- Trait chooser -->
-    <div id="trait-overlay" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:10010">
-      <!-- modal content will be injected here by script -->
-    </div>
+    <div id="trait-overlay" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:10010"></div>
 
   </div><!-- container -->
 
   <script src="skibidi-td-data.js"></script>
 
-  <!-- ====== FULL, REPLACEMENT CALCULATOR SCRIPT (SAFE — restores calculator, uses trait icons only in modal) ====== -->
+  <!-- ===================== Integrated script: adds trait buttons into unit cards + full calculator ===================== -->
   <script>
   (function(){
     'use strict';
-    // Helpers
+
+    // small helpers
     const imageProvider = "https://corsproxy.io/?https://drive.google.com/thumbnail?id=";
+    const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const parseValue = v => { if (v === 0) return 0; if(!v && v!==0) return 0; let s=String(v).trim().replace(/[\$\€\£\¥\₹]/g,'').replace(/\s+/g,''); const m=s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/); if(m){ let n=parseFloat(m[1].replace(/,/g,''))||0; const sx=m[2]; if(sx){ if(sx.toLowerCase()==='k') n*=1e3; if(sx.toLowerCase()==='m') n*=1e6;} return n;} const f=s.match(/[\d.]+/); return f?parseFloat(f[0].replace(/,/g,'')):0; };
+    const abbr = n => { if(!isFinite(n)||n===0) return '0'; if(n>=1e6) return (n/1e6).toFixed(2)+'M+'; if(n>=1e3) return (n/1e3).toFixed(2)+'K'; return Math.round(n).toLocaleString(); };
     const SOAP_SVG_DATAURL = "data:image/svg+xml;utf8," + encodeURIComponent('<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"><rect width="24" height="24" rx="6" fill="#fff"/><path fill="#4b7aff" d="M12 2a3 3 0 0 1 3 3v1h-2V5a1 1 0 0 0-1-1 1 1 0 0 0-1 1v1H9V5a3 3 0 0 1 3-3z"/><circle cx="8" cy="15" r="3" fill="#4b7aff"/><circle cx="16" cy="15" r="3" fill="#4b7aff"/></svg>');
 
-    // Trait icon IDs (user supplied)
-    const TRAIT_ICON_IDS = {
-      clean: null, // use inline soap SVG
-      gm: "1vAZZgMrtVNtV3_EGpCmtH01DNSS5NW4H",
-      ms: "13nyhqIwm-1w_-6t6imnKz7x9ShownI92",
-      sp: "1y2l5qpi5WmFE9cmcMSRZwRijpfos4VYT",
-      spd: "1URYMM6bvJyunpdUefQdOnLjS5LyAyblO"
+    // Trait icon IDs you provided earlier
+    const TRAIT_ICONS = {
+      gm: '1vAZZgMrtVNtV3_EGpCmtH01DNSS5NW4H',
+      ms: '13nyhqIwm-1w_-6t6imnKz7x9ShownI92',
+      sp: '1y2l5qpi5WmFE9cmcMSRZwRijpfos4VYT',
+      spd: '1URYMM6bvJyunpdUefQdOnLjS5LyAyblO'
     };
 
-    const getIconUrl = name => {
-      const id = TRAIT_ICON_IDS[name];
-      if (!id) return SOAP_SVG_DATAURL;
-      return imageProvider + id;
-    };
+    function iconUrlFor(name){
+      if (name === 'clean') return SOAP_SVG_DATAURL;
+      if (name === 'gm') return imageProvider + TRAIT_ICONS.gm;
+      if (name === 'ms') return imageProvider + TRAIT_ICONS.ms;
+      if (name === 'sp') return imageProvider + TRAIT_ICONS.sp;
+      if (name === 'spd') return imageProvider + TRAIT_ICONS.spd;
+      return '';
+    }
 
-    if (typeof unitDatabase === 'undefined') { console.error('unitDatabase missing — calculator cannot initialize'); return; }
-    const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
+    if (typeof unitDatabase === 'undefined') { console.error('unitDatabase missing'); return; }
 
-    // State
-    let leftItems = []; // entries: { id, key, trait, qty, single, computed, clean }
-    let rightItems = [];
-    const LS_KEY = 'skibidi_td_calc_v2';
+    // Reuse your existing renderValueList but inject trait buttons
+    const listRoot = document.getElementById('list-root');
+    const searchInput = document.getElementById('search-bar');
+    const tabs = document.getElementById('tabs-container');
+    const sortWrap = document.getElementById('sort-container');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const pageInfo = document.getElementById('page-info');
 
-    // DOM refs
-    const plusLeft = document.getElementById('plus-left');
-    const plusRight = document.getElementById('plus-right');
-    const pickerOverlay = document.getElementById('picker-overlay');
-    const pickerSidebar = document.getElementById('picker-sidebar');
-    const pickerGrid = document.getElementById('picker-grid');
-    const pickerSearch = document.getElementById('picker-search-input');
-    const traitOverlay = document.getElementById('trait-overlay');
+    let currentFilter = 'all', searchQuery = '', currentSort = 'default', currentPage = 1;
+    const itemsPerPage = 15;
+    const rarityOrder = { astral:1, cosmic:2, divine:3, godly:4, exclusive:5, mythic:6, legendary:7 };
+
+    // Calculator internal state (we provide full calculator so it works even if original was removed)
+    const LS_KEY = 'skibidi_td_calc_state_v1';
+    let leftItems = [], rightItems = [];
     const leftItemsEl = document.getElementById('left-items');
     const rightItemsEl = document.getElementById('right-items');
     const leftTotalEl = document.getElementById('left-total');
     const rightTotalEl = document.getElementById('right-total');
     const verdictText = document.getElementById('verdict-text');
-
     let currentPickerSide = 'left';
-    let pendingKey = null;
 
-    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-    function parseValue(v){ if(!v && v!==0) return 0; let s=String(v).trim().replace(/[\$\€\£\¥\₹]/g,'').replace(/\s+/g,''); const m=s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/); if(m){ let n=parseFloat(m[1].replace(/,/g,''))||0; const sx=m[2]; if(sx){ if(sx.toLowerCase()==='k') n*=1e3; if(sx.toLowerCase()==='m') n*=1e6;} return n;} const f=s.match(/[\d.]+/); return f?parseFloat(f[0].replace(/,/g,'')):0;}
-    function abbr(n){ if(!isFinite(n)||n===0) return '0'; if(n>=1e6) return (n/1e6).toFixed(2)+'M+'; if(n>=1e3) return (n/1e3).toFixed(2)+'K'; return Math.round(n).toLocaleString(); }
-
-    // Picker UI
-    function createPicker(){
-      const cats = ['Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
-      pickerSidebar.innerHTML = cats.map(c=>`<div class="picker-cat" data-cat="${c.toLowerCase()}">${c}</div>`).join('');
-      const def = pickerSidebar.querySelector('[data-cat="astral"]'); if(def) def.classList.add('active');
-      renderPickerGrid('astral','','', 'astral','');
-      pickerSidebar.querySelectorAll('.picker-cat').forEach(btn=>{
-        btn.addEventListener('click', ()=>{ pickerSidebar.querySelectorAll('.picker-cat').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); renderPickerGrid(btn.getAttribute('data-cat')||'astral','','',btn.getAttribute('data-cat')||'astral'); });
-      });
-      pickerSearch.value = '';
-      pickerSearch.removeEventListener('input', onPickerSearch);
-      pickerSearch.addEventListener('input', onPickerSearch);
-      pickerOverlay.addEventListener('click', (ev)=>{ if(ev.target===pickerOverlay) hidePicker(); });
-    }
-    function onPickerSearch(e){ const active = pickerSidebar.querySelector('.picker-cat.active'); const cat = active?active.getAttribute('data-cat'):'astral'; renderPickerGrid(cat,'','',cat,e.target.value||''); }
-
-    function renderPickerGrid(side, trait, qty, category, q){
-      category=(category||'astral').toLowerCase(); q=(q||'').toLowerCase();
-      const keys = unitKeys.filter(k=>{
-        const u = unitDatabase[k];
-        if (!u) return false;
-        if ((u.rarity||'').toLowerCase() !== category) return false;
-        if (q && !(u.name||'').toLowerCase().includes(q)) return false;
-        return true;
-      });
-      if(!keys.length){ pickerGrid.innerHTML=''; return; }
-      pickerGrid.innerHTML = keys.map(k=>{
-        const u = unitDatabase[k]; const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
-        const rcls = (u.rarity||'').toLowerCase().replace(/\s+/g,'-');
-        return `<div class="picker-thumb rarity-${rcls}" data-key="${k}" title="${esc(u.name)}"><div class="img" style="width:68px;height:68px;border-radius:8px;background-image:${p};background-size:cover;background-position:center"></div></div>`;
-      }).join('');
-      pickerGrid.querySelectorAll('.picker-thumb').forEach(t=>{ t.removeEventListener('click', onPickerClick); t.addEventListener('click', onPickerClick); });
-    }
-    function onPickerClick(e){ const key=e.currentTarget.getAttribute('data-key'); if(!key) return; pendingKey = key; openTraitModal(key); }
-
-    function showPicker(){ pickerOverlay.style.display='flex'; document.body.style.overflow='hidden'; }
-    function hidePicker(){ pickerOverlay.style.display='none'; document.body.style.overflow=''; }
-
-    // Trait modal for calculator (icons + quantity + demand)
-    function openTraitModal(key){
-      const u = unitDatabase[key];
-      if(!u) return;
-      // build trait options: normal, clean, plus unit.traits keys
-      const base = [{id:'normal',label:'Normal'},{id:'clean',label:'Clean'}];
-      const extra = (u.traits) ? Object.keys(u.traits) : [];
-      const all = base.concat(extra.map(t=>({id:t,label:t})));
-      // build modal HTML inside trait_overlay
-      const iconsHtml = all.map(t=>{
-        const iconUrl = (t.id==='clean') ? SOAP_SVG_DATAURL
-                        : (t.id.toLowerCase().includes('grand') ? imageProvider+TRAIT_ICON_ID('gm')
-                        : (t.id.toLowerCase().includes('master') ? imageProvider+TRAIT_ICON_ID('ms')
-                        : (t.id.toLowerCase().includes('sniper') ? imageProvider+TRAIT_ICON_ID('sp')
-                        : (t.id.toLowerCase().includes('super') ? imageProvider+TRAIT_ICON_ID('spd') : ''))));
-        return `<label style="display:inline-flex;align-items:center;gap:8px;margin:6px 8px;cursor:pointer"><input type="radio" name="sk_trait" value="${esc(t.id)}" ${t.id==='normal'?'checked':''}/> <img src="${iconUrl}" style="width:26px;height:26px;border-radius:4px;object-fit:cover;margin-right:6px"/> <span style="font-weight:900">${esc(t.label)}</span></label>`;
-      }).join('');
-      const demand = (u.baseStats && u.baseStats.demand) ? u.baseStats.demand : '';
-      traitOverlay.innerHTML = `<div style="width:100%;max-width:520px;padding:14px;background:var(--card);border-radius:10px;border:1px solid var(--border);">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div style="font-weight:900;font-size:18px;text-transform:uppercase;color:#fff">Enter Quantity</div>
-          <button id="sk_close" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">×</button>
-        </div>
-        <div style="margin-bottom:10px">
-          <input id="sk_qty" type="number" min="1" value="1" placeholder="Quantity" style="width:100%;padding:12px;border-radius:10px;border:2px solid #4b2bd6;background:#000;color:#fff;font-weight:900"/>
-        </div>
-        <div style="font-weight:900;color:#fff;margin-bottom:8px">Traits</div>
-        <div id="sk_traits" style="margin-bottom:12px">${iconsHtml}</div>
-        <div style="margin-bottom:12px;color:#ddd;font-weight:700">Demand: <span id="sk_demand">${esc(demand)}</span></div>
-        <div style="display:flex;justify-content:center"><button id="sk_add" style="padding:12px 18px;border-radius:10px;background:linear-gradient(90deg,#7b00e6,#ff2d6f);border:2px solid rgba(255,255,255,0.04);color:#000;font-weight:900;cursor:pointer">Add</button></div>
-      </div>`;
-      traitOverlay.style.display='flex';
-      traitOverlay.style.alignItems='center';
-      traitOverlay.style.justifyContent='center';
-
-      document.getElementById('sk_close').addEventListener('click', ()=> traitOverlay.style.display='none');
-      traitOverlay.addEventListener('click', function onOut(e){ if(e.target===traitOverlay){ traitOverlay.style.display='none'; traitOverlay.removeEventListener('click', onOut); } });
-
-      document.getElementById('sk_add').addEventListener('click', ()=>{
-        const qty = Number(document.getElementById('sk_qty').value) || 1;
-        const sel = traitOverlay.querySelector('input[name="sk_trait"]:checked');
-        const trait = sel ? sel.value : 'normal';
-        // add to currentPickerSide
-        const side = (window.currentPickerSide) ? window.currentPickerSide : (currentPickerSide || 'left');
-        addToSide(side, key, trait, qty);
-        // close
-        traitOverlay.style.display='none';
-      });
-    }
-
-    // Utility to select trait icon ids (our mapping)
-    function TRAIT_ICON_ID(name){
-      if (name==='gm') return '1vAZZgMrtVNtV3_EGpCmtH01DNSS5NW4H';
-      if (name==='ms') return '13nyhqIwm-1w_-6t6imnKz7x9ShownI92';
-      if (name==='sp') return '1y2l5qpi5WmFE9cmcMSRZwRijpfos4VYT';
-      if (name==='spd') return '1URYMM6bvJyunpdUefQdOnLjS5LyAyblO';
-      return '';
-    }
-
-    // Add / stacking
-    function addToSide(side, key, trait, qty){
-      if (!key || !unitDatabase[key]) return;
-      qty = Math.max(1, Math.floor(qty) || 1);
+    // small helpers for calculator
+    function addToSideLocal(side,key,trait,qty){
+      qty = Math.max(1,Math.floor(qty)||1);
       const u = unitDatabase[key];
       const single = (trait && trait!=='normal' && trait!=='clean' && u.traits && u.traits[trait]) ? parseValue(u.traits[trait].value) : parseValue(u.baseStats.value);
-      const arr = (side === 'left') ? leftItems : rightItems;
-      const found = arr.find(it => it.key === key && String(it.trait) === String(trait));
+      const arr = (side==='left') ? leftItems : rightItems;
+      const found = arr.find(x=> x.key===key && String(x.trait)===String(trait));
       if (found) {
         found.qty += qty;
         found.computed = (found.single||single) * found.qty;
       } else {
-        arr.push({ id:`${key}:${trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key, trait, qty, single, computed: single*qty, clean: trait==='clean' });
+        const it = { id:`${key}:${trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key, trait, qty, single, computed: single*qty, clean: trait==='clean' };
+        arr.push(it);
       }
       persistCalc();
       renderCalcThumbs();
-      updateTotalsAndVerdict();
+      updateTotals();
     }
 
+    // try to call existing external addToSide when available, else fallback to local
+    function addToSideUnified(side,key,trait,qty){
+      // Try user-provided functions first (keeps original behavior if present)
+      if (window._skibidi && typeof window._skibidi.addToSide === 'function') {
+        try { window._skibidi.addToSide(side,key,trait,qty); return; } catch(e){ console.warn(e); }
+      }
+      if (window._skibidi_calc && typeof window._skibidi_calc.addToSide === 'function') {
+        try { window._skibidi_calc.addToSide(side,key,trait,qty); return; } catch(e){ console.warn(e); }
+      }
+      if (typeof addToSide === 'function') {
+        try { addToSide(side,key,trait,qty); return; } catch(e){ console.warn(e); }
+      }
+      // fallback to local impl
+      addToSideLocal(side,key,trait,qty);
+    }
+
+    function persistCalc(){ try { localStorage.setItem(LS_KEY, JSON.stringify({left:leftItems.map(i=>({key:i.key,trait:i.trait,qty:i.qty})), right:rightItems.map(i=>({key:i.key,trait:i.trait,qty:i.qty})) })); } catch(e){console.warn(e);} }
+    function restoreCalc(){ try { const raw = localStorage.getItem(LS_KEY); if(!raw) return; const p = JSON.parse(raw); leftItems = (p.left||[]).map(it=>{ const u=unitDatabase[it.key]||{}; const single = (it.trait && it.trait!=='normal' && it.trait!=='clean' && u.traits && u.traits[it.trait])?parseValue(u.traits[it.trait].value):parseValue((u.baseStats&&u.baseStats.value)||0); return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single*(it.qty||1), clean:!!(it.trait==='clean') }; }); rightItems = (p.right||[]).map(it=>{ const u=unitDatabase[it.key]||{}; const single = (it.trait && it.trait!=='normal' && it.trait!=='clean' && u.traits && u.traits[it.trait])?parseValue(u.traits[it.trait].value):parseValue((u.baseStats&&u.baseStats.value)||0); return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single*(it.qty||1), clean:!!(it.trait==='clean') }; }); } catch(e){ console.warn(e); } }
+
     function calcThumbHtml(it){
-      const u = unitDatabase[it.key] || {};
+      const u = unitDatabase[it.key]||{};
       const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
       const rcls = (u.rarity||'').toLowerCase().replace(/\s+/g,'-');
-      const traitIcon = (()=> {
-        if (it.trait === 'clean') return SOAP_SVG_DATAURL;
-        if (/grand/i.test(it.trait)) return imageProvider + TRAIT_ICON_ID('gm');
-        if (/master/i.test(it.trait)) return imageProvider + TRAIT_ICON_ID('ms');
-        if (/snip/i.test(it.trait)) return imageProvider + TRAIT_ICON_ID('sp');
-        if (/super/i.test(it.trait) || /payday/i.test(it.trait)) return imageProvider + TRAIT_ICON_ID('spd');
-        return '';
-      })();
+      const traitIcon = (it.trait==='clean') ? SOAP_SVG_DATAURL : ( /grand/i.test(it.trait)? imageProvider+TRAIT_ICONS.gm : /master/i.test(it.trait) ? imageProvider+TRAIT_ICONS.ms : /snip/i.test(it.trait)? imageProvider+TRAIT_ICONS.sp : /super/i.test(it.trait) ? imageProvider+TRAIT_ICONS.spd : '' );
       const demand = (u.baseStats && u.baseStats.demand) ? u.baseStats.demand : '';
       const soap = it.clean ? '<div class="soap-badge">SOAP</div>' : '';
       return `<div class="calc-thumb rarity-${rcls}" data-id="${it.id}">
@@ -401,79 +318,205 @@
         <div style="position:absolute;bottom:6px;left:6px;background:var(--panel);color:#fff;padding:2px 6px;border-radius:8px;font-weight:700;font-size:11px">${esc(demand)}</div>
       </div>`;
     }
+    function renderCalcThumbs(){ leftItemsEl.innerHTML = leftItems.map(calcThumbHtml).join(''); rightItemsEl.innerHTML = rightItems.map(calcThumbHtml).join(''); }
 
-    function renderCalcThumbs(){
-      leftItemsEl.innerHTML = leftItems.map(calcThumbHtml).join('');
-      rightItemsEl.innerHTML = rightItems.map(calcThumbHtml).join('');
-    }
-
-    function updateTotalsAndVerdict(){
-      leftItems.forEach(i=>i.computed = (i.single||0)*(i.qty||1));
-      rightItems.forEach(i=>i.computed = (i.single||0)*(i.qty||1));
+    function updateTotals(){
+      leftItems.forEach(i=> i.computed = (i.single||0)*(i.qty||1));
+      rightItems.forEach(i=> i.computed = (i.single||0)*(i.qty||1));
       const leftSum = leftItems.reduce((s,i)=>s+Number(i.computed||0),0);
       const rightSum = rightItems.reduce((s,i)=>s+Number(i.computed||0),0);
       leftTotalEl.textContent = `TOTAL VALUE: ${abbr(leftSum)}`;
       rightTotalEl.textContent = `TOTAL VALUE: ${abbr(rightSum)}`;
-      const FAIR=0.02,SMALL=0.10;
+      const FAIR=0.02, SMALL=0.10;
       let verdict='NO ITEMS';
       if (leftSum===0 && rightSum===0) verdict='NO ITEMS';
       else if (Math.abs(leftSum-rightSum) <= Math.max(1,FAIR*Math.max(leftSum,rightSum))) verdict='FAIR';
-      else if (leftSum>rightSum){ if(rightSum===0 || leftSum>rightSum*(1+SMALL)) verdict='OVERPAYING'; else verdict='LOSE'; }
-      else { if(leftSum===0 || rightSum>leftSum*(1+SMALL)) verdict='UNDERPAYING'; else verdict='WIN'; }
+      else if (leftSum>rightSum){ if (rightSum===0 || leftSum>rightSum*(1+SMALL)) verdict='OVERPAYING'; else verdict='LOSE'; }
+      else { if (leftSum===0 || rightSum>leftSum*(1+SMALL)) verdict='UNDERPAYING'; else verdict='WIN'; }
       verdictText.textContent = verdict.toUpperCase();
     }
 
-    function persistCalc(){
-      try {
-        const payload = { left: leftItems.map(i=>({key:i.key,trait:i.trait,qty:i.qty,clean:!!i.clean})), right: rightItems.map(i=>({key:i.key,trait:i.trait,qty:i.qty,clean:!!i.clean})) };
-        localStorage.setItem(LS_KEY, JSON.stringify(payload));
-      } catch(e){ console.warn('persist calc fail', e); }
+    // picker + trait modal (preselected trait when clicking trait button)
+    const pickerOverlay = document.getElementById('picker-overlay');
+    const pickerSidebar = document.getElementById('picker-sidebar');
+    const pickerGrid = document.getElementById('picker-grid');
+    const pickerSearch = document.getElementById('picker-search-input');
+    const traitOverlay = document.getElementById('trait-overlay');
+
+    function createPicker(){
+      const cats = ['Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
+      pickerSidebar.innerHTML = cats.map(c=>`<div class="picker-cat" data-cat="${c.toLowerCase()}">${c}</div>`).join('');
+      const def = pickerSidebar.querySelector('[data-cat="astral"]'); if(def) def.classList.add('active');
+      renderPickerGrid('astral','','','astral','');
+      pickerSidebar.querySelectorAll('.picker-cat').forEach(btn=>{ btn.addEventListener('click', ()=>{ pickerSidebar.querySelectorAll('.picker-cat').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); renderPickerGrid(btn.getAttribute('data-cat')||'astral','','',btn.getAttribute('data-cat')||'astral'); }); });
+      pickerSearch.value=''; pickerSearch.removeEventListener('input', onPickerSearch); pickerSearch.addEventListener('input', onPickerSearch);
+      pickerOverlay.addEventListener('click', ev => { if (ev.target===pickerOverlay) hidePicker(); });
     }
-    function restoreCalc(){
-      try {
-        const raw = localStorage.getItem(LS_KEY); if(!raw) return;
-        const p = JSON.parse(raw);
-        leftItems = (p.left||[]).map(it=>{
-          const u = unitDatabase[it.key] || {};
-          const single = (it.trait && it.trait!=='normal' && it.trait!=='clean' && u.traits && u.traits[it.trait]) ? parseValue(u.traits[it.trait].value) : parseValue((u.baseStats && u.baseStats.value) || 0);
-          return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single*(it.qty||1), clean:!!it.clean };
-        });
-        rightItems = (p.right||[]).map(it=>{
-          const u = unitDatabase[it.key] || {};
-          const single = (it.trait && it.trait!=='normal' && it.trait!=='clean' && u.traits && u.traits[it.trait]) ? parseValue(u.traits[it.trait].value) : parseValue((u.baseStats && u.baseStats.value) || 0);
-          return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single*(it.qty||1), clean:!!it.clean };
-        });
-      } catch(e){ console.warn('restore calc fail', e); }
+    function onPickerSearch(e){ const active = pickerSidebar.querySelector('.picker-cat.active'); const cat = active?active.getAttribute('data-cat'):'astral'; renderPickerGrid(cat,'','',cat,e.target.value||''); }
+    function renderPickerGrid(side,trait,qty,category,q){ category=(category||'astral').toLowerCase(); q=(q||'').toLowerCase(); const keys = unitKeys.filter(k=>{ const u=unitDatabase[k]; if(!u) return false; if((u.rarity||'').toLowerCase()!==category) return false; if(q && !(u.name||'').toLowerCase().includes(q)) return false; return true; }); if(!keys.length){ pickerGrid.innerHTML=''; return; } pickerGrid.innerHTML = keys.map(k=>{ const u=unitDatabase[k]; const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : ''; const rcls=(u.rarity||'').toLowerCase().replace(/\s+/g,'-'); return `<div class="picker-thumb rarity-${rcls}" data-key="${k}"><div style="width:68px;height:68px;border-radius:8px;background-image:${p};background-size:cover;background-position:center"></div></div>`; }).join(''); pickerGrid.querySelectorAll('.picker-thumb').forEach(t=>{ t.removeEventListener('click', onPickerClick); t.addEventListener('click', onPickerClick); }); }
+    function showPicker(){ pickerOverlay.style.display='flex'; document.body.style.overflow='hidden'; }
+    function hidePicker(){ pickerOverlay.style.display='none'; document.body.style.overflow=''; }
+    function onPickerClick(e){ const key = e.currentTarget.getAttribute('data-key'); if(!key) return; openTraitModalForKey(key); }
+
+    // modal opened preselected to trait param (if provided)
+    function openTraitModalForKey(key, preTrait){
+      const u = unitDatabase[key]; if(!u) return;
+      const base = [{id:'clean',label:'Clean'},{id:'normal',label:'Normal'}];
+      const extra = u.traits ? Object.keys(u.traits) : [];
+      const all = base.concat(extra.map(t=>({id:t,label:t})));
+      // build icons and radios
+      const radios = all.map(t=>{
+        const label = t.label;
+        const id = 'sk_trait_'+Math.random().toString(36).slice(2,8);
+        const checked = (preTrait && preTrait===t.id) || (!preTrait && t.id==='normal') ? 'checked' : '';
+        const icon = (t.id==='clean') ? SOAP_SVG_DATAURL : ( /grand/i.test(t.id) ? imageProvider+TRAIT_ICONS.gm : /master/i.test(t.id) ? imageProvider+TRAIT_ICONS.ms : /snip/i.test(t.id) ? imageProvider+TRAIT_ICONS.sp : /super/i.test(t.id) ? imageProvider+TRAIT_ICONS.spd : '' );
+        const valueText = (u.traits && u.traits[t.id] && u.traits[t.id].value) ? u.traits[t.id].value : u.baseStats.value;
+        return `<label style="display:flex;align-items:center;gap:8px;margin:6px 8px;cursor:pointer"><input type="radio" name="sk_trait" value="${esc(t.id)}" ${checked}/> ${ icon ? `<img src="${icon}" style="width:20px;height:20px;border-radius:4px;object-fit:cover" />` : '' } <span style="font-weight:900;color:#fff">${esc(label)} - <span style="color:#ffd">${esc(valueText)}</span></span></label>`;
+      }).join('');
+      const demand = (u.baseStats && u.baseStats.demand) ? u.baseStats.demand : '';
+      traitOverlay.innerHTML = `<div style="width:100%;max-width:520px;padding:14px;background:var(--card);border-radius:10px;border:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-weight:900;font-size:18px;text-transform:uppercase;color:#fff">Enter Quantity</div>
+          <button id="sk_close" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer">×</button>
+        </div>
+        <div style="margin-bottom:10px">
+          <input id="sk_qty" type="number" min="1" value="1" placeholder="Quantity" style="width:100%;padding:12px;border-radius:10px;border:2px solid #552aa8;background:#000;color:#fff;font-weight:900"/>
+        </div>
+        <div style="font-weight:900;color:#fff;margin-bottom:8px">Traits</div>
+        <div id="sk_traits" style="margin-bottom:12px">${radios}</div>
+        <div style="margin-bottom:12px;color:#ddd;font-weight:700">Demand: <span id="sk_demand">${esc(demand)}</span></div>
+        <div style="display:flex;justify-content:center"><button id="sk_add" style="padding:12px 18px;border-radius:10px;background:linear-gradient(90deg,#7b00e6,#ff2d6f);border:2px solid rgba(255,255,255,0.04);color:#000;font-weight:900;cursor:pointer">Add</button></div>
+      </div>`;
+      traitOverlay.style.display='flex'; traitOverlay.style.alignItems='center'; traitOverlay.style.justifyContent='center';
+      document.getElementById('sk_close').addEventListener('click', ()=> traitOverlay.style.display='none');
+      traitOverlay.addEventListener('click', function out(e){ if(e.target===traitOverlay){ traitOverlay.style.display='none'; traitOverlay.removeEventListener('click', out); }});
+      document.getElementById('sk_add').addEventListener('click', ()=>{
+        const qty = Number(document.getElementById('sk_qty').value) || 1;
+        const sel = traitOverlay.querySelector('input[name="sk_trait"]:checked');
+        const trait = sel ? sel.value : 'normal';
+        addToSideUnified(currentPickerSide, key, trait, qty);
+        traitOverlay.style.display='none';
+      });
     }
 
-    // wire plus buttons
-    plusLeft && plusLeft.addEventListener('click', ()=>{ currentPickerSide='left'; createPicker(); showPicker(); });
-    plusRight && plusRight.addEventListener('click', ()=>{ currentPickerSide='right'; createPicker(); showPicker(); });
+    // ===== trait buttons inside unit card + render function (uses your original render but modifies) =====
+    const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
+    function formatStatusClass(status){ return String(status||'').toLowerCase().replace(/\s+/g,'-'); }
 
-    // clicking unit card opens modal (safe)
-    document.addEventListener('click', function(e){
-      const card = e.target.closest('.unit-card');
-      if(!card) return;
-      const unitKey = card.getAttribute('data-unit') || card.getAttribute('data-key');
-      if (!unitKey) return;
-      // open picker focused on unitKey: we will directly open trait modal for that key
-      // but to keep UX consistent, we open the picker then immediately pull modal
-      pendingKey = unitKey;
+    function buildTraitButtonsForUnit(key, unit){
+      // show Clean + Normal + unit.traits keys (if any). Each button shows the trait value (trait.value or baseStats.value)
+      const traits = ['clean','normal'];
+      if (unit.traits) traits.push(...Object.keys(unit.traits));
+      // create buttons with rarity-accent border
+      const rarity = (unit.rarity||'').toLowerCase();
+      const color = getComputedStyle(document.documentElement).getPropertyValue('--g-'+rarity) || 'transparent';
+      return traits.map(t=>{
+        const display = (t==='clean') ? 'Clean' : (t==='normal') ? 'Normal' : t;
+        const value = (unit.traits && unit.traits[t] && unit.traits[t].value) ? unit.traits[t].value : unit.baseStats.value;
+        // clicking opens modal preselected to this trait (option B)
+        return `<button class="trait-btn" data-unit="${key}" data-trait="${esc(t)}" style="margin:6px;padding:8px 10px;border-radius:10px;border:2px solid rgba(255,255,255,0.03);background:var(--card);color:#fff;font-weight:900;cursor:pointer">
+          <span style="display:inline-block;font-size:12px;margin-right:8px">${esc(display)}</span>
+          <span style="background:transparent;color:#ffd;font-weight:900">${esc(value)}</span>
+        </button>`;
+      }).join('');
+    }
+
+    function renderValueList(){
+      const keys = Object.keys(unitDatabase).filter(k=>{
+        const u = unitDatabase[k];
+        const r = (u.rarity||'').toLowerCase();
+        if (currentFilter !== 'all' && r !== currentFilter) return false;
+        if (searchQuery && !(u.name||'').toLowerCase().includes(searchQuery.toLowerCase())) return false;
+        return true;
+      });
+
+      keys.sort((a,b)=>{
+        if (currentSort === 'value-desc') return parseValue(unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats.value);
+        const wa = rarityOrder[(unitDatabase[a].rarity||'').toLowerCase()]||99;
+        const wb = rarityOrder[(unitDatabase[b].rarity||'').toLowerCase()]||99;
+        if (wa !== wb) return wa - wb;
+        return (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||'');
+      });
+
+      const totalPages = Math.max(1, Math.ceil(keys.length/itemsPerPage));
+      if (currentPage > totalPages) currentPage = totalPages;
+      const startIndex = (currentPage-1)*itemsPerPage;
+      const pageKeys = keys.slice(startIndex, startIndex+itemsPerPage);
+
+      pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages;
+
+      listRoot.innerHTML = pageKeys.map(k=>{
+        const u = unitDatabase[k];
+        const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
+        const rcls = (u.rarity||'').toLowerCase().replace(/\s+/g,'-');
+        const stClass = formatStatusClass(u.baseStats.status);
+        const second = u.secondEdition && String(u.secondEdition).toLowerCase()==='yes' ? `<div class="second-edition-tag">2nd Edition</div>` : '';
+        const traitButtonsHtml = buildTraitButtonsForUnit(k,u);
+        return `
+          <div class="unit-card ${rcls}" data-unit="${k}">
+            <div class="card-header">
+              <div class="unit-title">${esc(u.name)}</div>
+              <div class="portrait-frame ${rcls}">
+                <div class="portrait-circle ${rcls}">
+                  <div class="img" style="background-image:${portrait}"></div>
+                </div>
+              </div>
+              ${second}
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+              <div style="width:100%;display:flex;justify-content:center;flex-wrap:wrap">${traitButtonsHtml}</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-box">
+                <div class="label">Value</div>
+                <div class="val val-value highlight-gold">${esc(u.baseStats.value)}</div>
+              </div>
+              <div class="info-box">
+                <div class="label">Status</div>
+                <div class="val val-status status-${stClass}">${esc(u.baseStats.status)}</div>
+              </div>
+              <div class="info-box">
+                <div class="label">Demand</div>
+                <div class="val val-demand highlight-purple">${esc(u.baseStats.demand)}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      // after rendering, wire trait buttons to open preselected modal
+      document.querySelectorAll('.trait-btn').forEach(btn=>{
+        btn.removeEventListener('click', onTraitBtnClick);
+        btn.addEventListener('click', onTraitBtnClick);
+      });
+    }
+
+    function onTraitBtnClick(e){
+      const btn = e.currentTarget;
+      const unitKey = btn.getAttribute('data-unit');
+      const trait = btn.getAttribute('data-trait');
       currentPickerSide = (window.currentPickerSide) ? window.currentPickerSide : currentPickerSide;
-      openTraitModal(unitKey); // open with trait picker for that unit
-    }, true);
+      openTraitModalForKey(unitKey, trait); // opens modal preselected per Option B
+    }
 
-    // initialize
-    try {
-      restoreCalc();
-      renderCalcThumbs();
-      updateTotalsAndVerdict();
-    } catch(e){ console.error('calc init error', e); }
+    // attach controls
+    document.getElementById('search-bar').addEventListener('input', (e)=>{ searchQuery = e.target.value || ''; currentPage = 1; renderValueList(); });
+    document.getElementById('tabs-container').addEventListener('click', (e)=>{ if(e.target.classList.contains('tab-btn')){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); currentFilter = e.target.getAttribute('data-rarity'); currentPage=1; renderValueList(); }});
+    document.getElementById('sort-container').addEventListener('click', (e)=>{ if(e.target.classList.contains('sort-btn')){ document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); currentSort = e.target.getAttribute('data-sort'); currentPage=1; renderValueList(); }});
+    prevBtn.addEventListener('click', ()=>{ if(currentPage>1){ currentPage--; renderValueList(); window.scrollTo({top:0,behavior:'smooth'}); }});
+    nextBtn.addEventListener('click', ()=>{ const filteredTotal = Object.keys(unitDatabase).filter(key=>{ const u=unitDatabase[key]; return (currentFilter==='all' || u.rarity===currentFilter) && u.name.toLowerCase().includes(searchQuery.toLowerCase()); }).length; const maxPage = Math.ceil(filteredTotal/itemsPerPage); if(currentPage<maxPage){ currentPage++; renderValueList(); window.scrollTo({top:0,behavior:'smooth'}); }});
 
-    // Expose for debugging
-    window._skibidi_calc = { leftItems, rightItems, addToSide, renderCalcThumbs, updateTotalsAndVerdict };
+    // Initialize page list and calculator
+    (function init(){
+      try { restoreCalc(); renderValueList(); renderCalcThumbs(); updateTotals(); } catch(e){ console.error(e); }
+    })();
 
-    // End script
+    // expose for debug
+    window._skibidi_calc = { addToSide: addToSideUnified, leftItems, rightItems, renderCalcThumbs, updateTotals };
+
   })();
   </script>
 
