@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Skibidi TD — Fixed (menu categories + rarity colors + calculator)</title>
+  <title>Skibidi TD — Restored card design</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg:#050506;
-      --card:#0f0f11;
-      --panel:#111214;
-      --box:#141618;
-      --border:#232529;
+      --card:#0b0b0c;
+      --panel:#0f0f11;
+      --box:#121214;
+      --border:rgba(255,255,255,0.04);
       --muted:#9aa0a5;
       --text:#ffffff;
-      --radius:12px;
+      --radius:18px;
 
       --g-astral: linear-gradient(90deg,#7f00ff,#00ffd5);
       --g-cosmic: linear-gradient(90deg,#b800e6,#6cedf0);
@@ -24,6 +24,7 @@
       --g-mythic: linear-gradient(90deg,#ff6d68,#ffb86b);
       --g-legendary: linear-gradient(90deg,#ffd54a,#ff7a00);
 
+      --gold: #ffd54a;
       --accent: linear-gradient(90deg,#8b4bff,#ff2d6f);
     }
 
@@ -31,86 +32,107 @@
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text)}
     body{padding:22px;display:flex;flex-direction:column;align-items:center;gap:18px}
 
-    .container{width:100%;max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:12px;align-items:center}
+    .container{width:100%;max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:18px;align-items:center}
 
-    /* Search + menu */
-    .top-row{width:100%;display:flex;align-items:center;gap:12px;justify-content:space-between;position:relative}
-    #search-bar{flex:1;padding:12px 16px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.02);color:var(--text);outline:none}
-    .menu-btn{width:44px;height:44px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer}
-    .menu-btn .dots{width:6px;height:6px;background:var(--muted);border-radius:50%;box-shadow:0 -10px 0 0 var(--muted),0 10px 0 0 var(--muted)}
-
-    /* SMALL: keep menu button on small screens */
-    .menu-btn{display:none}
-    @media (max-width:600px){ .menu-btn{display:block} }
-
-    /* menu panel */
-    .menu-panel{position:absolute;right:22px;top:78px;min-width:300px;background:#fff;color:#000;border-radius:10px;box-shadow:0 30px 80px rgba(0,0,0,0.6);border:1px solid rgba(0,0,0,0.06);display:none;z-index:9999;overflow:hidden}
-    .menu-section{padding:8px;border-bottom:1px solid rgba(0,0,0,0.04)}
-    .menu-item{display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;cursor:pointer}
-    .menu-item:hover{background:rgba(0,0,0,0.04)}
-    .menu-label{font-weight:700;text-transform:uppercase}
-
-    /* uniform controls - made visible and styled as in screenshot */
-    .controls-row { width:100%; display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:6px; }
+/* top controls (kept visible and styled like screenshot) */
+    .controls-row { width:100%; display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:6px; }
     .control-btn{
-      padding:12px 20px;
-      border-radius:14px;
+      padding:10px 18px;
+      border-radius:10px;
       font-weight:900;
       text-transform:uppercase;
-      background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(0,0,0,0.03));
+      background:linear-gradient(180deg, rgba(255,255,255,0.006), rgba(255,255,255,0.003));
       color:var(--muted);
       border:1px solid rgba(255,255,255,0.03);
-      min-width:120px;
+      min-width:110px;
       text-align:center;
       cursor:pointer;
       box-shadow:inset 0 1px 0 rgba(255,255,255,0.02);
       transition:all .12s ease;
     }
-    .control-btn:hover{ color:#fff; transform:translateY(-2px); }
-    .control-btn.active{ border-color:#ffd54a; color:#fff; box-shadow:0 0 0 6px rgba(255,213,74,0.06), 0 10px 40px rgba(0,0,0,0.6); }
+    .control-btn.active{ border-color:var(--gold); color:#fff; box-shadow:0 0 0 6px rgba(255,213,74,0.06), 0 14px 40px rgba(0,0,0,0.6); }
 
-    /* sort */
     .sort-row{display:flex;gap:12px;justify-content:center;margin-top:6px}
     .sort-btn{padding:12px 18px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.006), rgba(255,255,255,0.003));border:1px solid rgba(255,255,255,0.03);color:var(--muted);font-weight:900;cursor:pointer}
-    .sort-btn.active{border-color:#ffd54a;color:#fff;box-shadow:0 0 0 6px rgba(255,213,74,0.06)}
+    .sort-btn.active{border-color:var(--gold);color:#fff;box-shadow:0 0 0 6px rgba(255,213,74,0.06)}
 
-    /* list grid */
-    .list-root{width:100%;max-width:1200px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:12px}
+    /* grid */
+    .list-root{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:12px;padding:6px}
+    @media (max-width:1100px){ .list-root{grid-template-columns:repeat(2,1fr)} }
+    @media (max-width:640px){ .list-root{grid-template-columns:1fr} }
 
-    /* unit card with fixed header to align */
-    .unit-card{position:relative;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));border-radius:var(--radius);padding:18px;border:1px solid var(--border);min-height:360px;display:flex;flex-direction:column;justify-content:space-between;overflow:visible}
-    .card-header{height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
-    .unit-title{font-weight:900;text-transform:uppercase;font-size:16px;letter-spacing:0.6px;text-align:center}
+    /* improved unit card styling to match screenshots */
+    .unit-card{
+      position:relative;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.06));
+      border-radius:20px;
+      padding:26px 22px 20px;
+      border:1px solid var(--border);
+      min-height:420px;
+      display:flex;flex-direction:column;justify-content:space-between;overflow:visible;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.01);
+      transition:transform .14s ease, box-shadow .14s ease;
+    }
+    .unit-card:hover{ transform:translateY(-6px); box-shadow: 0 18px 60px rgba(0,0,0,0.75); }
 
-    /* portrait frame + circle */
-    .portrait-frame{width:132px;height:132px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.03));display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.03);position:relative}
-    .portrait-circle{width:110px;height:110px;border-radius:50%;background:var(--panel);display:flex;align-items:center;justify-content:center;border:3px solid rgba(0,0,0,0.6)}
-    .portrait-circle .img{width:98px;height:98px;border-radius:50%;background-size:cover;background-position:center}
+    .card-header{height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+    .unit-title{font-weight:900;text-transform:uppercase;font-size:16px;letter-spacing:1.2px;text-align:center;color:#fff}
 
-    /* rarity halo */
-    .unit-card.rarity-astral .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-astral);z-index:-1;opacity:0.95;filter:blur(8px)}
-    .unit-card.rarity-cosmic .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-cosmic);z-index:-1;opacity:0.95;filter:blur(8px)}
-    .unit-card.rarity-divine .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-divine);z-index:-1;opacity:0.95;filter:blur(8px)}
-    .unit-card.rarity-godly .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-godly);z-index:-1;opacity:0.95;filter:blur(8px)}
-    .unit-card.rarity-exclusive .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-exclusive);z-index:-1;opacity:0.95;filter:blur(8px)}
-    .unit-card.rarity-mythic .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-mythic);z-index:-1;opacity:0.95;filter:blur(8px)}
-    .unit-card.rarity-legendary .portrait-frame::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:var(--g-legendary);z-index:-1;opacity:0.95;filter:blur(8px)}
+    /* portrait / circular icon inside rounded square */
+    .portrait-frame{
+      width:140px;height:140px;border-radius:18px;background:linear-gradient(180deg,rgba(0,0,0,0.45),rgba(255,255,255,0.02));
+      display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.02);position:relative;box-shadow: inset 0 -6px 18px rgba(0,0,0,0.6);
+    }
+    .portrait-circle{width:110px;height:110px;border-radius:50%;background:var(--panel);display:flex;align-items:center;justify-content:center;border:6px solid rgba(0,0,0,0.55);box-shadow: 0 6px 30px rgba(0,0,0,0.6)}
+    .portrait-circle .img{width:86px;height:86px;border-radius:50%;background-size:cover;background-position:center;box-shadow: 0 6px 16px rgba(0,0,0,0.6)}
 
-    .unit-card.rarity-astral::after{content:'';position:absolute;inset:0;background:var(--g-astral);opacity:0.04;border-radius:var(--radius);pointer-events:none}
-    .unit-card.rarity-cosmic::after{content:'';position:absolute;inset:0;background:var(--g-cosmic);opacity:0.04;border-radius:var(--radius);pointer-events:none}
-    .unit-card.rarity-divine::after{content:'';position:absolute;inset:0;background:var(--g-divine);opacity:0.04;border-radius:var(--radius);pointer-events:none}
-    .unit-card.rarity-godly::after{content:'';position:absolute;inset:0;background:var(--g-godly);opacity:0.04;border-radius:var(--radius);pointer-events:none}
-    .unit-card.rarity-exclusive::after{content:'';position:absolute;inset:0;background:var(--g-exclusive);opacity:0.04;border-radius:var(--radius);pointer-events:none}
-    .unit-card.rarity-mythic::after{content:'';position:absolute;inset:0;background:var(--g-mythic);opacity:0.04;border-radius:var(--radius);pointer-events:none}
-    .unit-card.rarity-legendary::after{content:'';position:absolute;inset:0;background:var(--g-legendary);opacity:0.04;border-radius:var(--radius);pointer-events:none}
+    /* big halo per rarity (subtle blur + color) */
+    .unit-card.rarity-astral .portrait-frame::before,
+    .unit-card.rarity-cosmic .portrait-frame::before,
+    .unit-card.rarity-divine .portrait-frame::before,
+    .unit-card.rarity-godly .portrait-frame::before,
+    .unit-card.rarity-exclusive .portrait-frame::before,
+    .unit-card.rarity-mythic .portrait-frame::before,
+    .unit-card.rarity-legendary .portrait-frame::before{
+      content:'';position:absolute;inset:-12px;border-radius:22px;z-index:-1;opacity:0.95;filter:blur(12px)
+    }
+    .unit-card.rarity-astral .portrait-frame::before{background:var(--g-astral)}
+    .unit-card.rarity-cosmic .portrait-frame::before{background:var(--g-cosmic)}
+    .unit-card.rarity-divine .portrait-frame::before{background:var(--g-divine)}
+    .unit-card.rarity-godly .portrait-frame::before{background:var(--g-godly)}
+    .unit-card.rarity-exclusive .portrait-frame::before{background:var(--g-exclusive)}
+    .unit-card.rarity-mythic .portrait-frame::before{background:var(--g-mythic)}
+    .unit-card.rarity-legendary .portrait-frame::before{background:var(--g-legendary)}
 
-    .info-row{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:12px}
-    .info-box{min-width:120px;background:var(--panel);border-radius:10px;padding:12px 14px;text-align:center;border:1px solid var(--border)}
+    /* soft overlay tint per rarity on card */
+    .unit-card.rarity-astral::after,
+    .unit-card.rarity-cosmic::after,
+    .unit-card.rarity-divine::after,
+    .unit-card.rarity-godly::after,
+    .unit-card.rarity-exclusive::after,
+    .unit-card.rarity-mythic::after,
+    .unit-card.rarity-legendary::after{
+      content:'';position:absolute;inset:0;border-radius:20px;opacity:0.045;pointer-events:none;
+    }
+    .unit-card.rarity-astral::after{background:var(--g-astral)}
+    .unit-card.rarity-cosmic::after{background:var(--g-cosmic)}
+    .unit-card.rarity-divine::after{background:var(--g-divine)}
+    .unit-card.rarity-godly::after{background:var(--g-godly)}
+    .unit-card.rarity-exclusive::after{background:var(--g-exclusive)}
+    .unit-card.rarity-mythic::after{background:var(--g-mythic)}
+    .unit-card.rarity-legendary::after{background:var(--g-legendary)}
+
+    .info-row{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:8px}
+    .info-box{
+      min-width:160px;
+      background:linear-gradient(180deg, rgba(0,0,0,0.45), rgba(255,255,255,0.01));
+      border-radius:12px;padding:12px 14px;text-align:center;border:1px solid rgba(255,255,255,0.02);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.55);
+    }
     .info-box .label{display:block;color:var(--muted);font-weight:800;font-size:11px;text-transform:uppercase}
-    .info-box .value{display:block;font-weight:900;margin-top:6px}
+    .info-box .value{display:block;font-weight:900;margin-top:6px;color:var(--gold);font-size:18px}
 
-    /* colored badges restored */
-    .status-badge{padding:6px 10px;border-radius:8px;font-weight:900;text-transform:uppercase;font-size:12px;display:inline-block}
+    .status-badge{padding:8px 12px;border-radius:12px;font-weight:900;text-transform:uppercase;font-size:13px;display:inline-block}
     .status-stable{background:linear-gradient(90deg,#f97316,#ffb86b);color:#2a1000}
     .status-high-demand{background:linear-gradient(90deg,#7c3aed,#a78bfa);color:#fff}
     .status-hyped{background:linear-gradient(90deg,#06b6d4,#7ef0f7);color:#021}
@@ -119,12 +141,14 @@
     .status-recovering{background:linear-gradient(90deg,#65a30d,#bef264);color:#032}
     .status-default{background:linear-gradient(90deg,#6b7280,#9ca3af);color:#fff}
 
-    .demand-pill{padding:6px 8px;border-radius:8px;font-weight:900;color:#fff}
+    .demand-pill{padding:8px 10px;border-radius:12px;font-weight:900;color:#fff;font-size:13px}
     .demand-low{background:linear-gradient(90deg,#6b7280,#9ca3af)}
     .demand-mid{background:linear-gradient(90deg,#f97316,#ffb86b);color:#120}
     .demand-high{background:linear-gradient(90deg,#16a34a,#6fe89a);color:#012}
 
-    /* calc thumbs */
+    .soap-badge{position:absolute;right:8px;top:8px;padding:5px 7px;border-radius:8px;background:linear-gradient(90deg,#fff7cc,#fff1a8);color:#3b2f00;font-weight:900;font-size:12px;z-index:4}
+
+    /* picker + calc thumbs kept similar to before */
     .calc-thumb{width:76px;height:76px;border-radius:10px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,0.04);background:var(--panel)}
     .calc-thumb .img{width:100%;height:100%;background-size:cover;background-position:center;border-radius:8px}
     .calc-thumb::before{content:'';position:absolute;inset:-6px;border-radius:12px;z-index:-1;opacity:0.98}
@@ -136,65 +160,46 @@
     .calc-thumb.rarity-mythic::before{background:var(--g-mythic)}
     .calc-thumb.rarity-legendary::before{background:var(--g-legendary)}
 
-    .soap-badge{position:absolute;right:6px;top:6px;padding:4px 6px;border-radius:8px;background:linear-gradient(90deg,#fff7cc,#fff1a8);color:#3b2f00;font-weight:900;font-size:11px;z-index:4}
-
-    /* picker */
     .picker-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);z-index:9999;padding:12px}
     .picker-box{width:100%;max-width:1180px;max-height:90vh;border-radius:12px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,0.006),rgba(255,255,255,0.003));border:1px solid var(--border);display:flex;gap:12px;overflow:hidden}
     .picker-sidebar{width:160px;display:flex;flex-direction:column;gap:10px;overflow:auto;padding:6px}
     .picker-cat{padding:12px;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-weight:900;cursor:pointer}
-    .picker-cat.active{outline:2px solid rgba(255,255,255,0.03);color:#fff; box-shadow:0 0 0 6px rgba(255,213,74,0.06); border-color:#ffd54a}
+    .picker-cat.active{outline:2px solid rgba(255,255,255,0.03);color:#fff; box-shadow:0 0 0 6px rgba(255,213,74,0.06); border-color:var(--gold)}
     .picker-grid{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,78px);gap:12px}
 
     .trait-btn{padding:8px 12px;border-radius:8px;background:var(--panel);color:var(--text);border:1px solid var(--border);font-weight:800;cursor:pointer;margin:6px}
-    @media (max-width:1024px){ .list-root{grid-template-columns:repeat(2,1fr)} .picker-box{flex-direction:column} .picker-sidebar{width:100%;flex-direction:row;overflow:auto} }
-    @media (max-width:600px){ .list-root{grid-template-columns:1fr} .card-header{height:170px} .portrait-frame{width:118px;height:118px} }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="top-row">
-      <input id="search-bar" placeholder="Search unit..." aria-label="Search units" />
-      <div style="display:flex;gap:12px;align-items:center">
-        <div class="menu-btn" id="menu-btn" title="Menu"><div class="dots" aria-hidden="true"></div></div>
-      </div>
-
-      <div class="menu-panel" id="menu-panel" aria-hidden="true">
-        <div class="menu-section">
-          <div class="menu-item" data-key="calculator"><div class="menu-label">Calculator</div></div>
-        </div>
-        <div class="menu-section">
-          <div class="menu-item" data-key="all"><div class="menu-label">All</div></div>
-          <div class="menu-item" data-key="astral"><div class="menu-label">Astral</div></div>
-          <div class="menu-item" data-key="cosmic"><div class="menu-label">Cosmic</div></div>
-          <div class="menu-item" data-key="divine"><div class="menu-label">Divine</div></div>
-          <div class="menu-item" data-key="godly"><div class="menu-label">Godly</div></div>
-          <div class="menu-item" data-key="exclusive"><div class="menu-label">Exclusive</div></div>
-          <div class="menu-item" data-key="mythic"><div class="menu-label">Mythic</div></div>
-          <div class="menu-item" data-key="legendary"><div class="menu-label">Legendary</div></div>
+    <!-- Search + controls -->
+    <div style="width:100%;display:flex;flex-direction:column;gap:8px;align-items:center">
+      <div style="width:100%;max-width:1240px;display:flex;align-items:center;gap:12px;justify-content:space-between">
+        <input id="search-bar" placeholder="Search units..." aria-label="Search units" style="flex:1;padding:12px 20px;border-radius:28px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.02);color:var(--text);outline:none;max-width:920px"/>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="menu-btn" id="menu-btn" title="Menu" style="display:none"><div class="dots" aria-hidden="true"></div></div>
         </div>
       </div>
+
+      <div class="controls-row">
+        <div class="control-btn active" data-rarity="all">All</div>
+        <div class="control-btn" data-rarity="astral">Astral</div>
+        <div class="control-btn" data-rarity="cosmic">Cosmic</div>
+        <div class="control-btn" data-rarity="divine">Divine</div>
+        <div class="control-btn" data-rarity="godly">Godly</div>
+        <div class="control-btn" data-rarity="exclusive">Exclusive</div>
+        <div class="control-btn" data-rarity="mythic">Mythic</div>
+        <div class="control-btn" data-rarity="legendary">Legendary</div>
+        <div class="control-btn" data-rarity="calculator">Calculator</div>
+      </div>
+
+      <div class="sort-row">
+        <button class="sort-btn active" data-sort="default">Default Sort</button>
+        <button class="sort-btn" data-sort="value-desc">High Value</button>
+      </div>
     </div>
 
-    <!-- Controls visible (restored like the screenshot) -->
-    <div class="controls-row">
-      <div class="control-btn active" data-rarity="all">All</div>
-      <div class="control-btn" data-rarity="astral">Astral</div>
-      <div class="control-btn" data-rarity="cosmic">Cosmic</div>
-      <div class="control-btn" data-rarity="divine">Divine</div>
-      <div class="control-btn" data-rarity="godly">Godly</div>
-      <div class="control-btn" data-rarity="exclusive">Exclusive</div>
-      <div class="control-btn" data-rarity="mythic">Mythic</div>
-      <div class="control-btn" data-rarity="legendary">Legendary</div>
-      <div class="control-btn" data-rarity="calculator">Calculator</div>
-    </div>
-
-    <div class="sort-row">
-      <button class="sort-btn active" data-sort="default">Default Sort</button>
-      <button class="sort-btn" data-sort="value-desc">High Value</button>
-    </div>
-
-    <div id="list-root" class="list-root"></div>
+    <div id="list-root" class="list-root" aria-live="polite"></div>
 
     <div style="display:flex;gap:12px;justify-content:center;align-items:center;margin-top:12px" id="pagination">
       <button id="prev-btn" class="sort-btn" style="min-width:120px">Previous</button>
@@ -300,14 +305,15 @@
       const rcls = (u.rarity||'').toLowerCase().replace(/\s+/g,'-');
       const st = statusClass(u.baseStats.status);
       const dm = demandClass(u.baseStats.demand);
-      const second = u.secondEdition && String(u.secondEdition).toLowerCase()==='yes' ? `<div style="color:#ffd54a;font-weight:900;margin-top:6px">2nd Edition</div>` : '';
+      const second = u.secondEdition && String(u.secondEdition).toLowerCase()==='yes' ? `<div style="color:var(--gold);font-weight:900;margin-top:6px">2nd Edition</div>` : '';
+      // improved layout: bigger labels, values, center portrait
       return `<div class="unit-card ${rcls}" data-key="${k}">
         <div class="card-header">
           <div class="unit-title">${esc(u.name)}</div>
-          <div class="portrait-frame"><div class="portrait-circle ${rcls}"><div class="img" style="background-image:${p}"></div></div></div>
+          <div class="portrait-frame" aria-hidden="true"><div class="portrait-circle ${rcls}"><div class="img" style="background-image:${p}"></div></div></div>
           ${second}
         </div>
-        <div class="info-row">
+        <div class="info-row" role="group" aria-label="unit stats">
           <div class="info-box"><div class="label">Value</div><div class="value">${esc(u.baseStats.value)}</div></div>
           <div class="info-box"><div class="label">Status</div><div class="value"><span class="status-badge ${st}">${esc(u.baseStats.status)}</span></div></div>
           <div class="info-box"><div class="label">Demand</div><div class="value"><span class="demand-pill ${dm}">${esc(u.baseStats.demand)}</span></div></div>
@@ -315,10 +321,11 @@
       </div>`; }).join('');
   }
 
-  // menu (kept for small screens)
-  menuBtn.addEventListener('click', ()=>{ const open = menuPanel.style.display==='block'; menuPanel.style.display = open ? 'none' : 'block'; menuPanel.setAttribute('aria-hidden', open ? 'true' : 'false'); });
-  document.addEventListener('click', (e)=>{ if(!menuBtn.contains(e.target) && !menuPanel.contains(e.target)){ menuPanel.style.display='none'; menuPanel.setAttribute('aria-hidden','true'); } });
-  menuPanel.querySelectorAll('.menu-item').forEach(it=>{ it.addEventListener('click', ()=>{ const key = it.getAttribute('data-key'); menuPanel.style.display='none'; if(key==='calculator'){ document.getElementById('calculator-root').style.display='block'; listRoot.style.display='none'; document.getElementById('pagination').style.display='none'; } else { document.getElementById('calculator-root').style.display='none'; listRoot.style.display=''; document.getElementById('pagination').style.display='flex'; currentFilter = key || 'all'; currentPage = 1; updateControlActiveFromFilter(); renderList(); } }); });
+  // small-screen menu (kept but hidden by default)
+  try {
+    const menuPanel = document.getElementById('menu-panel');
+    if (menuPanel) menuPanel.style.display = 'none';
+  } catch(e){}
 
   // sort
   document.querySelectorAll('.sort-btn').forEach(b=>{ b.addEventListener('click', ()=>{ document.querySelectorAll('.sort-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); currentSort = b.getAttribute('data-sort')||'default'; currentPage = 1; renderList(); }); });
@@ -328,7 +335,7 @@
   document.getElementById('next-btn').addEventListener('click', ()=>{ const keys = unitKeys.filter(k=>{ const u=unitDatabase[k]; const r=(u.rarity||'').toLowerCase(); if(currentFilter!=='all' && r!==currentFilter) return false; if(searchQuery && !(u.name||'').toLowerCase().includes(searchQuery.toLowerCase())) return false; return true; }); const maxp = Math.ceil(keys.length/itemsPerPage)||1; if(currentPage<maxp){ currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }});
   document.getElementById('search-bar').addEventListener('input', e=>{ searchQuery = e.target.value || ''; currentPage = 1; renderList(); });
 
-  // Controls row (restored UI controls like the screenshot)
+  // Controls row (filter buttons + calculator)
   const controlButtons = Array.from(document.querySelectorAll('.control-btn'));
   controlButtons.forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -355,19 +362,19 @@
       const r = b.getAttribute('data-rarity');
       if(r===currentFilter){ b.classList.add('active'); } else { b.classList.remove('active'); }
     });
-    // ensure calculator button not marked active when filter set
     const calcBtn = document.querySelector('.control-btn[data-rarity="calculator"]');
     if(calcBtn) calcBtn.classList.remove('active');
   }
 
-  // picker functions
+  // picker functions (calculator)
   function createPicker(){
     const cats=['Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
     pickerSidebar.innerHTML = cats.map(c=>`<div class="picker-cat" data-cat="${c.toLowerCase()}">${c}</div>`).join('');
     const def = pickerSidebar.querySelector('[data-cat="astral"]'); if(def) def.classList.add('active');
     renderPickerGrid('astral','',1,'astral','');
     pickerSidebar.querySelectorAll('.picker-cat').forEach(btn=>{ btn.addEventListener('click', ()=>{ pickerSidebar.querySelectorAll('.picker-cat').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); renderPickerGrid(btn.getAttribute('data-cat')||'astral','','',btn.getAttribute('data-cat')||'astral'); }); });
-    pickerSearch.removeEventListener('input', onPickerSearch); pickerSearch.addEventListener('input', onPickerSearch);
+    pickerSearch && pickerSearch.removeEventListener('input', onPickerSearch);
+    pickerSearch && pickerSearch.addEventListener('input', onPickerSearch);
     pickerOverlay.addEventListener('click', (ev)=>{ if(ev.target===pickerOverlay) hidePicker(); });
   }
   function onPickerSearch(e){ const active = pickerSidebar.querySelector('.picker-cat.active'); const cat = active?active.getAttribute('data-cat'):'astral'; renderPickerGrid(cat,'',1,cat,e.target.value||''); }
@@ -375,7 +382,7 @@
     category=(category||'astral').toLowerCase(); q=(q||'').toLowerCase();
     const keys = unitKeys.filter(k=>{ const u=unitDatabase[k]; if(!u) return false; if((u.rarity||'').toLowerCase() !== category) return false; if(q && !(u.name||'').toLowerCase().includes(q)) return false; return true; });
     if(!keys.length){ pickerGrid.innerHTML=''; return; }
-    pickerGrid.innerHTML = keys.map(k=>{ const u=unitDatabase[k]; const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : ''; const rcls=(u.rarity||'').toLowerCase().replace(/\s+/g,'-'); return `<div class="picker-thumb rarity-${rcls}" data-key="${k}"><div style="width:68px;height:68px;border-radius:8px;background-image:${p};background-size:cover;background-position:center"></div></div>`; }).join('');
+    pickerGrid.innerHTML = keys.map(k=>{ const u=unitDatabase[k]; const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : ''; const rcls=(u.rarity||'').toLowerCase().replace(/\s+/g,'-'); return `<div class="picker-thumb rarity-${rcls}" data-key="${k}" title="${esc(u.name)}"><div style="width:68px;height:68px;border-radius:8px;background-image:${p};background-size:cover;background-position:center"></div></div>`; }).join('');
     pickerGrid.querySelectorAll('.picker-thumb').forEach(t=>{ t.removeEventListener('click', onPickerClick); t.addEventListener('click', onPickerClick); });
   }
   function onPickerClick(e){ const key=e.currentTarget.getAttribute('data-key'); if(!key) return; pendingPickerKey = key; openTraitChooser(key); }
@@ -394,13 +401,15 @@
   function restoreTrade(){ try{ const raw=localStorage.getItem(LS_KEY); if(!raw) return; const p=JSON.parse(raw); leftItems=(p.left||[]).map(it=>{ const single=(it.trait && it.trait!=='normal' && it.trait!=='clean' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait])?parseValue(unitDatabase[it.key].traits[it.trait].value):parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value)||0); return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single*(it.qty||1), clean:!!it.clean }; }); rightItems=(p.right||[]).map(it=>{ const single=(it.trait && it.trait!=='normal' && it.trait!=='clean' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait])?parseValue(unitDatabase[it.key].traits[it.trait].value):parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value)||0); return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single*(it.qty||1), clean:!!it.clean }; }); }catch(e){console.warn(e);} }
 
   // plus buttons for calculator - open picker for left/right
-  document.getElementById('plus-left').addEventListener('click', ()=>{ currentPickerSide='left'; showPicker(); });
-  document.getElementById('plus-right').addEventListener('click', ()=>{ currentPickerSide='right'; showPicker(); });
+  const plusLeft = document.getElementById('plus-left');
+  const plusRight = document.getElementById('plus-right');
+  plusLeft && plusLeft.addEventListener('click', ()=>{ currentPickerSide='left'; showPicker(); });
+  plusRight && plusRight.addEventListener('click', ()=>{ currentPickerSide='right'; showPicker(); });
 
   // init
   try{ createPicker(); restoreTrade(); renderList(); renderThumbs(); updateTotalsAndVerdict(); }catch(e){ console.error('init',e); }
 
-  // expose
+  // expose for debugging
   window._skibidi = { unitDatabase, leftItems, rightItems, renderList, renderThumbs, updateTotalsAndVerdict };
 
 })();
