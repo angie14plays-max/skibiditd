@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-  <title>Skibidi TD — Value List + Calculator (restored, picker & categories)</title>
+  <title>Skibidi TD — Value List + Calculator (final layout)</title>
   <style>
     :root{
       --bg:#000;
@@ -14,7 +14,7 @@
       --muted:#777;
       --gold:#facc15;
       --purple:#a855f7;
-      --accent:linear-gradient(90deg,#8b4bff,#ff2d6f);
+      --accent-grad: linear-gradient(90deg,#8b4bff,#ff2d6f);
       --text:#fff;
 
       --grad-astral: linear-gradient(60deg, #640081, #7e00a5, #154af0, #00cd82, #11ff46);
@@ -26,87 +26,154 @@
       --grad-legendary: linear-gradient(180deg, #f5a623, #d48c00);
     }
 
-    *{box-sizing:border-box;font-family:'Montserrat',sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
-    html,body{margin:0;background:var(--bg);padding:20px 28px 80px}
+    *{box-sizing:border-box;font-family:'Montserrat',sans-serif;-webkit-font-smoothing:antialiased}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);padding:20px 30px}
 
-    /* Controls */
-    .controls{max-width:1200px;margin:0 auto 22px;display:flex;flex-direction:column;gap:14px}
+    /* Controls (unchanged look) */
+    .controls{max-width:1200px;margin:0 auto 18px;display:flex;flex-direction:column;gap:14px}
     #search-bar{width:100%;padding:14px;border-radius:12px;background:var(--card);border:2px solid var(--border);color:var(--text);outline:none}
     .tabs,.sort{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
     .tab-btn,.sort-btn{background:var(--card);border:2px solid var(--border);padding:10px 16px;border-radius:8px;color:var(--muted);font-weight:900;cursor:pointer;text-transform:uppercase}
     .tab-btn.active,.sort-btn.active{color:#fff;border-color:var(--gold);box-shadow:0 0 0 3px rgba(250,204,21,0.06) inset}
 
-    /* List grid (kept original look) */
+    /* Main list grid (restored, unchanged) */
     .list-root{max-width:1200px;margin:22px auto;display:grid;grid-template-columns:repeat(3,1fr);gap:25px}
-    .unit-card{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px;text-align:center}
-    .unit-title{font-weight:900;text-transform:uppercase;font-size:16px}
-    .portrait-frame{width:120px;height:120px;border-radius:50%;margin:6px auto 4px;display:flex;align-items:center;justify-content:center;background:var(--grad-astral);border:3px solid #000}
+    .unit-card{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px;text-align:center;display:flex;flex-direction:column;justify-content:space-between}
+    .header-section{min-height:60px;margin-bottom:8px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+    /* fix broken words: prevent mid-word breaks, center, wrap naturally between words */
+    .unit-title{font-weight:900;text-transform:uppercase;font-size:16px;line-height:1.1;white-space:normal;word-break:normal;overflow-wrap:break-word;text-align:center}
+    .second-edition-tag{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;margin-top:4px;letter-spacing:1px}
+    .portrait-frame{width:120px;height:120px;border-radius:50%;margin:6px auto 6px;display:flex;align-items:center;justify-content:center;background:var(--grad-astral);border:3px solid #000}
     .unit-image{width:110px;height:110px;border-radius:50%;background-size:cover;background-position:center}
-    .data-table{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+    .data-table{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
     .data-cell{background:var(--box);border:1px solid var(--border);padding:10px;border-radius:8px}
     .label{font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;margin-bottom:6px}
     .val{font-weight:900}
+    .highlight-gold{color:var(--gold)}
+    .highlight-purple{color:var(--purple)}
 
     .pagination{max-width:1200px;margin:22px auto;display:flex;gap:10px;justify-content:center;align-items:center}
     .pagination-btn{background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;color:var(--muted);font-weight:900}
     .page-info{color:var(--muted);font-weight:900}
 
-    /* Calculator (styled to match screenshots) */
-    .calculator-root{max-width:1200px;margin:20px auto;display:none}
-    .calc-row{display:flex;gap:18px;align-items:flex-start}
-    .trade-panel{flex:1;background:var(--card);border:2px solid var(--border);border-radius:18px;padding:18px;min-height:360px;display:flex;flex-direction:column;gap:12px}
-    .trade-title{font-weight:900;text-transform:uppercase;text-align:center}
-    .trade-title.you{color:#ff2d2d}
-    .trade-title.them{color:#5d80ff}
+    /* ---------------- Calculator (fixed frame & layout) ---------------- */
+    .calculator-root{max-width:1200px;margin:20px auto 8px;display:none}
+    /* Keep panels centered and aligned on same row, responsive fallback -> column */
+    .calc-row{display:flex;gap:28px;align-items:flex-start;justify-content:center}
+    .trade-panel{
+      width:46%;
+      background:var(--card);
+      border-radius:14px;
+      border:2px solid rgba(255,255,255,0.06);
+      padding:28px 26px;
+      min-height:380px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.01) inset;
+      display:flex;flex-direction:column;align-items:stretch;gap:16px;
+    }
+    .trade-title{font-weight:900;text-transform:uppercase;text-align:center;font-size:20px;letter-spacing:1px}
+    .trade-title.you{color:#ff3b3b}
+    .trade-title.them{color:#6ea0ff}
 
-    /* big center + button like screenshot */
-    .plus-btn{width:64px;height:64px;border-radius:10px;background:linear-gradient(90deg,#8b4bff,#ff2d6f);display:grid;place-items:center;font-size:32px;font-weight:900;color:#fff;margin:8px auto;cursor:pointer;border:3px solid rgba(255,255,255,0.06)}
+    /* center plus button exactly like your example */
+    .plus-wrap{display:flex;justify-content:center}
+    .plus-btn{
+      width:56px;height:56px;border-radius:10px;background:linear-gradient(180deg,#7b00e6,#ff2d6f);display:grid;place-items:center;font-size:28px;font-weight:900;color:#fff;cursor:pointer;
+      border:3px solid rgba(255,255,255,0.06);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    }
 
-    .controls-row{display:flex;gap:10px;align-items:center}
+    /* control row hidden visually but accessible for keyboard */
+    .controls-row{display:flex;gap:10px;align-items:center;justify-content:flex-start}
     select,input[type=number]{background:var(--box);border:2px solid var(--border);padding:10px;border-radius:10px;color:var(--text)}
-    select.unit-select{min-width:360px}
-    .add-small{background:var(--accent);border-radius:8px;padding:8px 10px;border:none;cursor:pointer;color:#000;font-weight:900}
+    select.unit-select{min-width:280px}
+    .add-small{background:var(--accent-grad);border-radius:8px;padding:8px 10px;border:none;cursor:pointer;color:#000;font-weight:900}
 
-    .items-list{background:rgba(255,255,255,0.01);border-radius:12px;border:1px solid rgba(255,255,255,0.04);min-height:180px;padding:14px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px}
-    .selected-thumb{width:84px;height:84px;border-radius:12px;position:relative;overflow:hidden;border:3px solid rgba(255,255,255,0.04);background:var(--box)}
+    /* big interior item box matches screenshot: inset border and rounded corners */
+    .items-list{
+      background:transparent;
+      border-radius:10px;
+      min-height:180px;
+      padding:14px;
+      border:2px solid rgba(255,255,255,0.03);
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-content:flex-start;
+      align-items:flex-start;
+      justify-content:flex-start;
+    }
+
+    /* thumbnails inside calculator: no value text, simple QTY & demand optionally */
+    .selected-thumb{
+      width:76px;height:76px;border-radius:10px;position:relative;overflow:hidden;border:3px solid rgba(255,255,255,0.04);background:var(--box);flex:0 0 auto;
+      display:flex;align-items:center;justify-content:center;
+    }
     .thumb-img{width:100%;height:100%;background-size:cover;background-position:center}
-    .thumb-badge{position:absolute;right:6px;top:6px;background:#000;padding:5px 6px;border-radius:8px;font-weight:900;border:2px solid #fff;font-size:11px}
-    .thumb-demand{position:absolute;left:6px;bottom:6px;background:#000;padding:4px 6px;border-radius:6px;font-weight:900;border:2px solid #fff;font-size:11px}
+    .thumb-badge{position:absolute;right:6px;top:6px;background:rgba(0,0,0,0.65);padding:4px 6px;border-radius:8px;font-weight:900;color:#fff;font-size:11px;display:none} /* hide value badge */
+    .thumb-demand{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,0.65);padding:4px 6px;border-radius:6px;font-weight:900;color:#fff;font-size:11px;display:none} /* hide demand on squares */
 
-    .total-box{margin-top:auto;display:flex;justify-content:center}
-    .total-value{background:linear-gradient(90deg,#8b4bff,#ff2d6f);padding:12px 22px;border-radius:12px;color:#000;font-weight:900}
+    /* total button centered and matching style */
+    .total-box{display:flex;justify-content:center}
+    .total-value{
+      background:linear-gradient(90deg,#7b00e6,#ff2d6f);
+      padding:10px 18px;border-radius:10px;color:#000;font-weight:900;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+    }
 
-    .verdict-wrap{max-width:1200px;margin:20px auto;display:flex;justify-content:center}
-    .verdict{width:480px;background:var(--card);border:2px solid var(--border);border-radius:12px;padding:18px;display:flex;justify-content:center}
-    .verdict-text{font-weight:900;font-size:36px;color:#ff1a1a;text-shadow:0 6px 18px rgba(255,0,0,0.15)}
+    /* verdict centered under the calculator panels (big) */
+    .verdict-wrap{max-width:1200px;margin:22px auto;display:flex;justify-content:center}
+    .verdict{
+      width:520px;background:var(--card);border-radius:12px;border:2px solid rgba(255,255,255,0.04);padding:18px;display:flex;justify-content:center;
+    }
+    .verdict-text{font-weight:900;font-size:32px;color:#6ea0ff;letter-spacing:2px}
 
-    /* Unit picker modal */
-    .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
-    .picker-box{width:100%;max-width:1100px;background:var(--card);border:2px solid var(--border);border-radius:14px;padding:18px;display:flex;gap:12px;min-height:480px}
-    .picker-sidebar{width:160px;display:flex;flex-direction:column;gap:12px}
-    .picker-cat{padding:12px;border-radius:10px;border:2px solid var(--border);color:var(--muted);font-weight:900;cursor:pointer;text-transform:uppercase}
+    /* ---------------- Picker modal improvements ---------------- */
+    .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:9999;padding:18px}
+    /* outer frame like your sample: thicker rounded border and inset inner dark panel */
+    .picker-box{
+      width:100%;max-width:1180px;border-radius:14px;padding:14px;background:linear-gradient(#0f0f0f,#0f0f0f);
+      border:3px solid rgba(255,255,255,0.04);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      display:flex;gap:12px;min-height:520px;
+    }
+    .picker-sidebar{width:160px;display:flex;flex-direction:column;gap:12px;padding:8px}
+    .picker-cat{padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.03);color:var(--muted);font-weight:900;cursor:pointer;text-transform:uppercase;background:transparent}
     .picker-cat.active{border-color:var(--gold);color:#fff}
-    .picker-main{flex:1;display:flex;flex-direction:column;gap:10px}
-    .picker-search input{width:100%;padding:12px;border-radius:10px;background:var(--box);border:2px solid var(--border);color:var(--text)}
-    .picker-grid{flex:1;background:rgba(0,0,0,0.01);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.03);overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,78px);gap:12px;align-content:start}
-    .picker-thumb{width:78px;height:78px;border-radius:10px;overflow:hidden;border:3px solid rgba(255,255,255,0.04);cursor:pointer;position:relative;background:var(--box)}
-    .picker-thumb .p-badge{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,0.6);padding:4px 6px;border-radius:6px;font-weight:900;font-size:11px;border:2px solid #fff}
+    .picker-main{flex:1;display:flex;flex-direction:column;gap:12px;padding:8px}
+    .picker-search input{width:100%;padding:12px;border-radius:12px;background:var(--box);border:2px solid var(--border);color:var(--text)}
+    .picker-grid{flex:1;background:transparent;border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.03);overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,78px);gap:12px;align-content:start}
+    .picker-thumb{width:78px;height:78px;border-radius:10px;overflow:hidden;border:3px solid rgba(255,255,255,0.04);cursor:pointer;position:relative;background:var(--box);display:flex;align-items:center;justify-content:center}
+    .picker-thumb:hover{transform:translateY(-6px);transition:transform .12s ease;box-shadow:0 8px 20px rgba(0,0,0,0.6)}
+
+    /* remove value badge on picker thumbnails (you asked no values) */
+    .picker-thumb .p-badge{display:none !important}
 
     /* rarity halos */
-    .rarity-astral .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-astral);z-index:-1}
-    .rarity-cosmic .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-cosmic);z-index:-1}
-    .rarity-divine .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-divine);z-index:-1}
-    .rarity-godly .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-godly);z-index:-1}
-    .rarity-exclusive .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-exclusive);z-index:-1}
-    .rarity-mythic .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-mythic);z-index:-1}
-    .rarity-legendary .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-legendary);z-index:-1}
+    .rarity-astral .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-astral);z-index:-1;opacity:.95}
+    .rarity-cosmic .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-cosmic);z-index:-1;opacity:.95}
+    .rarity-divine .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-divine);z-index:-1;opacity:.95}
+    .rarity-godly .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-godly);z-index:-1;opacity:.95}
+    .rarity-exclusive .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-exclusive);z-index:-1;opacity:.95}
+    .rarity-mythic .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-mythic);z-index:-1;opacity:.95}
+    .rarity-legendary .picker-thumb::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:var(--grad-legendary);z-index:-1;opacity:.95}
 
-    @media(max-width:1024px){.list-root{grid-template-columns:repeat(2,1fr)}.calc-row{flex-direction:column}.verdict{width:90%}.picker-sidebar{display:flex;overflow:auto}}
-    @media(max-width:600px){.list-root{grid-template-columns:1fr}.picker-grid{grid-template-columns:repeat(auto-fill,86px)}select.unit-select{min-width:160px}}
+    /* Responsive */
+    @media(max-width:1024px){
+      .list-root{grid-template-columns:repeat(2,1fr)}
+      .calc-row{flex-direction:column;gap:18px}
+      .trade-panel{width:100%}
+      .picker-box{flex-direction:column;min-height:560px}
+      .picker-sidebar{width:100%;display:flex;overflow:auto;gap:10px}
+      .picker-grid{grid-template-columns:repeat(auto-fill,86px)}
+    }
+    @media(max-width:600px){
+      .list-root{grid-template-columns:1fr}
+      .picker-grid{grid-template-columns:repeat(auto-fill,86px)}
+      .unit-title{font-size:14px}
+    }
   </style>
 </head>
 <body>
-
   <div class="controls">
     <input id="search-bar" placeholder="Search unit...">
     <div class="tabs" id="tabs">
@@ -126,32 +193,33 @@
     </div>
   </div>
 
-  <!-- Calculator: styled to match your screenshots exactly -->
+  <!-- Calculator -->
   <div id="calculator-root" class="calculator-root" aria-hidden="true">
     <div class="calc-row">
       <div class="trade-panel" id="left-panel">
         <div class="trade-title you">YOUR VALUE</div>
-        <div style="display:flex;justify-content:center">
+
+        <div class="plus-wrap">
           <div class="plus-btn" id="plus-left">+</div>
         </div>
-        <div style="display:flex;justify-content:center">
-          <div style="width:88%;"> <!-- controls row (hidden but keeps layout) -->
-            <div class="controls-row" style="justify-content:space-between">
-              <select id="unit-select-left" class="unit-select"></select>
-              <select id="trait-select-left">
-                <option value="base">Base</option>
-                <option value="grandmaster">Grandmaster</option>
-                <option value="master">Master</option>
-                <option value="superPayday">Super Payday</option>
-                <option value="sniper">Sniper</option>
-              </select>
-              <input id="qty-left" type="number" min="1" value="1" style="width:80px">
-              <button class="add-small" id="add-left">Add</button>
-            </div>
+
+        <!-- controls are available but visually secondary (picker is primary) -->
+        <div style="display:none" aria-hidden="true">
+          <div class="controls-row">
+            <select id="unit-select-left" class="unit-select"></select>
+            <select id="trait-select-left">
+              <option value="base">Base</option>
+              <option value="grandmaster">Grandmaster</option>
+              <option value="master">Master</option>
+              <option value="superPayday">Super Payday</option>
+              <option value="sniper">Sniper</option>
+            </select>
+            <input id="qty-left" type="number" min="1" value="1" style="width:80px">
+            <button class="add-small" id="add-left">Add</button>
           </div>
         </div>
 
-        <div class="items-list" id="left-items"></div>
+        <div class="items-list" id="left-items" aria-live="polite"></div>
 
         <div class="total-box">
           <div class="total-value" id="left-total">TOTAL VALUE: 0</div>
@@ -160,27 +228,27 @@
 
       <div class="trade-panel" id="right-panel">
         <div class="trade-title them">THEIR VALUE</div>
-        <div style="display:flex;justify-content:center">
+
+        <div class="plus-wrap">
           <div class="plus-btn" id="plus-right">+</div>
         </div>
-        <div style="display:flex;justify-content:center">
-          <div style="width:88%;">
-            <div class="controls-row" style="justify-content:space-between">
-              <select id="unit-select-right" class="unit-select"></select>
-              <select id="trait-select-right">
-                <option value="base">Base</option>
-                <option value="grandmaster">Grandmaster</option>
-                <option value="master">Master</option>
-                <option value="superPayday">Super Payday</option>
-                <option value="sniper">Sniper</option>
-              </select>
-              <input id="qty-right" type="number" min="1" value="1" style="width:80px">
-              <button class="add-small" id="add-right">Add</button>
-            </div>
+
+        <div style="display:none" aria-hidden="true">
+          <div class="controls-row">
+            <select id="unit-select-right" class="unit-select"></select>
+            <select id="trait-select-right">
+              <option value="base">Base</option>
+              <option value="grandmaster">Grandmaster</option>
+              <option value="master">Master</option>
+              <option value="superPayday">Super Payday</option>
+              <option value="sniper">Sniper</option>
+            </select>
+            <input id="qty-right" type="number" min="1" value="1" style="width:80px">
+            <button class="add-small" id="add-right">Add</button>
           </div>
         </div>
 
-        <div class="items-list" id="right-items"></div>
+        <div class="items-list" id="right-items" aria-live="polite"></div>
 
         <div class="total-box">
           <div class="total-value" id="right-total">TOTAL VALUE: 0</div>
@@ -189,14 +257,13 @@
     </div>
   </div>
 
-  <!-- Verdict big centered -->
   <div class="verdict-wrap">
     <div class="verdict" id="verdict-panel">
       <div class="verdict-text" id="verdict-text">NO ITEMS</div>
     </div>
   </div>
 
-  <!-- Main list (restored site look) -->
+  <!-- Main list -->
   <div id="list-root" class="list-root" aria-live="polite"></div>
 
   <div class="pagination">
@@ -205,13 +272,12 @@
     <button id="next-btn" class="pagination-btn">Next</button>
   </div>
 
-  <!-- Unit data file -->
+  <!-- Unit data (unchanged) -->
   <script src="skibidi-td-data.js"></script>
 
-  <!-- Renderer + calculator + picker -->
+  <!-- Renderer, calculator and picker script (keeps previous logic; small adjustments to keep thumbnails/value hidden) -->
   <script>
   (function(){
-    // parseValue (same robust version as before)
     function parseValue(valString){
       if(valString===0) return 0;
       if(!valString && valString !== 0) return 0;
@@ -232,19 +298,15 @@
     }
     window.parseValue = parseValue;
 
-    // formatting helpers
     function abbr(n){
       if(!isFinite(n) || n===0) return '0';
       if(n >= 1e6) return (n/1e6).toFixed(2) + 'M+';
       if(n >= 1e3) return (n/1e3).toFixed(2) + 'K';
       return Math.round(n).toLocaleString();
     }
-    function nice(n){
-      if(!isFinite(n)) return '0';
-      return Math.round(n).toLocaleString();
-    }
+    function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    // UI refs
+    // DOM refs
     const listRoot = document.getElementById('list-root');
     const searchBar = document.getElementById('search-bar');
     const tabs = document.getElementById('tabs');
@@ -253,7 +315,6 @@
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
 
-    // calculator refs
     const calcRoot = document.getElementById('calculator-root');
     const leftSelect = document.getElementById('unit-select-left');
     const rightSelect = document.getElementById('unit-select-right');
@@ -271,20 +332,14 @@
     const plusLeft = document.getElementById('plus-left');
     const plusRight = document.getElementById('plus-right');
 
-    // modal picker
     let pickerOverlay = null;
-
-    // pagination/filter state
     let currentFilter='all';
     let searchQuery='';
     let currentSort='default';
     let currentPage=1;
     const itemsPerPage = 15;
-
-    // rarity order same as original
     const rarityOrder = { 'astral':1,'cosmic':2,'godly':3,'divine':4,'mythic':5,'legendary':6,'exclusive':99 };
 
-    // validate unitDatabase presence
     if(typeof unitDatabase === 'undefined'){
       listRoot.innerHTML = '<div style="color:#f88">Error: unitDatabase not loaded</div>';
       throw new Error('unitDatabase missing');
@@ -293,7 +348,6 @@
     const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
     const imageProvider = "https://corsproxy.io/?https://drive.google.com/thumbnail?id=";
 
-    // populate list cards (keeps original look)
     function renderList(){
       const keys = unitKeys.filter(k=>{
         const u = unitDatabase[k];
@@ -303,7 +357,6 @@
         return matchesRarity && matchesSearch;
       });
 
-      // sort
       keys.sort((a,b)=>{
         if(currentSort==='value-desc'){
           return parseValue(unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats.value);
@@ -331,13 +384,11 @@
         const edition = isSecond ? `<div class="second-edition-tag">2nd Edition</div>` : '';
         const rslug = (u.rarity||'').toLowerCase();
         return `<div class="unit-card rarity-${rslug}" data-unit="${k}">
-          <div class="header-section"><div class="unit-title">${u.name}</div>${edition}</div>
-          <div class="card-body">
-            <div class="buff-column"></div>
+          <div class="header-section"><div class="unit-title">${escapeHtml(u.name)}</div>${edition}</div>
+          <div class="card-body" style="display:flex;align-items:center;justify-content:center;gap:10px">
             <div class="portrait-frame" onclick="updateUnitStats('${k}', null)" title="Reset to Base Stats">
               <div class="unit-image" style="background-image:${portrait}"></div>
             </div>
-            <div class="buff-column"></div>
           </div>
           <div class="data-table">
             <div class="data-cell">
@@ -357,7 +408,6 @@
       }).join('');
     }
 
-    // updateUnitStats (kept for compatibility with portrait click actions)
     window.updateUnitStats = function(unitKey, traitKey){
       const unit = unitDatabase[unitKey];
       const card = document.querySelector(`[data-unit="${unitKey}"]`);
@@ -366,20 +416,17 @@
       const valueEl = card.querySelector('.val-value');
       const demandEl = card.querySelector('.val-demand');
       const statusEl = card.querySelector('.val-status');
-      // if present update; otherwise whole card render uses base values already
       if(valueEl) valueEl.innerText = stats.value;
       if(demandEl) demandEl.innerText = stats.demand;
-      if(statusEl){ statusEl.innerText = stats.status; }
+      if(statusEl) statusEl.innerText = stats.status;
     };
 
-    // wire controls
     searchBar.addEventListener('input',e=>{ searchQuery=e.target.value||''; currentPage=1; renderList(); });
     tabs.addEventListener('click',e=>{
       if(!e.target.classList.contains('tab-btn')) return;
       tabs.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
       e.target.classList.add('active');
       currentFilter = e.target.getAttribute('data-rarity') || 'all';
-      // show calculator if requested
       if(currentFilter === 'calculator'){
         calcRoot.style.display = 'block';
         calcRoot.setAttribute('aria-hidden','false');
@@ -403,24 +450,19 @@
     prevBtn.addEventListener('click', ()=>{ if(currentPage>1){currentPage--;renderList(); window.scrollTo({top:0,behavior:'smooth'});} });
     nextBtn.addEventListener('click', ()=>{ const filteredTotal = unitKeys.filter(k=>{ const u = unitDatabase[k]; return (currentFilter==='all' || (u.rarity||'').toLowerCase()===currentFilter) && (u.name||'').toLowerCase().includes(searchQuery.toLowerCase()) }).length; const maxPage = Math.ceil(filteredTotal/itemsPerPage)||1; if(currentPage<maxPage){currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'});} });
 
-    // --------------------------------------------------------------------
-    // Calculator logic, picker modal and thumbnails with correct values/demand
-    // --------------------------------------------------------------------
-    // data stores for both sides
+    // ---------------- Calculator ----------------
     const leftItems = [];
     const rightItems = [];
 
-    // populate selects (convenience)
     function populateSelects(){
       const makeOpt = key=>{
         const u = unitDatabase[key];
-        return `<option value="${key}">${u.name} (${u.rarity||'n/a'}) — ${u.baseStats.value||'N/A'}</option>`;
+        return `<option value="${key}">${escapeHtml(u.name)} (${u.rarity||'n/a'}) — ${u.baseStats.value||'N/A'}</option>`;
       };
       leftSelect.innerHTML = unitKeys.map(makeOpt).join('');
       rightSelect.innerHTML = unitKeys.map(makeOpt).join('');
     }
 
-    // compute unit numeric value for trait
     function getUnitValue(key, trait){
       const u = unitDatabase[key];
       if(!u) return 0;
@@ -428,7 +470,6 @@
       return parseValue(u.baseStats.value);
     }
 
-    // add item to side
     function addToSide(side,key,trait,qty){
       qty = Math.max(1, Math.floor(qty)||1);
       const single = getUnitValue(key, trait);
@@ -436,15 +477,12 @@
       const id = `${key}|${trait}|${Date.now()}|${Math.random().toString(36).slice(2,6)}`;
       const entry = {id,key,trait,qty,single,computed};
       if(side==='left') leftItems.push(entry); else rightItems.push(entry);
-      renderThumbs();
-      updateTotalsAndVerdict();
+      renderThumbs(); updateTotalsAndVerdict();
     }
 
-    // render thumbnails in the big box (matching screenshots)
     function renderThumbs(){
-      leftItemsEl.innerHTML = leftItems.length ? leftItems.map(it => thumbHTML(it,'left')).join('') : '';
-      rightItemsEl.innerHTML = rightItems.length ? rightItems.map(it => thumbHTML(it,'right')).join('') : '';
-      // attach removes
+      leftItemsEl.innerHTML = leftItems.length ? leftItems.map(it=> thumbHTML(it,'left')).join('') : '';
+      rightItemsEl.innerHTML = rightItems.length ? rightItems.map(it=> thumbHTML(it,'right')).join('') : '';
       document.querySelectorAll('.thumb-remove').forEach(btn=>{
         btn.removeEventListener('click', thumbRemoveHandler);
         btn.addEventListener('click', thumbRemoveHandler);
@@ -454,11 +492,8 @@
       const u = unitDatabase[it.key] || {};
       const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
       const r = (u.rarity||'').toLowerCase();
-      const demand = u.baseStats && u.baseStats.demand ? u.baseStats.demand : 'N/A';
       return `<div class="selected-thumb rarity-${r}" data-id="${it.id}" data-side="${side}">
         <div class="thumb-img" style="background-image:${portrait}"></div>
-        <div class="thumb-badge">QTY:${it.qty}</div>
-        <div class="thumb-demand">${demand}</div>
         <div class="thumb-remove" style="position:absolute;left:6px;top:6px;background:rgba(0,0,0,0.7);color:#fff;border-radius:6px;padding:2px 6px;cursor:pointer;font-weight:900" data-id="${it.id}" data-side="${side}">×</div>
       </div>`;
     }
@@ -470,12 +505,9 @@
       renderThumbs(); updateTotalsAndVerdict();
     }
 
-    function sumList(list){
-      return list.reduce((s,it)=> s + Number(it.computed||0), 0);
-    }
+    function sumList(list){ return list.reduce((s,it)=> s + Number(it.computed||0), 0); }
 
     function updateTotalsAndVerdict(){
-      // recompute computed (in case underlying values changed)
       leftItems.forEach(i=> i.computed = (i.single||0) * (i.qty||1));
       rightItems.forEach(i=> i.computed = (i.single||0) * (i.qty||1));
       const leftSum = sumList(leftItems);
@@ -483,7 +515,6 @@
       leftTotalEl.innerText = `TOTAL VALUE: ${abbr(leftSum)}`;
       rightTotalEl.innerText = `TOTAL VALUE: ${abbr(rightSum)}`;
 
-      // balance / verdict rules
       const FAIR = 0.02; const SMALL = 0.10;
       let verdict='NO ITEMS';
       if(leftSum===0 && rightSum===0) verdict='NO ITEMS';
@@ -496,7 +527,7 @@
       verdictText.innerText = verdict.toUpperCase();
     }
 
-    // ---------- Picker modal (categories by rarity) ----------
+    // ---------- Picker (rarity categories) ----------
     function createPicker(){
       if(pickerOverlay) return;
       pickerOverlay = document.createElement('div');
@@ -510,10 +541,10 @@
       </div>`;
       document.body.appendChild(pickerOverlay);
       pickerOverlay.addEventListener('click', (e)=>{ if(e.target===pickerOverlay) pickerOverlay.style.display='none'; });
-      // fill sidebar with rarities (these will filter)
+
       const sidebar = pickerOverlay.querySelector('#picker-sidebar');
-      const cats = ['All','Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
-      sidebar.innerHTML = cats.map(c=> `<div class="picker-cat" data-cat="${c.toLowerCase()}">${c}</div>`).join('');
+      const rarities = ['All','Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
+      sidebar.innerHTML = rarities.map(r => `<div class="picker-cat" data-cat="${r.toLowerCase()}">${r}</div>`).join('');
       sidebar.querySelectorAll('.picker-cat').forEach(btn=>{
         btn.addEventListener('click', ()=>{
           sidebar.querySelectorAll('.picker-cat').forEach(x=>x.classList.remove('active'));
@@ -522,10 +553,8 @@
           renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, cat, pickerOverlay.querySelector('#picker-search-input').value || '');
         });
       });
-      // set All active
       const first = sidebar.querySelector('.picker-cat'); if(first) first.classList.add('active');
 
-      // search input
       pickerOverlay.querySelector('#picker-search-input').addEventListener('input', (e)=>{
         const active = sidebar.querySelector('.picker-cat.active');
         const cat = active ? active.getAttribute('data-cat') : 'all';
@@ -533,7 +562,6 @@
       });
     }
 
-    // state for picker
     let currentPickerSide='left', currentPickerTrait='base', currentPickerQty=1;
 
     function openPicker(side, trait, qty){
@@ -542,32 +570,22 @@
       currentPickerQty = Math.max(1, Math.floor(qty)||1);
       createPicker();
       pickerOverlay.style.display = 'flex';
-      // initial render - All
       const active = pickerOverlay.querySelector('.picker-cat.active');
-      const currentCat = active ? active.getAttribute('data-cat') : 'all';
-      renderPickerGrid(side, trait, qty, currentCat, '');
-      // focus search
+      const cat = active ? active.getAttribute('data-cat') : 'all';
+      renderPickerGrid(side, trait, qty, cat, '');
       setTimeout(()=>{ const s = pickerOverlay.querySelector('#picker-search-input'); if(s) s.focus(); },120);
     }
 
     function renderPickerGrid(side, trait, qty, category, q){
       category = (category||'all').toLowerCase();
       q = (q||'').toLowerCase();
-      // map category to rarity filter: category names are the ones user showed earlier; we will treat them as 'all' except rarities
-      // We support rarities explicitly because unitDatabase uses rarities — this matches screenshot behavior when clicking categories.
-      const rarityMap = {
-        'astral':'astral','cosmic':'cosmic','divine':'divine','godly':'godly','exclusive':'exclusive','mythic':'mythic','legendary':'legendary'
-      };
       const keys = unitKeys.filter(k=>{
         const u = unitDatabase[k];
         if(!u) return false;
-        const nameMatch = (u.name||'').toLowerCase().includes(q);
-        if(!nameMatch) return false;
-        if(category==='all') return true;
+        if(!(u.name||'').toLowerCase().includes(q)) return false;
+        if(category === 'all') return true;
         const rar = (u.rarity||'').toLowerCase();
-        if(rarityMap[category]) return rar === rarityMap[category];
-        // for categories not matching rarities (APEX, EVOLUTIONS etc) show all by default — you can provide a mapping later.
-        return true;
+        return rar === category;
       });
 
       const grid = pickerOverlay.querySelector('#picker-grid');
@@ -575,49 +593,35 @@
         const u = unitDatabase[k];
         const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
         const rslug = (u.rarity||'').toLowerCase();
-        const valueLabel = u.baseStats && u.baseStats.value ? u.baseStats.value : 'N/A';
-        return `<div class="picker-thumb rarity-${rslug}" data-key="${k}" title="${u.name}">
+        return `<div class="picker-thumb rarity-${rslug}" data-key="${k}" title="${escapeHtml(u.name)}">
           <div style="width:100%;height:100%;background-image:${portrait};background-size:cover;background-position:center;"></div>
-          <div class="p-badge">${valueLabel}</div>
         </div>`;
       }).join('');
 
-      // attach click handlers
       grid.querySelectorAll('.picker-thumb').forEach(t=>{
         t.addEventListener('click', ()=>{
           const key = t.getAttribute('data-key');
-          // add using the currently selected trait & qty
           addToSide(currentPickerSide, key, currentPickerTrait, currentPickerQty);
           pickerOverlay.style.display = 'none';
         });
       });
     }
 
-    // attach add button behaviour: open picker when clicking plus or add
     plusLeft.addEventListener('click', ()=> openPicker('left', traitLeft.value, Number(qtyLeft.value||1)));
     plusRight.addEventListener('click', ()=> openPicker('right', traitRight.value, Number(qtyRight.value||1)));
-    addLeft.addEventListener('click', ()=> {
-      // fallback quick add (use select value)
-      addToSide('left', leftSelect.value, traitLeft.value, Number(qtyLeft.value||1));
-    });
-    addRight.addEventListener('click', ()=> {
-      addToSide('right', rightSelect.value, traitRight.value, Number(qtyRight.value||1));
-    });
-
-    // double-click selects quick add
+    addLeft.addEventListener('click', ()=> addToSide('left', leftSelect.value, traitLeft.value, Number(qtyLeft.value||1)));
+    addRight.addEventListener('click', ()=> addToSide('right', rightSelect.value, traitRight.value, Number(qtyRight.value||1)));
     leftSelect.addEventListener('dblclick', ()=> addToSide('left', leftSelect.value, traitLeft.value, Number(qtyLeft.value||1)));
     rightSelect.addEventListener('dblclick', ()=> addToSide('right', rightSelect.value, traitRight.value, Number(qtyRight.value||1)));
 
-    // initialize
+    // init
     populateSelects();
     renderList();
     renderThumbs();
     updateTotalsAndVerdict();
 
-    // expose for debugging if needed
     window._leftItems = leftItems;
     window._rightItems = rightItems;
-
   })();
   </script>
 </body>
