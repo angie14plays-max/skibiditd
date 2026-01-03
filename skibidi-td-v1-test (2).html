@@ -1,25 +1,14 @@
+```html name=skibidi-td-v1-rarity-frames.html
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Skibidi TD — Value List + Calculator (complete)</title>
+  <title>Skibidi TD — Rarity Frames & Calculator Isolation</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    /*
-      Complete UI:
-      - Stronger persistent rarity colors for cards, portraits and calculator thumbs
-      - Picker opens on Astral and includes quick category tabs inside the modal
-      - Picker has internal scroll and fixed frame (no page overflow)
-      - Calculator fully isolated; pagination hidden when calculator active
-      - Calculator items persist to localStorage
-      - Drag-and-drop: drag from picker thumbnails into calculator panels
-      - No "view all" in picker (only categories)
-      - No explanatory text inside picker grid; empty when no results
-    */
-
     :root{
-      --bg:#000000;
+      --bg:#000;
       --card:#0f0f0f;
       --panel:#121212;
       --box:#151515;
@@ -28,7 +17,7 @@
       --gold:#facc15;
       --purple:#a855f7;
       --accent-grad: linear-gradient(90deg,#8b4bff,#ff2d6f);
-      --text:#ffffff;
+      --text:#fff;
 
       --g-astral: linear-gradient(135deg,#640081,#7e00a5,#154af0,#00cd82,#11ff46);
       --g-cosmic: linear-gradient(135deg,#b800e6,#6cedf0);
@@ -43,42 +32,55 @@
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text)}
     body{padding:22px;display:flex;flex-direction:column;align-items:center;gap:18px}
 
+    /* debug overlay */
     #debug-overlay{display:none;position:fixed;left:0;right:0;top:0;padding:12px;background:#b91c1c;color:white;z-index:99999;text-align:center;font-family:sans-serif}
 
     /* controls */
     .controls{width:100%;max-width:1200px;margin:0 auto 12px;display:flex;flex-direction:column;gap:12px}
     #search-bar{width:100%;padding:14px;border-radius:12px;background:var(--card);border:2px solid var(--border);color:var(--text);outline:none}
     .tabs,.sort{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-    .tab-btn,.sort-btn{background:var(--card);border:2px solid var(--border);padding:10px 16px;border-radius:8px;color:var(--muted);font-weight:900;cursor:pointer;text-transform:uppercase}
+    .tab-btn,.sort-btn{background:var(--card);border:2px solid var(--border);padding:10px 16px;border-radius:8px;color:var(--muted);font-weight:900;cursor:pointer;text-transform:uppercase;position:relative}
     .tab-btn.active,.sort-btn.active{color:#fff;border-color:var(--gold);box-shadow:0 0 0 4px rgba(250,204,21,0.06) inset}
 
-    /* list grid */
+    /* per-category color mark on the main tabs (always visible, subtle) */
+    .tab-btn[data-rarity="astral"]::before { content:""; position:absolute; left:6px; top:6px; bottom:6px; width:6px; border-radius:6px; background:var(--g-astral); opacity:0.95; }
+    .tab-btn[data-rarity="cosmic"]::before { content:""; position:absolute; left:6px; top:6px; bottom:6px; width:6px; border-radius:6px; background:var(--g-cosmic); opacity:0.95; }
+    .tab-btn[data-rarity="divine"]::before { content:""; position:absolute; left:6px; top:6px; bottom:6px; width:6px; border-radius:6px; background:var(--g-divine); opacity:0.95; }
+    .tab-btn[data-rarity="godly"]::before { content:""; position:absolute; left:6px; top:6px; bottom:6px; width:6px; border-radius:6px; background:var(--g-godly); opacity:0.95; }
+    .tab-btn[data-rarity="exclusive"]::before { content:""; position:absolute; left:6px; top:6px; bottom:6px; width:6px; border-radius:6px; background:var(--g-exclusive); opacity:0.95; }
+    .tab-btn[data-rarity="mythic"]::before { content:""; position:absolute; left:6px; top:6px; bottom:6px; width:6px; border-radius:6px; background:var(--g-mythic); opacity:0.95; }
+    .tab-btn[data-rarity="legendary"]::before { content:""; position:absolute; left:6px; top:6px; bottom:6px; width:6px; border-radius:6px; background:var(--g-legendary); opacity:0.95; }
+    .tab-btn[data-rarity="all"]::before { content:""; position:absolute; left:6px; top:6px; bottom:6px; width:6px; border-radius:6px; background:transparent; opacity:0.95; }
+
+    /* list container */
     .list-root{width:100%;max-width:1200px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:12px auto 28px;align-items:start;padding:8px;border-radius:12px}
     .unit-card{position:relative;background:var(--card);border-radius:16px;padding:18px;border:2px solid var(--border);display:flex;flex-direction:column;gap:12px;min-height:260px;justify-content:space-between;overflow:hidden}
-    .unit-card> *{position:relative;z-index:2}
-    /* stronger color overlay for each rarity (persistent) */
-    .unit-card.rarity-astral::before{content:'';position:absolute;inset:0;background:var(--g-astral);opacity:0.22;pointer-events:none}
-    .unit-card.rarity-cosmic::before{content:'';position:absolute;inset:0;background:var(--g-cosmic);opacity:0.22;pointer-events:none}
-    .unit-card.rarity-divine::before{content:'';position:absolute;inset:0;background:var(--g-divine);opacity:0.22;pointer-events:none}
-    .unit-card.rarity-godly::before{content:'';position:absolute;inset:0;background:var(--g-godly);opacity:0.22;pointer-events:none}
-    .unit-card.rarity-exclusive::before{content:'';position:absolute;inset:0;background:var(--g-exclusive);opacity:0.22;pointer-events:none}
-    .unit-card.rarity-mythic::before{content:'';position:absolute;inset:0;background:var(--g-mythic);opacity:0.22;pointer-events:none}
-    .unit-card.rarity-legendary::before{content:'';position:absolute;inset:0;background:var(--g-legendary);opacity:0.22;pointer-events:none}
+    .unit-card>*{position:relative;z-index:2}
+
+    /* ALWAYS visible square colored frame around the portrait */
+    .portrait-square { width:120px; height:120px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto; position:relative; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02)); border:3px solid rgba(0,0,0,0.6); }
+    .portrait-square .unit-image { width:88px; height:88px; border-radius:50%; background-size:cover; background-position:center; }
+
+    .unit-card.rarity-astral .portrait-square::before { content:''; position:absolute; inset:-6px; border-radius:14px; background:var(--g-astral); z-index:-1; opacity:0.95; }
+    .unit-card.rarity-cosmic .portrait-square::before { content:''; position:absolute; inset:-6px; border-radius:14px; background:var(--g-cosmic); z-index:-1; opacity:0.95; }
+    .unit-card.rarity-divine .portrait-square::before { content:''; position:absolute; inset:-6px; border-radius:14px; background:var(--g-divine); z-index:-1; opacity:0.95; }
+    .unit-card.rarity-godly .portrait-square::before { content:''; position:absolute; inset:-6px; border-radius:14px; background:var(--g-godly); z-index:-1; opacity:0.95; }
+    .unit-card.rarity-exclusive .portrait-square::before { content:''; position:absolute; inset:-6px; border-radius:14px; background:var(--g-exclusive); z-index:-1; opacity:0.95; }
+    .unit-card.rarity-mythic .portrait-square::before { content:''; position:absolute; inset:-6px; border-radius:14px; background:var(--g-mythic); z-index:-1; opacity:0.95; }
+    .unit-card.rarity-legendary .portrait-square::before { content:''; position:absolute; inset:-6px; border-radius:14px; background:var(--g-legendary); z-index:-1; opacity:0.95; }
+
+    /* subtle card overlay tint (stronger than before) */
+    .unit-card.rarity-astral::after { content:''; position:absolute; inset:0; background:var(--g-astral); opacity:0.20; z-index:0; pointer-events:none; border-radius:14px; }
+    .unit-card.rarity-cosmic::after { content:''; position:absolute; inset:0; background:var(--g-cosmic); opacity:0.20; z-index:0; pointer-events:none; border-radius:14px; }
+    .unit-card.rarity-divine::after { content:''; position:absolute; inset:0; background:var(--g-divine); opacity:0.20; z-index:0; pointer-events:none; border-radius:14px; }
+    .unit-card.rarity-godly::after { content:''; position:absolute; inset:0; background:var(--g-godly); opacity:0.20; z-index:0; pointer-events:none; border-radius:14px; }
+    .unit-card.rarity-exclusive::after { content:''; position:absolute; inset:0; background:var(--g-exclusive); opacity:0.20; z-index:0; pointer-events:none; border-radius:14px; }
+    .unit-card.rarity-mythic::after { content:''; position:absolute; inset:0; background:var(--g-mythic); opacity:0.20; z-index:0; pointer-events:none; border-radius:14px; }
+    .unit-card.rarity-legendary::after { content:''; position:absolute; inset:0; background:var(--g-legendary); opacity:0.20; z-index:0; pointer-events:none; border-radius:14px; }
 
     .header-section{display:flex;flex-direction:column;align-items:center;gap:6px;min-height:56px}
     .unit-title{font-weight:900;font-size:16px;text-transform:uppercase;text-align:center;line-height:1.1;white-space:normal;word-break:normal;overflow-wrap:break-word}
     .second-edition-tag{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;margin-top:4px;letter-spacing:1px}
-
-    .portrait-frame{width:120px;height:120px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;position:relative;border:3px solid rgba(0,0,0,0.8);background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02))}
-    .unit-image{width:110px;height:110px;border-radius:50%;background-size:cover;background-position:center}
-    /* portrait rings always present */
-    .portrait-frame.rarity-astral::after{content:'';position:absolute;inset:-8px;border-radius:50%;background:var(--g-astral);z-index:-1;opacity:0.95}
-    .portrait-frame.rarity-cosmic::after{content:'';position:absolute;inset:-8px;border-radius:50%;background:var(--g-cosmic);z-index:-1;opacity:0.95}
-    .portrait-frame.rarity-divine::after{content:'';position:absolute;inset:-8px;border-radius:50%;background:var(--g-divine);z-index:-1;opacity:0.95}
-    .portrait-frame.rarity-godly::after{content:'';position:absolute;inset:-8px;border-radius:50%;background:var(--g-godly);z-index:-1;opacity:0.95}
-    .portrait-frame.rarity-exclusive::after{content:'';position:absolute;inset:-8px;border-radius:50%;background:var(--g-exclusive);z-index:-1;opacity:0.95}
-    .portrait-frame.rarity-mythic::after{content:'';position:absolute;inset:-8px;border-radius:50%;background:var(--g-mythic);z-index:-1;opacity:0.95}
-    .portrait-frame.rarity-legendary::after{content:'';position:absolute;inset:-8px;border-radius:50%;background:var(--g-legendary);z-index:-1;opacity:0.95}
 
     .data-table{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
     .data-cell{background:var(--panel);border-radius:10px;border:1px solid var(--border);padding:10px;text-align:center;min-height:56px;display:flex;flex-direction:column;justify-content:center}
@@ -87,12 +89,13 @@
     .highlight-gold{color:var(--gold)}
     .highlight-purple{color:var(--purple)}
 
+    /* pagination */
     .pagination{width:100%;max-width:1200px;display:flex;gap:12px;justify-content:center;align-items:center;margin:22px auto}
     .pagination-btn{background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;color:var(--muted);font-weight:900}
     .pagination-btn:disabled{opacity:0.35;cursor:not-allowed}
     .page-info{color:var(--muted);font-weight:900}
 
-    /* calculator (isolated) */
+    /* calculator */
     .calculator-root{width:100%;max-width:1200px;margin:0 auto 12px;display:none}
     .calc-row{display:flex;gap:28px;align-items:flex-start;justify-content:center}
     .trade-panel{width:46%;min-height:380px;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.006));border:2px solid rgba(255,255,255,0.06);box-shadow:0 0 28px rgba(255,255,255,0.03),0 0 36px rgba(255,50,80,0.06) inset}
@@ -105,13 +108,14 @@
     .calc-thumb .img{width:100%;height:100%;background-size:cover;background-position:center}
     .calc-thumb .remove{position:absolute;left:6px;top:6px;background:rgba(0,0,0,0.6);color:#fff;border-radius:6px;padding:2px 6px;cursor:pointer;font-weight:900}
 
-    .calc-thumb.rarity-astral{box-shadow:0 0 0 4px rgba(100,0,129,0.20) inset;border-color:rgba(100,0,129,0.35)}
-    .calc-thumb.rarity-cosmic{box-shadow:0 0 0 4px rgba(184,0,230,0.20) inset;border-color:rgba(184,0,230,0.35)}
-    .calc-thumb.rarity-divine{box-shadow:0 0 0 4px rgba(196,0,207,0.20) inset;border-color:rgba(196,0,207,0.35)}
-    .calc-thumb.rarity-godly{box-shadow:0 0 0 4px rgba(123,0,230,0.20) inset;border-color:rgba(123,0,230,0.35)}
-    .calc-thumb.rarity-exclusive{box-shadow:0 0 0 4px rgba(46,125,255,0.20) inset;border-color:rgba(46,125,255,0.35)}
-    .calc-thumb.rarity-mythic{box-shadow:0 0 0 4px rgba(255,109,104,0.20) inset;border-color:rgba(255,109,104,0.35)}
-    .calc-thumb.rarity-legendary{box-shadow:0 0 0 4px rgba(245,166,35,0.20) inset;border-color:rgba(245,166,35,0.35)}
+    /* square rarity frame on calc-thumb (persistent) */
+    .calc-thumb.rarity-astral::before{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-astral);z-index:-1;opacity:0.95}
+    .calc-thumb.rarity-cosmic::before{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-cosmic);z-index:-1;opacity:0.95}
+    .calc-thumb.rarity-divine::before{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-divine);z-index:-1;opacity:0.95}
+    .calc-thumb.rarity-godly::before{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-godly);z-index:-1;opacity:0.95}
+    .calc-thumb.rarity-exclusive::before{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-exclusive);z-index:-1;opacity:0.95}
+    .calc-thumb.rarity-mythic::before{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-mythic);z-index:-1;opacity:0.95}
+    .calc-thumb.rarity-legendary::before{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-legendary);z-index:-1;opacity:0.95}
 
     .total-box{display:flex;justify-content:center;margin-top:auto}
     .total-value{background:linear-gradient(90deg,#7b00e6,#ff2d6f);padding:10px 18px;border-radius:10px;color:#000;font-weight:900}
@@ -120,7 +124,7 @@
     .verdict{width:520px;padding:12px;border-radius:12px;border:2px solid rgba(255,255,255,0.03);display:flex;justify-content:center;background:transparent}
     .verdict-text{font-weight:900;font-size:32px;color:#6ea0ff;text-transform:uppercase;letter-spacing:2px}
 
-    /* picker modal: no 'all', internal scroll, fixed frame */
+    /* picker modal */
     .picker-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);z-index:9999;padding:18px}
     .picker-box{width:100%;max-width:1180px;min-height:520px;border-radius:12px;padding:12px;display:flex;gap:12px;background:linear-gradient(180deg,rgba(255,255,255,0.006),rgba(255,255,255,0.003));border:3px solid rgba(255,255,255,0.03);box-shadow:0 30px 80px rgba(0,0,0,0.75)}
     .picker-sidebar{width:160px;display:flex;flex-direction:column;gap:12px;padding:6px;overflow:auto}
@@ -135,6 +139,7 @@
     .picker-thumb{width:78px;height:78px;border-radius:10px;overflow:hidden;border:3px solid rgba(255,255,255,0.04);background:var(--box);display:flex;align-items:center;justify-content:center;position:relative;cursor:grab}
     .picker-thumb .img{width:100%;height:100%;background-size:cover;background-position:center}
     .picker-thumb:hover{transform:translateY(-6px);transition:transform .12s ease;box-shadow:0 8px 20px rgba(0,0,0,0.6)}
+
     .picker-thumb.rarity-astral::after{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-astral);z-index:-1;opacity:0.95}
     .picker-thumb.rarity-cosmic::after{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-cosmic);z-index:-1;opacity:0.95}
     .picker-thumb.rarity-divine::after{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-divine);z-index:-1;opacity:0.95}
@@ -144,7 +149,7 @@
     .picker-thumb.rarity-legendary::after{content:'';position:absolute;inset:-6px;border-radius:12px;background:var(--g-legendary);z-index:-1;opacity:0.95}
 
     @media (max-width:1024px){ .list-root{grid-template-columns:repeat(2,1fr)} .calc-row{flex-direction:column} .trade-panel{width:100%} .picker-box{flex-direction:column;min-height:560px} .picker-sidebar{width:100%;display:flex;overflow:auto} .picker-grid{grid-template-columns:repeat(auto-fill,86px)} }
-    @media (max-width:600px){ .list-root{grid-template-columns:1fr} .portrait-frame{width:96px;height:96px} .unit-image{width:86px;height:86px} .picker-grid{grid-template-columns:repeat(auto-fill,86px)} .items-list{grid-template-columns:repeat(auto-fill,64px);grid-auto-rows:64px;gap:6px} }
+    @media (max-width:600px){ .list-root{grid-template-columns:1fr} .portrait-square{width:96px;height:96px} .portrait-square .unit-image{width:72px;height:72px} .picker-grid{grid-template-columns:repeat(auto-fill,86px)} .items-list{grid-template-columns:repeat(auto-fill,64px);grid-auto-rows:64px;gap:6px} }
 
   </style>
 </head>
@@ -171,21 +176,37 @@
     </div>
   </div>
 
-  <!-- Calculator (hidden by default) -->
+  <!-- Calculator: hidden unless calculator tab active -->
   <div id="calculator-root" class="calculator-root" aria-hidden="true" style="display:none">
     <div class="calc-row">
-      <div class="trade-panel" id="left-panel" aria-label="Your value panel">
+      <div class="trade-panel" id="left-panel" aria-label="Your value">
         <div class="trade-title you">YOUR VALUE</div>
         <div class="plus-wrap"><div class="plus-btn" id="plus-left">+</div></div>
-        <div style="display:none"><div class="controls-row"><select id="unit-select-left" class="unit-select"></select><select id="trait-select-left"><option value="base">Base</option><option value="grandmaster">Grandmaster</option><option value="master">Master</option><option value="superPayday">Super Payday</option><option value="sniper">Sniper</option></select><input id="qty-left" type="number" min="1" value="1" style="width:80px"><button id="add-left" class="add-small">Add</button></div></div>
+        <div style="display:none">
+          <div class="controls-row">
+            <select id="unit-select-left" class="unit-select"></select>
+            <select id="trait-select-left"><option value="base">Base</option><option value="grandmaster">Grandmaster</option><option value="master">Master</option><option value="superPayday">Super Payday</option><option value="sniper">Sniper</option></select>
+            <input id="qty-left" type="number" min="1" value="1" style="width:80px">
+            <button id="add-left" class="add-small">Add</button>
+          </div>
+        </div>
+
         <div id="left-items" class="items-list" aria-live="polite" aria-label="Your items area"></div>
         <div class="total-box"><div id="left-total" class="total-value">TOTAL VALUE: 0</div></div>
       </div>
 
-      <div class="trade-panel" id="right-panel" aria-label="Their value panel">
+      <div class="trade-panel" id="right-panel" aria-label="Their value">
         <div class="trade-title them">THEIR VALUE</div>
         <div class="plus-wrap"><div class="plus-btn" id="plus-right">+</div></div>
-        <div style="display:none"><div class="controls-row"><select id="unit-select-right" class="unit-select"></select><select id="trait-select-right"><option value="base">Base</option><option value="grandmaster">Grandmaster</option><option value="master">Master</option><option value="superPayday">Super Payday</option><option value="sniper">Sniper</option></select><input id="qty-right" type="number" min="1" value="1" style="width:80px"><button id="add-right" class="add-small">Add</button></div></div>
+        <div style="display:none">
+          <div class="controls-row">
+            <select id="unit-select-right" class="unit-select"></select>
+            <select id="trait-select-right"><option value="base">Base</option><option value="grandmaster">Grandmaster</option><option value="master">Master</option><option value="superPayday">Super Payday</option><option value="sniper">Sniper</option></select>
+            <input id="qty-right" type="number" min="1" value="1" style="width:80px">
+            <button id="add-right" class="add-small">Add</button>
+          </div>
+        </div>
+
         <div id="right-items" class="items-list" aria-live="polite" aria-label="Their items area"></div>
         <div class="total-box"><div id="right-total" class="total-value">TOTAL VALUE: 0</div></div>
       </div>
@@ -194,12 +215,12 @@
     <div class="verdict-wrap"><div class="verdict"><div id="verdict-text" class="verdict-text">NO ITEMS</div></div></div>
   </div>
 
-  <!-- Picker modal (no "All", defaults to Astral). Fixed frame + internal scroll. Quick tabs inside to switch categories. -->
+  <!-- Picker: defaults to Astral, includes quick tabs (no "All"). Fixed frame with scroll inside -->
   <div id="picker-overlay" class="picker-overlay" style="display:none" role="dialog" aria-modal="true">
     <div class="picker-box" role="document" aria-label="Unit picker">
       <div id="picker-sidebar" class="picker-sidebar"></div>
       <div class="picker-main">
-        <div class="picker-quicktabs" id="picker-quicktabs"></div>
+        <div id="picker-quicktabs" class="picker-quicktabs"></div>
         <div class="picker-search"><input id="picker-search-input" placeholder="SEARCH UNITS..." aria-label="Picker search" /></div>
         <div id="picker-grid" class="picker-grid"></div>
       </div>
@@ -209,58 +230,28 @@
   <!-- Main list -->
   <div id="list-root" class="list-root" aria-live="polite"></div>
 
-  <!-- Pagination (hidden while calculator active) -->
+  <!-- Pagination -->
   <div class="pagination" id="pagination">
     <button id="prev-btn" class="pagination-btn">Previous</button>
     <div id="page-info" class="page-info">Page 1 of 1</div>
     <button id="next-btn" class="pagination-btn">Next</button>
   </div>
 
-  <!-- External data (unchanged) -->
+  <!-- Data (unchanged) -->
   <script src="skibidi-td-data.js"></script>
 
   <script>
   (function(){
     'use strict';
 
-    // Utility and debug
-    function showFatal(message){
-      console.error(message);
-      const overlay = document.getElementById('debug-overlay');
-      if (overlay) { overlay.style.display = 'block'; overlay.textContent = 'Fatal: ' + message; }
-      else alert(message);
-    }
-
-    // parseValue: K/M handling
-    function parseValue(valString){
-      if (valString === 0) return 0;
-      if (!valString && valString !== 0) return 0;
-      let s = String(valString).trim();
-      s = s.replace(/[\$\€\£\¥\₹]/g, '').replace(/\s+/g, '');
-      const m = s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/);
-      if (m) {
-        let num = parseFloat(m[1].replace(/,/g, '')) || 0;
-        const suffix = m[2];
-        if (suffix) {
-          if (suffix.toLowerCase() === 'k') num *= 1e3;
-          if (suffix.toLowerCase() === 'm') num *= 1e6;
-        }
-        return num;
-      }
-      const fallback = s.match(/[\d.]+/);
-      return fallback ? parseFloat(fallback[0].replace(/,/g, '')) : 0;
-    }
-    window.parseValue = parseValue;
-
-    function abbr(n){
-      if (!isFinite(n) || n === 0) return '0';
-      if (n >= 1e6) return (n/1e6).toFixed(2) + 'M+';
-      if (n >= 1e3) return (n/1e3).toFixed(2) + 'K';
-      return Math.round(n).toLocaleString();
-    }
+    // small helpers
+    function showFatal(msg){ console.error(msg); const o=document.getElementById('debug-overlay'); if(o){ o.style.display='block'; o.textContent='Fatal: '+msg; } else alert(msg); }
+    function parseValue(v){ if(v===0) return 0; if(!v && v!==0) return 0; let s=String(v).trim(); s=s.replace(/[\$\€\£\¥\₹]/g,'').replace(/\s+/g,''); const m=s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/); if(m){ let n=parseFloat(m[1].replace(/,/g,''))||0; const sx=m[2]; if(sx){ if(sx.toLowerCase()==='k') n*=1e3; if(sx.toLowerCase()==='m') n*=1e6; } return n; } const f=s.match(/[\d.]+/); return f?parseFloat(f[0].replace(/,/g,'')):0; }
+    function abbr(n){ if(!isFinite(n)||n===0) return '0'; if(n>=1e6) return (n/1e6).toFixed(2)+'M+'; if(n>=1e3) return (n/1e3).toFixed(2)+'K'; return Math.round(n).toLocaleString(); }
     function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    // DOM refs
+    if (typeof unitDatabase === 'undefined' || !unitDatabase || typeof unitDatabase !== 'object') { showFatal('unitDatabase not found. Ensure skibidi-td-data.js is loaded.'); return; }
+
     const listRoot = document.getElementById('list-root');
     const pickerOverlay = document.getElementById('picker-overlay');
     const pickerSidebar = document.getElementById('picker-sidebar');
@@ -294,35 +285,26 @@
     const addLeft = document.getElementById('add-left');
     const addRight = document.getElementById('add-right');
 
-    if (typeof unitDatabase === 'undefined' || !unitDatabase || typeof unitDatabase !== 'object') {
-      showFatal('unitDatabase not found. Make sure skibidi-td-data.js is loaded and defines unitDatabase.');
-      return;
-    }
-
-    // State
+    // state
     let currentFilter = 'all';
     let searchQuery = '';
     let currentSort = 'default';
     let currentPage = 1;
     const itemsPerPage = 15;
     const rarityOrder = { astral:1, cosmic:2, godly:3, divine:4, mythic:5, legendary:6, exclusive:99 };
-
-    const unitKeys = Object.keys(unitDatabase).sort((a,b) => (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
+    const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
     const imageProvider = "https://corsproxy.io/?https://drive.google.com/thumbnail?id=";
 
-    // Calculator arrays (will be persisted)
+    // calculator arrays (persisted)
+    const LS_KEY = 'skibidi_td_trade_v1';
     let leftItems = [];
     let rightItems = [];
 
-    const LS_KEY = 'skibidi_td_trade_v1';
+    // utility to build rarity class string
+    function rarityClass(u){ return (u && u.rarity) ? ('rarity-' + String(u.rarity).toLowerCase().replace(/\s+/g,'-')) : ''; }
 
-    // Helper: rarity class string
-    function rarityClass(u) {
-      return u && u.rarity ? 'rarity-' + String(u.rarity).toLowerCase().replace(/\s+/g,'-') : '';
-    }
-
-    // Apply subtle background tint to list when a category is active
-    function applyListBackgroundForFilter(filter) {
+    // apply subtle background tint to list based on selected category
+    function applyListBackground(filter){
       const map = {
         astral: 'linear-gradient(180deg, rgba(100,0,129,0.06), rgba(0,0,0,0))',
         cosmic: 'linear-gradient(180deg, rgba(184,0,230,0.06), rgba(0,0,0,0))',
@@ -333,13 +315,13 @@
         legendary: 'linear-gradient(180deg, rgba(245,166,35,0.06), rgba(0,0,0,0))',
         all: 'transparent'
       };
-      listRoot.style.background = map[(filter || 'all')] || 'transparent';
+      listRoot.style.background = map[(filter||'all')] || 'transparent';
     }
 
-    // Rendering main list
-    function renderList() {
-      const keys = unitKeys.filter(key => {
-        const u = unitDatabase[key];
+    // render main list (applies rarity class to unit card & portrait square)
+    function renderList(){
+      const keys = unitKeys.filter(k => {
+        const u = unitDatabase[k];
         const r = (u.rarity || '').toLowerCase();
         const matchesRarity = currentFilter === 'all' || r === currentFilter;
         const matchesSearch = (u.name || '').toLowerCase().includes(searchQuery.toLowerCase());
@@ -347,64 +329,50 @@
       });
 
       keys.sort((a,b) => {
-        if (currentSort === 'value-desc') {
-          return parseValue(unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats.value);
-        } else {
-          const wa = rarityOrder[(unitDatabase[a].rarity || '').toLowerCase()] || 999;
-          const wb = rarityOrder[(unitDatabase[b].rarity || '').toLowerCase()] || 999;
-          if (wa !== wb) return wa - wb;
-          return (unitDatabase[a].name || '').localeCompare(unitDatabase[b].name || '');
-        }
+        if (currentSort === 'value-desc') return parseValue(unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats.value);
+        const wa = rarityOrder[(unitDatabase[a].rarity || '').toLowerCase()] || 999;
+        const wb = rarityOrder[(unitDatabase[b].rarity || '').toLowerCase()] || 999;
+        if (wa !== wb) return wa - wb;
+        return (unitDatabase[a].name || '').localeCompare(unitDatabase[b].name || '');
       });
 
       const totalPages = Math.max(1, Math.ceil(keys.length / itemsPerPage));
       if (currentPage > totalPages) currentPage = totalPages;
-      const startIndex = (currentPage - 1) * itemsPerPage;
-      const pageKeys = keys.slice(startIndex, startIndex + itemsPerPage);
+      const start = (currentPage - 1) * itemsPerPage;
+      const pageKeys = keys.slice(start, start + itemsPerPage);
 
       pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
       prevBtn.disabled = currentPage === 1;
       nextBtn.disabled = currentPage === totalPages;
 
-      // apply list tint
-      applyListBackgroundForFilter(currentFilter);
+      applyListBackground(currentFilter);
 
-      listRoot.innerHTML = pageKeys.map(key => {
-        const u = unitDatabase[key];
-        const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
+      listRoot.innerHTML = pageKeys.map(k => {
+        const u = unitDatabase[k];
+        const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
         const rcls = rarityClass(u);
         const second = u.secondEdition && String(u.secondEdition).toLowerCase() === 'yes' ? `<div class="second-edition-tag">2nd Edition</div>` : '';
-        return `
-          <div class="unit-card ${rcls}" data-unit="${key}">
-            <div class="header-section">
-              <div class="unit-title">${esc(u.name)}</div>
-              ${second}
+        return `<div class="unit-card ${rcls}" data-unit="${k}">
+          <div class="header-section">
+            <div class="unit-title">${esc(u.name)}</div>
+            ${second}
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center">
+            <div class="portrait-square ${rcls}">
+              <div class="unit-image" style="background-image:${p}"></div>
             </div>
-            <div style="display:flex;align-items:center;justify-content:center">
-              <div class="portrait-frame ${rcls}">
-                <div class="unit-image" style="background-image:${portrait}"></div>
-              </div>
-            </div>
-            <div class="data-table">
-              <div class="data-cell">
-                <div class="label">Value</div>
-                <div class="val highlight-gold">${esc(u.baseStats.value)}</div>
-              </div>
-              <div class="data-cell">
-                <div class="label">Status</div>
-                <div class="val">${esc(u.baseStats.status)}</div>
-              </div>
-              <div class="data-cell">
-                <div class="label">Demand</div>
-                <div class="val highlight-purple">${esc(u.baseStats.demand)}</div>
-              </div>
-            </div>
-          </div>`;
+          </div>
+          <div class="data-table">
+            <div class="data-cell"><div class="label">Value</div><div class="val highlight-gold">${esc(u.baseStats.value)}</div></div>
+            <div class="data-cell"><div class="label">Status</div><div class="val">${esc(u.baseStats.status)}</div></div>
+            <div class="data-cell"><div class="label">Demand</div><div class="val highlight-purple">${esc(u.baseStats.demand)}</div></div>
+          </div>
+        </div>`;
       }).join('');
     }
 
-    // Populate fallback selects (keyboard users)
-    function populateSelects() {
+    // populate fallback selects (keyboard users)
+    function populateSelects(){
       const opts = unitKeys.map(k => {
         const u = unitDatabase[k];
         return `<option value="${k}">${esc(u.name)} (${esc(u.rarity||'n/a')}) — ${esc(u.baseStats.value||'N/A')}</option>`;
@@ -413,33 +381,33 @@
       if (unitSelectRight) unitSelectRight.innerHTML = opts;
     }
 
-    // Calculator: render thumbs and totals
-    function renderThumbs() {
+    // calculator thumbs rendering
+    function renderThumbs(){
       leftItemsEl.innerHTML = leftItems.map(it => calcThumbHTML(it)).join('');
       rightItemsEl.innerHTML = rightItems.map(it => calcThumbHTML(it)).join('');
-      // attach remove handlers
+      // attach remove
       document.querySelectorAll('.thumb-remove').forEach(btn => {
         btn.removeEventListener('click', onThumbRemove);
         btn.addEventListener('click', onThumbRemove);
       });
-      // attach dragover & drop targets to allow dropping on panels
+      // attach dragover/drop for panels (already attached in init, but safe)
       leftItemsEl.removeEventListener('dragover', onDragOver); leftItemsEl.addEventListener('dragover', onDragOver);
       rightItemsEl.removeEventListener('dragover', onDragOver); rightItemsEl.addEventListener('dragover', onDragOver);
       leftItemsEl.removeEventListener('drop', onDropLeft); leftItemsEl.addEventListener('drop', onDropLeft);
       rightItemsEl.removeEventListener('drop', onDropRight); rightItemsEl.addEventListener('drop', onDropRight);
     }
 
-    function calcThumbHTML(it) {
+    function calcThumbHTML(it){
       const u = unitDatabase[it.key] || {};
-      const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
+      const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
       const rcls = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
-      return `<div class="calc-thumb rarity-${rcls}" data-id="${it.id}" data-key="${it.key}" draggable="false" title="${esc(u.name)}">
-        <div class="img" style="background-image:${portrait}"></div>
+      return `<div class="calc-thumb rarity-${rcls}" data-id="${it.id}" title="${esc(u.name)}" draggable="false">
+        <div class="img" style="background-image:${p}"></div>
         <div class="remove thumb-remove" data-id="${it.id}">×</div>
       </div>`;
     }
 
-    function onThumbRemove(e) {
+    function onThumbRemove(e){
       const id = e.currentTarget.getAttribute('data-id');
       let idx = leftItems.findIndex(x => x.id === id);
       if (idx >= 0) leftItems.splice(idx, 1);
@@ -450,7 +418,7 @@
       updateTotalsAndVerdict();
     }
 
-    function addToSide(side, key, trait, qty) {
+    function addToSide(side, key, trait, qty){
       if (!key || !unitDatabase[key]) return;
       qty = Math.max(1, Math.floor(qty) || 1);
       const u = unitDatabase[key];
@@ -462,72 +430,58 @@
       updateTotalsAndVerdict();
     }
 
-    function updateTotalsAndVerdict() {
+    function updateTotalsAndVerdict(){
       leftItems.forEach(i => i.computed = (i.single || 0) * (i.qty || 1));
       rightItems.forEach(i => i.computed = (i.single || 0) * (i.qty || 1));
-      const leftSum = leftItems.reduce((s, i) => s + Number(i.computed || 0), 0);
-      const rightSum = rightItems.reduce((s, i) => s + Number(i.computed || 0), 0);
+      const leftSum = leftItems.reduce((s,i)=> s + Number(i.computed||0), 0);
+      const rightSum = rightItems.reduce((s,i)=> s + Number(i.computed||0), 0);
       leftTotalEl.innerText = `TOTAL VALUE: ${abbr(leftSum)}`;
       rightTotalEl.innerText = `TOTAL VALUE: ${abbr(rightSum)}`;
-
       const FAIR = 0.02, SMALL = 0.10;
       let verdict = 'NO ITEMS';
       if (leftSum === 0 && rightSum === 0) verdict = 'NO ITEMS';
       else if (Math.abs(leftSum - rightSum) <= Math.max(1, FAIR * Math.max(leftSum, rightSum))) verdict = 'FAIR';
-      else if (leftSum > rightSum) {
-        if (rightSum === 0 || leftSum > rightSum * (1 + SMALL)) verdict = 'OVERPAYING';
-        else verdict = 'LOSE';
-      } else {
-        if (leftSum === 0 || rightSum > leftSum * (1 + SMALL)) verdict = 'UNDERPAYING';
-        else verdict = 'WIN';
-      }
+      else if (leftSum > rightSum) { if (rightSum === 0 || leftSum > rightSum * (1 + SMALL)) verdict = 'OVERPAYING'; else verdict = 'LOSE'; }
+      else { if (leftSum === 0 || rightSum > leftSum * (1 + SMALL)) verdict = 'UNDERPAYING'; else verdict = 'WIN'; }
       verdictText.innerText = verdict.toUpperCase();
     }
 
-    // Persist / restore trade to localStorage
-    function persistTrade() {
+    // persistence
+    function persistTrade(){
       try {
-        const payload = { left: leftItems.map(it => ({ key: it.key, trait: it.trait, qty: it.qty })), right: rightItems.map(it => ({ key: it.key, trait: it.trait, qty: it.qty })) };
+        const payload = { left: leftItems.map(i => ({ key: i.key, trait: i.trait, qty: i.qty })), right: rightItems.map(i => ({ key: i.key, trait: i.trait, qty: i.qty })) };
         localStorage.setItem(LS_KEY, JSON.stringify(payload));
-      } catch (err) {
-        console.warn('Failed to persist trade', err);
-      }
+      } catch (err) { console.warn('persist error', err); }
     }
-    function restoreTrade() {
+    function restoreTrade(){
       try {
-        const data = localStorage.getItem(LS_KEY);
-        if (!data) return;
-        const parsed = JSON.parse(data);
+        const raw = localStorage.getItem(LS_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
         if (parsed && parsed.left && parsed.right) {
-          leftItems = parsed.left.map(item => {
-            const single = (item.trait && item.trait !== 'base' && unitDatabase[item.key] && unitDatabase[item.key].traits && unitDatabase[item.key].traits[item.trait]) ? parseValue(unitDatabase[item.key].traits[item.trait].value) : parseValue((unitDatabase[item.key] && unitDatabase[item.key].baseStats && unitDatabase[item.key].baseStats.value) || 0);
-            return { id: `${item.key}:${item.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key: item.key, trait: item.trait, qty: Math.max(1, item.qty || 1), single, computed: single * (item.qty || 1) };
+          leftItems = parsed.left.map(it => {
+            const single = (it.trait && it.trait !== 'base' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0);
+            return { id: `${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key: it.key, trait: it.trait, qty: Math.max(1, it.qty || 1), single, computed: single * (it.qty || 1) };
           });
-          rightItems = parsed.right.map(item => {
-            const single = (item.trait && item.trait !== 'base' && unitDatabase[item.key] && unitDatabase[item.key].traits && unitDatabase[item.key].traits[item.trait]) ? parseValue(unitDatabase[item.key].traits[item.trait].value) : parseValue((unitDatabase[item.key] && unitDatabase[item.key].baseStats && unitDatabase[item.key].baseStats.value) || 0);
-            return { id: `${item.key}:${item.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key: item.key, trait: item.trait, qty: Math.max(1, item.qty || 1), single, computed: single * (item.qty || 1) };
+          rightItems = parsed.right.map(it => {
+            const single = (it.trait && it.trait !== 'base' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0);
+            return { id: `${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key: it.key, trait: it.trait, qty: Math.max(1, it.qty || 1), single, computed: single * (it.qty || 1) };
           });
         }
-      } catch (err) {
-        console.warn('Failed to restore trade', err);
-      }
+      } catch (err) { console.warn('restore error', err); }
     }
 
-    // Picker functions
-    function createPicker() {
-      // categories to show in picker - no "All" (user requested)
+    // Picker implementation (no "All")
+    function createPicker(){
       const cats = ['Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
+      // sidebar
       pickerSidebar.innerHTML = cats.map(c => `<div class="picker-cat" data-cat="${c.toLowerCase()}">${c}</div>`).join('');
-      // quick tabs inside main (same categories) for convenience
+      // quick tabs
       pickerQuickTabs.innerHTML = cats.map(c => `<button data-cat="${c.toLowerCase()}">${c}</button>`).join('');
-
-      // default: Astral active
-      const sidebarBtn = pickerSidebar.querySelector('[data-cat="astral"]');
-      if (sidebarBtn) sidebarBtn.classList.add('active');
-
-      // show initial astral grid
+      // default active = astral
+      const defaultBtn = pickerSidebar.querySelector('[data-cat="astral"]');
+      if (defaultBtn) defaultBtn.classList.add('active');
       renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, 'astral', '');
-
       // handlers
       pickerSidebar.querySelectorAll('.picker-cat').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -537,36 +491,32 @@
           renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, cat, pickerSearch.value || '');
         });
       });
-
       pickerQuickTabs.querySelectorAll('button').forEach(b => {
         b.addEventListener('click', () => {
           const cat = b.getAttribute('data-cat');
-          // set sidebar active to keep state
           pickerSidebar.querySelectorAll('.picker-cat').forEach(x => x.classList.remove('active'));
           const sidebarBtn = pickerSidebar.querySelector(`[data-cat="${cat}"]`);
           if (sidebarBtn) sidebarBtn.classList.add('active');
           renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, cat, pickerSearch.value || '');
         });
       });
-
+      // search inside picker
       pickerSearch.value = '';
-      pickerSearch.removeEventListener('input', onPickerSearchInput);
-      pickerSearch.addEventListener('input', onPickerSearchInput);
-
-      // prevent page scroll under overlay
-      pickerOverlay.addEventListener('click', (e) => { if (e.target === pickerOverlay) hidePicker(); });
+      pickerSearch.removeEventListener('input', onPickerSearch);
+      pickerSearch.addEventListener('input', onPickerSearch);
+      // close on overlay click
+      pickerOverlay.addEventListener('click', (ev) => { if (ev.target === pickerOverlay) hidePicker(); });
     }
 
-    function onPickerSearchInput(e) {
+    function onPickerSearch(e){
       const active = pickerSidebar.querySelector('.picker-cat.active');
       const cat = active ? active.getAttribute('data-cat') : 'astral';
       renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, cat, e.target.value || '');
     }
 
-    function renderPickerGrid(side, trait, qty, category, q) {
+    function renderPickerGrid(side, trait, qty, category, q){
       category = (category || 'astral').toLowerCase();
       q = (q || '').toLowerCase();
-
       const keys = unitKeys.filter(k => {
         const u = unitDatabase[k];
         if (!u) return false;
@@ -574,7 +524,6 @@
         return (u.rarity || '').toLowerCase() === category;
       });
 
-      // empty grid rather than show text if no results
       if (!keys.length) {
         pickerGrid.innerHTML = '';
         return;
@@ -582,121 +531,55 @@
 
       pickerGrid.innerHTML = keys.map(k => {
         const u = unitDatabase[k];
-        const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
+        const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
         const rcls = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
-        // draggable: enable dragstart so user can drag into calculator panels
-        return `<div class="picker-thumb rarity-${rcls}" data-key="${k}" title="${esc(u.name)}" draggable="true">
-          <div class="img" style="background-image:${portrait}"></div>
-        </div>`;
+        return `<div class="picker-thumb rarity-${rcls}" data-key="${k}" title="${esc(u.name)}" draggable="true"><div class="img" style="background-image:${p}"></div></div>`;
       }).join('');
 
-      // attach dragstart for DnD and click to quick add
+      // attach dragstart and click
       pickerGrid.querySelectorAll('.picker-thumb').forEach(t => {
+        t.removeEventListener('dragstart', onPickerDragStart);
         t.addEventListener('dragstart', onPickerDragStart);
-        t.addEventListener('click', () => {
-          const key = t.getAttribute('data-key');
-          // quick-click adds to the currently selected side (currentPickerSide)
-          addToSide(currentPickerSide, key, currentPickerTrait, currentPickerQty);
-          // keep picker open for convenience — user can close manually
-        });
+        t.removeEventListener('click', onPickerClick);
+        t.addEventListener('click', onPickerClick);
       });
     }
 
-    // Drag & Drop handlers
-    function onPickerDragStart(e) {
+    function onPickerDragStart(e){
       const key = e.currentTarget.getAttribute('data-key');
       if (!key) return;
       e.dataTransfer.setData('text/plain', key);
       e.dataTransfer.effectAllowed = 'copy';
-      // highlight drop targets optionally
     }
-    function onDragOver(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
-    }
-    function onDropLeft(e) {
-      e.preventDefault();
-      const key = e.dataTransfer.getData('text/plain');
-      if (key) addToSide('left', key, 'base', 1);
-    }
-    function onDropRight(e) {
-      e.preventDefault();
-      const key = e.dataTransfer.getData('text/plain');
-      if (key) addToSide('right', key, 'base', 1);
+    function onPickerClick(e){
+      const key = e.currentTarget.getAttribute('data-key');
+      if (!key) return;
+      // quick add to the side currently being edited
+      addToSide(currentPickerSide, key, currentPickerTrait, currentPickerQty);
     }
 
-    // Show/hide picker
-    function showPicker() {
-      pickerOverlay.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    }
-    function hidePicker() {
-      pickerOverlay.style.display = 'none';
-      document.body.style.overflow = '';
-    }
+    function showPicker(){ pickerOverlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+    function hidePicker(){ pickerOverlay.style.display = 'none'; document.body.style.overflow = ''; }
 
-    // Save/restore trade to localStorage
-    const LS_KEY = 'skibidi_td_trade_v1';
-    function persistTrade(){
-      try {
-        const payload = {
-          left: leftItems.map(i => ({ key: i.key, trait: i.trait, qty: i.qty })),
-          right: rightItems.map(i => ({ key: i.key, trait: i.trait, qty: i.qty }))
-        };
-        localStorage.setItem(LS_KEY, JSON.stringify(payload));
-      } catch (err) {
-        console.warn('persistTrade error', err);
-      }
-    }
-    function restoreTrade(){
-      try {
-        const raw = localStorage.getItem(LS_KEY);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (!parsed) return;
-        if (Array.isArray(parsed.left)) {
-          leftItems = parsed.left.map(it => {
-            const single = (it.trait && it.trait !== 'base' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0);
-            return { id: `${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key: it.key, trait: it.trait, qty: Math.max(1, it.qty || 1), single, computed: single * Math.max(1, it.qty || 1) };
-          });
-        }
-        if (Array.isArray(parsed.right)) {
-          rightItems = parsed.right.map(it => {
-            const single = (it.trait && it.trait !== 'base' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0);
-            return { id: `${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key: it.key, trait: it.trait, qty: Math.max(1, it.qty || 1), single, computed: single * Math.max(1, it.qty || 1) };
-          });
-        }
-      } catch (err) {
-        console.warn('restoreTrade error', err);
-      }
-    }
+    // drag/drop handlers for calculator panels
+    function onDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }
+    function onDropLeft(e) { e.preventDefault(); const key = e.dataTransfer.getData('text/plain'); if (key) addToSide('left', key, 'base', 1); }
+    function onDropRight(e) { e.preventDefault(); const key = e.dataTransfer.getData('text/plain'); if (key) addToSide('right', key, 'base', 1); }
 
-    // Event wiring
-    searchBar.addEventListener('input', e => {
-      searchQuery = e.target.value || '';
-      currentPage = 1;
-      renderList();
-    });
+    // wiring top controls
+    searchBar.addEventListener('input', e => { searchQuery = e.target.value || ''; currentPage = 1; renderList(); });
 
     tabs.addEventListener('click', e => {
       if (!e.target.classList.contains('tab-btn')) return;
       tabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
-      const selected = e.target.getAttribute('data-rarity') || 'all';
-      currentFilter = selected;
+      const sel = e.target.getAttribute('data-rarity') || 'all';
+      currentFilter = sel;
       if (currentFilter === 'calculator') {
-        // show calculator only, hide list and pagination
-        calculatorRoot.style.display = 'block';
-        calculatorRoot.setAttribute('aria-hidden', 'false');
-        listRoot.style.display = 'none';
-        pagination.style.display = 'none';
+        calculatorRoot.style.display = 'block'; calculatorRoot.setAttribute('aria-hidden', 'false'); listRoot.style.display = 'none'; pagination.style.display = 'none';
       } else {
-        calculatorRoot.style.display = 'none';
-        calculatorRoot.setAttribute('aria-hidden', 'true');
-        listRoot.style.display = '';
-        pagination.style.display = 'flex';
-        currentPage = 1;
-        renderList();
+        calculatorRoot.style.display = 'none'; calculatorRoot.setAttribute('aria-hidden', 'true'); listRoot.style.display = ''; pagination.style.display = 'flex';
+        currentPage = 1; renderList();
       }
     });
 
@@ -705,68 +588,58 @@
       sort.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       currentSort = e.target.getAttribute('data-sort') || 'default';
-      currentPage = 1;
-      renderList();
+      currentPage = 1; renderList();
     });
 
-    prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderList(); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
-    nextBtn.addEventListener('click', () => {
+    prevBtn.addEventListener('click', ()=>{ if (currentPage>1) { currentPage--; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }});
+    nextBtn.addEventListener('click', ()=> {
       const filteredTotal = unitKeys.filter(k => {
         const u = unitDatabase[k];
-        return (currentFilter === 'all' || (u.rarity || '').toLowerCase() === currentFilter) &&
-               (u.name || '').toLowerCase().includes(searchQuery.toLowerCase());
+        return (currentFilter === 'all' || (u.rarity || '').toLowerCase() === currentFilter) && (u.name || '').toLowerCase().includes(searchQuery.toLowerCase());
       }).length;
       const maxPage = Math.ceil(filteredTotal / itemsPerPage) || 1;
-      if (currentPage < maxPage) { currentPage++; renderList(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      if (currentPage < maxPage) { currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }
     });
 
-    // picker open handlers (defaults to Astral and shows Astral grid)
+    // picker openers: default to Astral
     let currentPickerSide = 'left', currentPickerTrait = 'base', currentPickerQty = 1;
-    plusLeft.addEventListener('click', () => {
-      currentPickerSide = 'left';
-      currentPickerTrait = (traitSelectLeft && traitSelectLeft.value) || 'base';
-      currentPickerQty = (qtyLeft && Math.max(1, Number(qtyLeft.value || 1))) || 1;
-      createPicker(); showPicker();
-    });
-    plusRight.addEventListener('click', () => {
-      currentPickerSide = 'right';
-      currentPickerTrait = (traitSelectRight && traitSelectRight.value) || 'base';
-      currentPickerQty = (qtyRight && Math.max(1, Number(qtyRight.value || 1))) || 1;
-      createPicker(); showPicker();
-    });
+    plusLeft.addEventListener('click', ()=> { currentPickerSide = 'left'; currentPickerTrait = (traitSelectLeft && traitSelectLeft.value) || 'base'; currentPickerQty = (qtyLeft && Math.max(1, Number(qtyLeft.value || 1))) || 1; createPicker(); showPicker(); });
+    plusRight.addEventListener('click', ()=> { currentPickerSide = 'right'; currentPickerTrait = (traitSelectRight && traitSelectRight.value) || 'base'; currentPickerQty = (qtyRight && Math.max(1, Number(qtyRight.value || 1))) || 1; createPicker(); showPicker(); });
 
-    // fallback quick-add (hidden controls)
-    if (addLeft) addLeft.addEventListener('click', () => addToSide('left', unitSelectLeft.value, traitSelectLeft.value, Number(qtyLeft.value || 1)));
-    if (addRight) addRight.addEventListener('click', () => addToSide('right', unitSelectRight.value, traitSelectRight.value, Number(qtyRight.value || 1)));
-    if (unitSelectLeft) unitSelectLeft.addEventListener('dblclick', () => addToSide('left', unitSelectLeft.value, traitSelectLeft.value, Number(qtyLeft.value || 1)));
-    if (unitSelectRight) unitSelectRight.addEventListener('dblclick', () => addToSide('right', unitSelectRight.value, traitSelectRight.value, Number(qtyRight.value || 1)));
-
-    // Drag/drop on calculator panels
-    leftItemsEl.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
-    rightItemsEl.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
-    leftItemsEl.addEventListener('drop', (e) => { e.preventDefault(); const key = e.dataTransfer.getData('text/plain'); if (key) addToSide('left', key, 'base', 1); });
-    rightItemsEl.addEventListener('drop', (e) => { e.preventDefault(); const key = e.dataTransfer.getData('text/plain'); if (key) addToSide('right', key, 'base', 1); });
+    // fallback add buttons (hidden)
+    addLeft && addLeft.addEventListener('click', ()=> addToSide('left', unitSelectLeft.value, traitSelectLeft.value, Number(qtyLeft.value || 1)));
+    addRight && addRight.addEventListener('click', ()=> addToSide('right', unitSelectRight.value, traitSelectRight.value, Number(qtyRight.value || 1)));
+    unitSelectLeft && unitSelectLeft.addEventListener('dblclick', ()=> addToSide('left', unitSelectLeft.value, traitSelectLeft.value, Number(qtyLeft.value || 1)));
+    unitSelectRight && unitSelectRight.addEventListener('dblclick', ()=> addToSide('right', unitSelectRight.value, traitSelectRight.value, Number(qtyRight.value || 1)));
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') hidePicker(); });
 
-    // Initialization: restore trade, populate selects, render list
+    // initialization: restore trade, populate selects, render
     try {
-      // restore persisted trade if present
+      // restore persisted trade
       restoreTrade();
-      // populate fallback selects
+      // populate fallback selects for keyboard users
       if (unitSelectLeft) unitSelectLeft.innerHTML = unitKeys.map(k => `<option value="${k}">${esc(unitDatabase[k].name)} (${esc(unitDatabase[k].rarity||'n/a')})</option>`).join('');
       if (unitSelectRight) unitSelectRight.innerHTML = unitKeys.map(k => `<option value="${k}">${esc(unitDatabase[k].name)} (${esc(unitDatabase[k].rarity||'n/a')})</option>`).join('');
       renderList();
       renderThumbs();
       updateTotalsAndVerdict();
+      // attach dragover/drop on panels (so drag from picker works)
+      leftItemsEl.addEventListener('dragover', onDragOver);
+      rightItemsEl.addEventListener('dragover', onDragOver);
+      leftItemsEl.addEventListener('drop', onDropLeft);
+      rightItemsEl.addEventListener('drop', onDropRight);
     } catch (err) {
       showFatal('Initialization error: ' + (err && err.message ? err.message : String(err)));
     }
 
-    // expose for debugging
+    // expose debug
     window._skibidi = { unitDatabase, leftItems, rightItems, persistTrade, restoreTrade, renderList, renderThumbs, updateTotalsAndVerdict };
 
+    // small convenience: when user switches main tab (category) visually set background color on the tabs area too
+    // (we already applied a colored left marker via CSS for each tab button)
   })();
   </script>
 </body>
 </html>
+```
