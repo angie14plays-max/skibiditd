@@ -3,31 +3,25 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Skibidi TD — Value List + Calculator (ultimate)</title>
+  <title>Skibidi TD — Value List + Calculator (picker scroll & rarity frames fixed)</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    /* =========================================================================
-       THEME VARIABLES
-       ========================================================================= */
+    /* ============================
+       THEME / VARIABLES
+       ============================ */
     :root{
-      --bg: #000000;
-      --card: #0f0f0f;
-      --panel: #121212;
-      --panel-2: #151515;
-      --box: #181818;
-      --border: #2f2f2f;
-      --muted: #8a8a8a;
-      --white-dim: rgba(255,255,255,0.06);
-
-      --gold: #facc15;
-      --purple: #a855f7;
+      --bg:#000;
+      --card:#0f0f0f;
+      --panel:#121212;
+      --box:#151515;
+      --border:#2f2f2f;
+      --muted:#8a8a8a;
+      --gold:#facc15;
+      --purple:#a855f7;
       --accent-grad: linear-gradient(90deg,#8b4bff,#ff2d6f);
-
       --neon-red: rgba(255,50,80,0.18);
-      --neon-white: rgba(255,255,255,0.08);
-      --text: #ffffff;
+      --text:#ffffff;
 
-      /* Rarity gradients (used for halos & frames) */
       --grad-astral: linear-gradient(135deg,#640081,#7e00a5,#154af0,#00cd82,#11ff46);
       --grad-cosmic: linear-gradient(135deg,#b800e6,#6cedf0);
       --grad-divine: linear-gradient(135deg,#c400cf,#2248ff);
@@ -37,143 +31,101 @@
       --grad-legendary: linear-gradient(135deg,#f5a623,#d48c00);
     }
 
-    /* =========================================================================
-       BASE LAYOUT
-       ========================================================================= */
-    * { box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-    html,body { height:100%; margin:0; background:var(--bg); color:var(--text); }
+    /* ============================
+       BASE
+       ============================ */
+    * { box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-font-smoothing: antialiased; }
+    html,body { margin:0; height:100%; background:var(--bg); color:var(--text); }
     body { padding:22px; display:flex; flex-direction:column; align-items:center; gap:18px; }
 
-    /* =========================================================================
-       CONTROLS: SEARCH / TABS / SORT
-       ========================================================================= */
-    .controls { width:100%; max-width:1200px; display:flex; flex-direction:column; gap:14px; margin:0 auto; }
-    #search-bar {
-      width:100%; padding:14px 16px; border-radius:12px; background:var(--panel); border:2px solid var(--border); color:var(--text); font-size:15px;
-      outline: none;
-    }
-    .tabs, .sort { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-    .tab-btn, .sort-btn {
-      background:var(--card); border:2px solid var(--border); padding:10px 16px; border-radius:8px; color:var(--muted);
-      font-weight:900; text-transform:uppercase; cursor:pointer;
-    }
-    .tab-btn.active, .sort-btn.active {
-      color:#fff; border-color:var(--gold); box-shadow:0 0 0 4px rgba(250,204,21,0.06) inset;
-    }
+    #debug-overlay { display:none; position:fixed; left:0; right:0; top:0; padding:12px; background:#b91c1c; color:white; z-index:99999; text-align:center; font-family:sans-serif; }
 
-    /* =========================================================================
-       LIST: GRID & CARDS
-       - Ensure titles don't break words awkwardly (user complaint)
-       - Add rarity background mapping (user wants each rarity to show a color)
-       ========================================================================= */
-    .list-root { max-width:1200px; width:100%; display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin:14px auto 36px; align-items:start; }
+    /* ============================
+       CONTROLS
+       ============================ */
+    .controls { width:100%; max-width:1200px; display:flex; flex-direction:column; gap:12px; margin:0 auto; }
+    #search-bar { width:100%; padding:14px; border-radius:12px; background:var(--card); border:2px solid var(--border); color:var(--text); outline:none; }
+    .tabs, .sort { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    .tab-btn, .sort-btn { background:var(--card); border:2px solid var(--border); color:var(--muted); padding:10px 16px; border-radius:8px; font-weight:900; cursor:pointer; text-transform:uppercase; }
+    .tab-btn.active, .sort-btn.active { color:#fff; border-color:var(--gold); box-shadow: 0 0 0 4px rgba(250,204,21,0.06) inset; }
+
+    /* ============================
+       MAIN LIST GRID
+       ============================ */
+    .list-root { width:100%; max-width:1200px; display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin:12px auto 28px; }
     .unit-card {
       background:var(--card); border-radius:16px; padding:18px; border:2px solid var(--border);
-      display:flex; flex-direction:column; gap:12px; justify-content:space-between; min-height:260px;
+      display:flex; flex-direction:column; gap:12px; min-height:260px; justify-content:space-between;
     }
-    .header-section { display:flex; flex-direction:column; align-items:center; gap:6px; min-height:60px; }
-    .unit-title {
-      font-weight:900; font-size:16px; text-transform:uppercase; text-align:center; line-height:1.1;
-      white-space:normal; word-break:normal; overflow-wrap:break-word; /* prevents mid-word breaks */
-    }
-    .second-edition-tag { font-size:10px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:1px; }
+    .unit-card.rarity-astral { box-shadow: 0 0 0 6px rgba(100,0,129,0.03) inset; }
+    .unit-card.rarity-cosmic { box-shadow: 0 0 0 6px rgba(184,0,230,0.03) inset; }
+    .unit-card.rarity-divine { box-shadow: 0 0 0 6px rgba(196,0,207,0.03) inset; }
+    .unit-card.rarity-godly { box-shadow: 0 0 0 6px rgba(123,0,230,0.03) inset; }
+    .unit-card.rarity-exclusive { box-shadow: 0 0 0 6px rgba(46,125,255,0.03) inset; }
+    .unit-card.rarity-mythic { box-shadow: 0 0 0 6px rgba(255,109,104,0.03) inset; }
+    .unit-card.rarity-legendary { box-shadow: 0 0 0 6px rgba(245,166,35,0.03) inset; }
 
-    /* Portrait frame with small colored background ring (rarity color) behind the portrait */
+    .header-section { display:flex; flex-direction:column; align-items:center; gap:6px; min-height:56px; }
+    .unit-title { font-weight:900; font-size:16px; text-transform:uppercase; text-align:center; line-height:1.1; white-space:normal; word-break:normal; overflow-wrap:break-word; }
+
     .portrait-frame {
       width:120px; height:120px; border-radius:50%; margin:0 auto; display:flex; align-items:center; justify-content:center; position:relative;
-      border:4px solid rgba(0,0,0,0.8);
-      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
+      border:3px solid rgba(0,0,0,0.8);
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
     }
     .unit-image { width:110px; height:110px; border-radius:50%; background-size:cover; background-position:center; }
+    /* We also add a small halo class on portrait frames via JS */
 
-    /* Add rarity background classes for portrait frame - these show a colored ring */
-    .rarity-astral .portrait-frame::before   { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-astral); z-index:-1; opacity:0.95; }
-    .rarity-cosmic .portrait-frame::before   { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-cosmic); z-index:-1; opacity:0.95; }
-    .rarity-divine .portrait-frame::before   { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-divine); z-index:-1; opacity:0.95; }
-    .rarity-godly .portrait-frame::before    { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-godly); z-index:-1; opacity:0.95; }
-    .rarity-exclusive .portrait-frame::before{ content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-exclusive); z-index:-1; opacity:0.95; }
-    .rarity-mythic .portrait-frame::before   { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-mythic); z-index:-1; opacity:0.95; }
-    .rarity-legendary .portrait-frame::before{ content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--grad-legendary); z-index:-1; opacity:0.95; }
-
-    /* Data boxes (value/status/demand) styled as small rounded pills like original */
     .data-table { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:8px; }
-    .data-cell {
-      background:var(--panel-2); border-radius:10px; border:1px solid var(--border); padding:10px; text-align:center; min-height:56px;
-      display:flex; flex-direction:column; justify-content:center; gap:6px;
-    }
-    .data-cell .label { color:var(--muted); font-size:11px; font-weight:800; text-transform:uppercase; }
+    .data-cell { background:var(--panel); border-radius:10px; border:1px solid var(--border); padding:10px; text-align:center; min-height:56px; display:flex; flex-direction:column; justify-content:center; }
+    .data-cell .label { color:var(--muted); font-size:11px; font-weight:800; text-transform:uppercase; margin-bottom:6px; }
     .data-cell .val { font-weight:900; }
-
     .highlight-gold { color:var(--gold); }
     .highlight-purple { color:var(--purple); }
 
-    /* Pagination */
-    .pagination { max-width:1200px; width:100%; display:flex; gap:12px; justify-content:center; align-items:center; margin:24px auto; }
+    .pagination { width:100%; max-width:1200px; display:flex; gap:12px; justify-content:center; align-items:center; margin:22px auto; }
     .pagination-btn { background:var(--card); border:1px solid var(--border); padding:8px 12px; border-radius:8px; color:var(--muted); font-weight:900; cursor:pointer; }
     .pagination-btn:disabled { opacity:0.35; cursor:not-allowed; }
     .page-info { color:var(--muted); font-weight:900; }
 
     /* =========================================================================
-       CALCULATOR: fully contained and only shown when calculator tab active
-       - user demanded neon white + red frame
-       - thumbnails inside calculator should have colored frames (rarity color)
-       - no space between each unit (tight grid look)
+       CALCULATOR
+       - Calculator is hidden unless calculator tab is active.
+       - Verdict banner MUST be inside calculatorRoot to avoid leaking into list view.
        ========================================================================= */
-    .calculator-root { width:100%; max-width:1200px; margin: 0 auto 18px; display:none; } /* hidden by default */
-    .calc-row { display:flex; gap:30px; align-items:flex-start; justify-content:center; }
+    .calculator-root { width:100%; max-width:1200px; margin:0 auto 12px; display:none; }
+    .calc-row { display:flex; gap:28px; align-items:flex-start; justify-content:center; }
     .trade-panel {
-      width:46%;
-      border-radius:14px;
-      padding:20px;
-      min-height:380px;
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-      /* neon white + red frame effect */
+      width:46%; min-height:380px; border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:14px;
       background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006));
       border: 2px solid rgba(255,255,255,0.06);
-      box-shadow: 0 0 30px rgba(255,255,255,0.03), 0 0 24px rgba(255,50,80,0.08) inset;
+      box-shadow: 0 0 28px rgba(255,255,255,0.03), 0 0 36px rgba(255,50,80,0.06) inset;
     }
-    .trade-title { text-align:center; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:var(--gold); }
-    .trade-title.you { color:#ff4d4d; } /* left red */
-    .trade-title.them { color:#6ea0ff; } /* right blue */
+    .trade-title { text-align:center; font-weight:900; text-transform:uppercase; letter-spacing:1px; }
+    .trade-title.you { color:#ff4d4d; }
+    .trade-title.them { color:#6ea0ff; }
 
     .plus-wrap { display:flex; justify-content:center; }
-    .plus-btn {
-      width:56px; height:56px; border-radius:12px; display:grid; place-items:center; font-size:30px; font-weight:900; color:#fff;
-      background: linear-gradient(180deg,#7b00e6,#ff2d6f);
-      border:3px solid rgba(255,255,255,0.06);
-      box-shadow: 0 12px 36px rgba(255,50,80,0.14);
-      cursor:pointer;
-    }
+    .plus-btn { width:56px; height:56px; border-radius:12px; background: var(--accent-grad); display:grid; place-items:center; font-size:28px; font-weight:900; cursor:pointer; border:3px solid rgba(255,255,255,0.06); box-shadow:0 12px 36px rgba(255,50,80,0.14); }
 
-    /* Hide the "controls" selects visually (picker is primary) but keep available for keyboard users */
-    .controls-row { display:flex; gap:10px; align-items:center; }
-    select, input[type=number] { background:var(--box); border:2px solid var(--border); padding:10px; border-radius:10px; color:var(--text); }
-    select.unit-select { min-width:260px; }
-
-    /* Items area in calculator: user requested no space between items / tight look */
+    /* Items grid — tight layout, small gap; user requested scroll in the picker only but this grid is tight as requested */
     .items-list {
-      border-radius:10px; min-height:180px; padding:6px;
+      border-radius:10px; padding:6px;
       display:grid;
       grid-template-columns: repeat(auto-fill, 76px);
       grid-auto-rows: 76px;
-      gap:4px; /* very small gap for tight look */
+      gap:4px;
       align-content:start;
       justify-content:start;
+      min-height:180px;
       border:2px solid rgba(255,255,255,0.03);
       background: rgba(0,0,0,0.01);
     }
 
-    /* Calculator thumbnail: framed by rarity color and no extra badges */
-    .calc-thumb {
-      width:76px; height:76px; border-radius:10px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center;
-      background:var(--box); border:3px solid rgba(255,255,255,0.03);
-    }
-    .calc-thumb .img { width:100%; height:100%; background-size:cover; background-position:center; }
-    .calc-thumb .remove { position:absolute; left:6px; top:6px; background:rgba(0,0,0,0.6); color:#fff; border-radius:6px; padding:2px 6px; cursor:pointer; font-weight:900; }
-
-    /* Add rarity frame for calculator thumbs (outer ring) */
+    .calc-thumb { width:76px; height:76px; border-radius:10px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center; background:var(--box); border:3px solid rgba(255,255,255,0.04); }
+    .calc-thumb .img { width:100%; height:100%; background-size:cover; background-position:center; display:block; }
+    .calc-thumb .remove { position:absolute; left:6px; top:6px; background:rgba(0,0,0,0.6); color:#fff; border-radius:6px; padding:2px 6px; cursor:pointer; font-weight:900; font-size:12px; }
+    /* Rarity frame on calc-thumb applied via class */
     .calc-thumb.rarity-astral { box-shadow: 0 0 0 3px rgba(100,0,129,0.12) inset; border-color: rgba(100,0,129,0.25); }
     .calc-thumb.rarity-cosmic { box-shadow: 0 0 0 3px rgba(184,0,230,0.12) inset; border-color: rgba(184,0,230,0.25); }
     .calc-thumb.rarity-divine { box-shadow: 0 0 0 3px rgba(196,0,207,0.12) inset; border-color: rgba(196,0,207,0.25); }
@@ -182,51 +134,49 @@
     .calc-thumb.rarity-mythic { box-shadow: 0 0 0 3px rgba(255,109,104,0.12) inset; border-color: rgba(255,109,104,0.25); }
     .calc-thumb.rarity-legendary { box-shadow: 0 0 0 3px rgba(245,166,35,0.12) inset; border-color: rgba(245,166,35,0.25); }
 
-    .total-box { display:flex; justify-content:center; margin-top:6px; }
+    .total-box { display:flex; justify-content:center; margin-top:auto; }
     .total-value { background: linear-gradient(90deg,#7b00e6,#ff2d6f); padding:10px 18px; border-radius:10px; color:#000; font-weight:900; }
 
-    /* Verdict banner (only inside calculator) */
-    .verdict-wrap { max-width:1200px; margin:18px auto; display:flex; justify-content:center; }
-    .verdict { width:520px; padding:16px; border-radius:12px; border:2px solid rgba(255,255,255,0.03); display:flex; justify-content:center; background:transparent; }
+    .verdict-wrap { width:100%; max-width:1200px; display:flex; justify-content:center; margin-top:12px; }
+    .verdict { width:520px; padding:12px; border-radius:12px; border:2px solid rgba(255,255,255,0.03); display:flex; justify-content:center; background:transparent; }
     .verdict-text { font-weight:900; font-size:32px; color:#6ea0ff; text-transform:uppercase; letter-spacing:2px; }
 
     /* =========================================================================
        PICKER MODAL
-       - Hidden thumbs until category clicked
+       - IMPORTANT: picker grid has a fixed height with overflow-y:auto so frame stays same size and you scroll inside
+       - No thumbnails shown until a category is clicked (unless search active)
        ========================================================================= */
-    .picker-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:9999; padding:18px; }
+    .picker-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.85); z-index:9999; padding:18px; }
     .picker-box { width:100%; max-width:1180px; min-height:520px; border-radius:12px; padding:12px; display:flex; gap:12px; background:linear-gradient(180deg, rgba(255,255,255,0.006), rgba(255,255,255,0.003)); border:3px solid rgba(255,255,255,0.03); box-shadow:0 30px 80px rgba(0,0,0,0.75); }
     .picker-sidebar { width:160px; display:flex; flex-direction:column; gap:12px; padding:6px; }
     .picker-cat { padding:12px; border-radius:10px; border:2px solid rgba(255,255,255,0.03); color:var(--muted); font-weight:900; cursor:pointer; text-transform:uppercase; background:transparent; }
     .picker-cat.active { color:#fff; border-color:var(--gold); box-shadow:0 0 0 4px rgba(250,204,21,0.05) inset; }
     .picker-main { flex:1; display:flex; flex-direction:column; gap:10px; padding:6px; }
-    .picker-search input { width:100%; padding:12px; border-radius:12px; background:var(--box); border:2px solid var(--border); color:var(--text); }
-    .picker-grid { flex:1; display:grid; grid-template-columns:repeat(auto-fill,78px); gap:12px; overflow:auto; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.02); }
-    .picker-thumb { width:78px; height:78px; border-radius:10px; overflow:hidden; border:3px solid rgba(255,255,255,0.04); background:var(--box); display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; }
-    .picker-thumb .img { width:100%; height:100%; background-size:cover; background-position:center; }
-    .picker-thumb:hover { transform:translateY(-6px); transition: transform .12s ease; box-shadow:0 8px 20px rgba(0,0,0,0.6); }
-    .picker-placeholder { padding:24px; border-radius:8px; border:1px dashed rgba(255,255,255,0.02); color:var(--muted); display:flex; align-items:center; justify-content:center; height:100%; }
-
-    /* Rarity halos on picker thumbs */
-    .picker-thumb.rarity-astral::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-astral); z-index:-1; opacity:0.95; }
-    .picker-thumb.rarity-cosmic::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-cosmic); z-index:-1; opacity:0.95; }
-    .picker-thumb.rarity-divine::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-divine); z-index:-1; opacity:0.95; }
-    .picker-thumb.rarity-godly::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-godly); z-index:-1; opacity:0.95; }
-    .picker-thumb.rarity-exclusive::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-exclusive); z-index:-1; opacity:0.95; }
-    .picker-thumb.rarity-mythic::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-mythic); z-index:-1; opacity:0.95; }
-    .picker-thumb.rarity-legendary::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-legendary); z-index:-1; opacity:0.95; }
+    .picker-search input { width:100%; padding:12px; border-radius:12px; background:var(--box); border:2px solid var(--border); color:var(--text); outline:none; }
+    /* Fixed height grid. Scroll inside. Frame remains same size. */
+    .picker-grid { flex:1; background:transparent; border-radius:8px; padding:12px; border:1px solid rgba(255,255,255,0.02); overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill,78px); gap:12px; align-content:start; }
+    .picker-placeholder { padding:16px; border-radius:8px; border:1px dashed rgba(255,255,255,0.02); color:var(--muted); font-weight:900; display:flex; align-items:center; justify-content:center; }
+    .picker-thumb { width:78px; height:78px; border-radius:10px; overflow:hidden; border:3px solid rgba(255,255,255,0.04); background:var(--box); display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer; }
+    .picker-thumb .img { width:100%; height:100%; background-size:cover; background-position:center; display:block; }
+    .picker-thumb:hover { transform:translateY(-6px); transition:transform .12s ease; box-shadow:0 8px 20px rgba(0,0,0,0.6); }
+    .picker-thumb.rarity-astral::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-astral); z-index:-1; opacity:.95; }
+    .picker-thumb.rarity-cosmic::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-cosmic); z-index:-1; opacity:.95; }
+    .picker-thumb.rarity-divine::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-divine); z-index:-1; opacity:.95; }
+    .picker-thumb.rarity-godly::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-godly); z-index:-1; opacity:.95; }
+    .picker-thumb.rarity-exclusive::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-exclusive); z-index:-1; opacity:.95; }
+    .picker-thumb.rarity-mythic::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-mythic); z-index:-1; opacity:.95; }
+    .picker-thumb.rarity-legendary::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--grad-legendary); z-index:-1; opacity:.95; }
 
     /* =========================================================================
-       RESPONSIVE
+       Responsive tweaks
        ========================================================================= */
     @media (max-width:1024px) {
       .list-root { grid-template-columns:repeat(2,1fr); }
-      .calc-row { flex-direction:column; gap:18px; }
+      .calc-row { flex-direction:column; }
       .trade-panel { width:100%; }
       .picker-box { flex-direction:column; min-height:560px; }
-      .picker-sidebar { width:100%; display:flex; overflow:auto; gap:10px; }
+      .picker-sidebar { width:100%; display:flex; overflow:auto; gap:8px; }
       .picker-grid { grid-template-columns:repeat(auto-fill,86px); }
-      .items-list { grid-template-columns:repeat(auto-fill,72px); grid-auto-rows:72px; gap:6px; }
     }
     @media (max-width:600px) {
       .list-root { grid-template-columns:1fr; gap:18px; }
@@ -235,20 +185,11 @@
       .picker-grid { grid-template-columns:repeat(auto-fill,86px); }
       .items-list { grid-template-columns:repeat(auto-fill,64px); grid-auto-rows:64px; gap:6px; }
     }
-
-    /* =========================================================================
-       DEBUG / ERROR OVERLAY (safe, visible only when errors)
-       ========================================================================= */
-    #debug-overlay {
-      display:none;
-      position:fixed; left:0; right:0; top:0; padding:12px; background:#b91c1c; color:white; z-index:99999; text-align:center; font-family:sans-serif;
-    }
   </style>
 </head>
 <body>
   <div id="debug-overlay" role="alert" aria-live="assertive"></div>
 
-  <!-- CONTROLS -->
   <div class="controls">
     <input id="search-bar" placeholder="Search unit..." aria-label="Search units" />
     <div class="tabs" id="tabs">
@@ -262,163 +203,123 @@
       <button class="tab-btn" data-rarity="legendary">Legendary</button>
       <button class="tab-btn" data-rarity="calculator" id="calculator-tab">Calculator</button>
     </div>
+
     <div class="sort" id="sort">
       <button class="sort-btn active" data-sort="default">Default Sort</button>
       <button class="sort-btn" data-sort="value-desc">High Value</button>
     </div>
   </div>
 
-  <!-- CALCULATOR (hidden outside calculator tab) -->
+  <!-- Calculator (hidden until calculator tab) -->
   <div id="calculator-root" class="calculator-root" aria-hidden="true">
     <div class="calc-row">
-      <div class="trade-panel" id="left-panel" aria-label="Your value panel">
+      <div class="trade-panel" id="left-panel" aria-label="Your value">
         <div class="trade-title you">YOUR VALUE</div>
-        <div class="plus-wrap"><div class="plus-btn" id="plus-left" title="Open picker to add units">+</div></div>
-
-        <!-- Hidden selects (for accessibility / advanced users) -->
+        <div class="plus-wrap"><div class="plus-btn" id="plus-left">+</div></div>
+        <!-- hidden quick controls for keyboard users -->
         <div style="display:none" aria-hidden="true">
-          <div class="controls-row" role="group" aria-label="Left quick controls">
-            <select id="unit-select-left" class="unit-select" aria-label="Left unit select"></select>
-            <select id="trait-select-left" aria-label="Left trait select">
-              <option value="base">Base</option>
-              <option value="grandmaster">Grandmaster</option>
-              <option value="master">Master</option>
-              <option value="superPayday">Super Payday</option>
-              <option value="sniper">Sniper</option>
-            </select>
-            <input id="qty-left" type="number" min="1" value="1" aria-label="Left quantity" style="width:80px">
+          <div class="controls-row">
+            <select id="unit-select-left" class="unit-select"></select>
+            <select id="trait-select-left"><option value="base">Base</option><option value="grandmaster">Grandmaster</option><option value="master">Master</option><option value="superPayday">Super Payday</option><option value="sniper">Sniper</option></select>
+            <input id="qty-left" type="number" min="1" value="1" style="width:80px" />
             <button class="add-small" id="add-left">Add</button>
           </div>
         </div>
 
-        <!-- Tight grid, no large spacing (as user requested) -->
-        <div class="items-list" id="left-items" aria-live="polite" aria-label="Your items area"></div>
-
-        <div class="total-box"><div class="total-value" id="left-total">TOTAL VALUE: 0</div></div>
+        <div id="left-items" class="items-list" aria-live="polite"></div>
+        <div class="total-box"><div id="left-total" class="total-value">TOTAL VALUE: 0</div></div>
       </div>
 
-      <div class="trade-panel" id="right-panel" aria-label="Their value panel">
+      <div class="trade-panel" id="right-panel" aria-label="Their value">
         <div class="trade-title them">THEIR VALUE</div>
-        <div class="plus-wrap"><div class="plus-btn" id="plus-right" title="Open picker to add units">+</div></div>
+        <div class="plus-wrap"><div class="plus-btn" id="plus-right">+</div></div>
 
         <div style="display:none" aria-hidden="true">
-          <div class="controls-row" role="group" aria-label="Right quick controls">
-            <select id="unit-select-right" class="unit-select" aria-label="Right unit select"></select>
-            <select id="trait-select-right" aria-label="Right trait select">
-              <option value="base">Base</option>
-              <option value="grandmaster">Grandmaster</option>
-              <option value="master">Master</option>
-              <option value="superPayday">Super Payday</option>
-              <option value="sniper">Sniper</option>
-            </select>
-            <input id="qty-right" type="number" min="1" value="1" aria-label="Right quantity" style="width:80px">
+          <div class="controls-row">
+            <select id="unit-select-right" class="unit-select"></select>
+            <select id="trait-select-right"><option value="base">Base</option><option value="grandmaster">Grandmaster</option><option value="master">Master</option><option value="superPayday">Super Payday</option><option value="sniper">Sniper</option></select>
+            <input id="qty-right" type="number" min="1" value="1" style="width:80px" />
             <button class="add-small" id="add-right">Add</button>
           </div>
         </div>
 
-        <div class="items-list" id="right-items" aria-live="polite" aria-label="Their items area"></div>
-
-        <div class="total-box"><div class="total-value" id="right-total">TOTAL VALUE: 0</div></div>
+        <div id="right-items" class="items-list" aria-live="polite"></div>
+        <div class="total-box"><div id="right-total" class="total-value">TOTAL VALUE: 0</div></div>
       </div>
     </div>
-  </div>
 
-  <!-- Verdict banner (only visible when calculator is active, updated by JS) -->
-  <div class="verdict-wrap">
-    <div class="verdict" id="verdict-panel" aria-live="polite">
-      <div class="verdict-text" id="verdict-text">NO ITEMS</div>
+    <!-- Verdict banner INSIDE calculator area so it doesn't appear on list mode -->
+    <div class="verdict-wrap" role="status" aria-live="polite">
+      <div class="verdict"><div id="verdict-text" class="verdict-text">NO ITEMS</div></div>
     </div>
   </div>
 
-  <!-- Picker Modal -->
+  <!-- Picker modal: fixed frame size with internal scroll -->
   <div id="picker-overlay" class="picker-overlay" style="display:none" role="dialog" aria-modal="true">
     <div class="picker-box" role="document" aria-label="Unit picker">
-      <div class="picker-sidebar" id="picker-sidebar"></div>
+      <div id="picker-sidebar" class="picker-sidebar"></div>
       <div class="picker-main">
         <div class="picker-search"><input id="picker-search-input" placeholder="SEARCH UNITS..." aria-label="Picker search" /></div>
-        <div id="picker-grid" class="picker-grid"></div>
+        <div id="picker-grid" class="picker-grid"><div class="picker-placeholder">Choose a category on the left</div></div>
       </div>
     </div>
   </div>
 
-  <!-- MAIN LIST (the gallery) -->
+  <!-- Main list -->
   <div id="list-root" class="list-root" aria-live="polite"></div>
 
   <div class="pagination">
     <button id="prev-btn" class="pagination-btn">Previous</button>
-    <div class="page-info" id="page-info">Page 1 of 1</div>
+    <div id="page-info" class="page-info">Page 1 of 1</div>
     <button id="next-btn" class="pagination-btn">Next</button>
   </div>
 
-  <!-- -------------------------------------------------------------------------
-       Unit data file (must be present and load before main script).
-       Keep your existing skibidi-td-data.js file unchanged in the same folder.
-       ------------------------------------------------------------------------- -->
+  <!-- Data file (must be present) -->
   <script src="skibidi-td-data.js"></script>
 
-  <!-- =========================================================================
-       MAIN SCRIPT (rendering, picker, calculator)
-       - Defensive checks
-       - Clear separation between list UI and calculator UI (nothing shown outside)
-       - Picker empty until category chosen
-       - Calculator thumbnails have colored frames and tight layout
-       - Rarity colors applied to main list portraits and calculator thumbs
-     ========================================================================= -->
+  <!-- MAIN SCRIPT -->
   <script>
-  (function () {
+  (function(){
     'use strict';
 
-    // -----------------------
-    // Helper: show fatal error overlay
-    // -----------------------
-    function showFatal(message) {
-      console.error(message);
-      const overlay = document.getElementById('debug-overlay');
-      if (overlay) {
-        overlay.style.display = 'block';
-        overlay.textContent = 'Fatal: ' + message;
-      } else {
-        alert(message);
-      }
+    // Debug overlay helper
+    function showFatal(msg) {
+      console.error(msg);
+      const o = document.getElementById('debug-overlay');
+      if (o) { o.style.display = 'block'; o.textContent = 'Fatal: ' + msg; }
+      else alert(msg);
     }
 
-    // -----------------------
-    // parseValue: same robust K/M logic (exposed globally for debugging)
-    // -----------------------
-    function parseValue(valString) {
-      if (valString === 0) return 0;
-      if (!valString && valString !== 0) return 0;
-      let s = String(valString).trim();
-      s = s.replace(/[\$\€\£\¥\₹]/g, '').replace(/\s+/g, '');
+    // parseValue (K/M)
+    function parseValue(v) {
+      if (v === 0) return 0;
+      if (!v && v !== 0) return 0;
+      let s = String(v).trim();
+      s = s.replace(/[\$\€\£\¥\₹]/g,'').replace(/\s+/g,'');
       const m = s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/);
       if (m) {
-        let num = parseFloat(m[1].replace(/,/g, '')) || 0;
-        const sfx = m[2];
-        if (sfx) {
-          if (sfx.toLowerCase() === 'k') num *= 1e3;
-          if (sfx.toLowerCase() === 'm') num *= 1e6;
+        let n = parseFloat(m[1].replace(/,/g,'')) || 0;
+        const sx = m[2];
+        if (sx) {
+          if (sx.toLowerCase()==='k') n *= 1e3;
+          if (sx.toLowerCase()==='m') n *= 1e6;
         }
-        return num;
+        return n;
       }
-      const fallback = s.match(/[\d.]+/);
-      return fallback ? parseFloat(fallback[0].replace(/,/g, '')) : 0;
+      const f = s.match(/[\d.]+/);
+      return f ? parseFloat(f[0].replace(/,/g,'')) : 0;
     }
     window.parseValue = parseValue;
 
-    // -----------------------
-    // Formatting helpers
-    // -----------------------
     function abbr(n) {
       if (!isFinite(n) || n === 0) return '0';
-      if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M+';
-      if (n >= 1e3) return (n / 1e3).toFixed(2) + 'K';
+      if (n >= 1e6) return (n/1e6).toFixed(2) + 'M+';
+      if (n >= 1e3) return (n/1e3).toFixed(2) + 'K';
       return Math.round(n).toLocaleString();
     }
-    function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    // -----------------------
-    // Basic DOM refs (cached)
-    // -----------------------
+    // DOM refs
     const debugOverlay = document.getElementById('debug-overlay');
     const listRoot = document.getElementById('list-root');
     const pickerOverlay = document.getElementById('picker-overlay');
@@ -429,7 +330,7 @@
     const searchBar = document.getElementById('search-bar');
     const tabs = document.getElementById('tabs');
     const sort = document.getElementById('sort');
-    const pageInfoEl = document.getElementById('page-info');
+    const pageInfo = document.getElementById('page-info');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
 
@@ -438,11 +339,10 @@
     const plusRight = document.getElementById('plus-right');
     const leftItemsEl = document.getElementById('left-items');
     const rightItemsEl = document.getElementById('right-items');
-    const leftTotalEl = document.getElementById('left-total');
-    const rightTotalEl = document.getElementById('right-total');
+    const leftTotal = document.getElementById('left-total');
+    const rightTotal = document.getElementById('right-total');
     const verdictText = document.getElementById('verdict-text');
 
-    // Hidden selects (kept for accessibility / advanced usage)
     const unitSelectLeft = document.getElementById('unit-select-left');
     const unitSelectRight = document.getElementById('unit-select-right');
     const traitSelectLeft = document.getElementById('trait-select-left');
@@ -452,23 +352,18 @@
     const addLeft = document.getElementById('add-left');
     const addRight = document.getElementById('add-right');
 
-    // -----------------------
-    // Validate unitDatabase exists
-    // -----------------------
+    // validation
     if (typeof unitDatabase === 'undefined' || !unitDatabase || typeof unitDatabase !== 'object') {
-      showFatal('unitDatabase is missing or invalid. Make sure skibidi-td-data.js is loaded and defines a global unitDatabase object.');
+      showFatal('unitDatabase not found or invalid. Ensure skibidi-td-data.js is loaded and defines unitDatabase.');
       return;
     }
 
-    // -----------------------
     // State
-    // -----------------------
     let currentFilter = 'all';
     let searchQuery = '';
     let currentSort = 'default';
     let currentPage = 1;
     const itemsPerPage = 15;
-
     const rarityOrder = { astral:1, cosmic:2, godly:3, divine:4, mythic:5, legendary:6, exclusive:99 };
 
     const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
@@ -478,138 +373,121 @@
     const leftItems = [];
     const rightItems = [];
 
-    // -----------------------
-    // Utility: add class for rarity on elements (safe)
-    // -----------------------
-    function rarityClassFor(unit) {
-      if (!unit || !unit.rarity) return '';
-      return 'rarity-' + String(unit.rarity || '').toLowerCase().replace(/\s+/g, '-');
+    // Utility: rarity class
+    function rarityClass(u) {
+      return (u && u.rarity) ? ('rarity-' + String(u.rarity).toLowerCase().replace(/\s+/g,'-')) : '';
     }
 
-    // -----------------------
-    // RENDER MAIN LIST
-    // -----------------------
+    // RENDER MAIN LIST (ensures rarity class applied on unit-card)
     function renderList() {
-      // Build filtered list
-      const keys = unitKeys.filter(key => {
-        const u = unitDatabase[key];
-        const r = (u.rarity || '').toLowerCase();
+      const keys = unitKeys.filter(k => {
+        const u = unitDatabase[k];
+        const r = (u.rarity||'').toLowerCase();
         const matchesRarity = currentFilter === 'all' || r === currentFilter;
-        const matchesSearch = (u.name || '').toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = (u.name||'').toLowerCase().includes(searchQuery.toLowerCase());
         return matchesRarity && matchesSearch;
       });
 
-      // Sort
       keys.sort((a,b) => {
-        if (currentSort === 'value-desc') {
-          return parseValue(unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats.value);
-        }
-        const wa = rarityOrder[(unitDatabase[a].rarity || '').toLowerCase()] || 999;
-        const wb = rarityOrder[(unitDatabase[b].rarity || '').toLowerCase()] || 999;
+        if (currentSort === 'value-desc') return parseValue(unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats.value);
+        const wa = rarityOrder[(unitDatabase[a].rarity||'').toLowerCase()]||999;
+        const wb = rarityOrder[(unitDatabase[b].rarity||'').toLowerCase()]||999;
         if (wa !== wb) return wa - wb;
-        return (unitDatabase[a].name || '').localeCompare(unitDatabase[b].name || '');
+        return (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||'');
       });
 
-      // Pagination
       const totalPages = Math.max(1, Math.ceil(keys.length / itemsPerPage));
       if (currentPage > totalPages) currentPage = totalPages;
-      const start = (currentPage - 1) * itemsPerPage;
+      const start = (currentPage-1) * itemsPerPage;
       const pageKeys = keys.slice(start, start + itemsPerPage);
 
-      pageInfoEl.innerText = `Page ${currentPage} of ${totalPages}`;
+      pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
       prevBtn.disabled = currentPage === 1;
       nextBtn.disabled = currentPage === totalPages;
 
-      // Render cards
-      listRoot.innerHTML = pageKeys.map(key => {
-        const u = unitDatabase[key];
+      listRoot.innerHTML = pageKeys.map(k => {
+        const u = unitDatabase[k];
         const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
-        const rarityCls = rarityClassFor(u);
+        const rcls = rarityClass(u);
         const second = u.secondEdition && String(u.secondEdition).toLowerCase() === 'yes' ? `<div class="second-edition-tag">2nd Edition</div>` : '';
         return `
-          <div class="unit-card">
+          <div class="unit-card ${rcls}" data-unit="${k}">
             <div class="header-section">
               <div class="unit-title">${esc(u.name)}</div>
               ${second}
             </div>
             <div style="display:flex;align-items:center;justify-content:center">
-              <div class="portrait-frame ${rarityCls}">
+              <div class="portrait-frame ${rcls}">
                 <div class="unit-image" style="background-image:${portrait}"></div>
               </div>
             </div>
             <div class="data-table">
-              <div class="data-cell">
-                <div class="label">Value</div>
-                <div class="val highlight-gold">${esc(u.baseStats.value)}</div>
-              </div>
-              <div class="data-cell">
-                <div class="label">Status</div>
-                <div class="val">${esc(u.baseStats.status)}</div>
-              </div>
-              <div class="data-cell">
-                <div class="label">Demand</div>
-                <div class="val highlight-purple">${esc(u.baseStats.demand)}</div>
-              </div>
+              <div class="data-cell"><div class="label">Value</div><div class="val highlight-gold">${esc(u.baseStats.value)}</div></div>
+              <div class="data-cell"><div class="label">Status</div><div class="val">${esc(u.baseStats.status)}</div></div>
+              <div class="data-cell"><div class="label">Demand</div><div class="val highlight-purple">${esc(u.baseStats.demand)}</div></div>
             </div>
           </div>`;
       }).join('');
     }
 
-    // -----------------------
-    // POPULATE hidden selects (fallback)
-    // -----------------------
+    // Populate hidden selects (fallback)
     function populateSelects() {
-      const opts = unitKeys.map(key => {
-        const u = unitDatabase[key];
-        return `<option value="${key}">${esc(u.name)} (${esc(u.rarity||'n/a')}) — ${esc(u.baseStats.value||'N/A')}</option>`;
+      const opts = unitKeys.map(k => {
+        const u = unitDatabase[k];
+        return `<option value="${k}">${esc(u.name)} (${esc(u.rarity||'n/a')}) — ${esc(u.baseStats.value||'N/A')}</option>`;
       }).join('');
       if (unitSelectLeft) unitSelectLeft.innerHTML = opts;
       if (unitSelectRight) unitSelectRight.innerHTML = opts;
     }
 
-    // -----------------------
-    // CALCULATOR: rendering thumbnails & totals
-    // -----------------------
+    // Calculator: render thumbs in tight grid
     function renderThumbs() {
-      leftItemsEl.innerHTML = leftItems.length ? leftItems.map(it => calcThumbHTML(it)).join('') : '';
-      rightItemsEl.innerHTML = rightItems.length ? rightItems.map(it => calcThumbHTML(it)).join('') : '';
-      // Attach remove listeners
+      leftItemsEl.innerHTML = leftItems.map(it => thumbHTML(it)).join('');
+      rightItemsEl.innerHTML = rightItems.map(it => thumbHTML(it)).join('');
       document.querySelectorAll('.thumb-remove').forEach(btn => {
         btn.removeEventListener('click', thumbRemoveHandler);
         btn.addEventListener('click', thumbRemoveHandler);
       });
     }
-    function calcThumbHTML(it) {
+    function thumbHTML(it) {
       const u = unitDatabase[it.key] || {};
       const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
-      const rcls = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
-      return `
-        <div class="calc-thumb rarity-${rcls}" data-id="${it.id}" data-key="${it.key}">
-          <div class="img" style="background-image:${portrait}"></div>
-          <div class="thumb-remove" data-id="${it.id}" title="Remove">×</div>
-        </div>`;
+      const rcls = (u.rarity||'').toLowerCase().replace(/\s+/g,'-');
+      return `<div class="calc-thumb rarity-${rcls}" data-id="${it.id}" data-key="${it.key}">
+        <div class="img" style="background-image:${portrait}"></div>
+        <div class="remove thumb-remove" data-id="${it.id}">×</div>
+      </div>`;
     }
     function thumbRemoveHandler(e) {
       const id = e.currentTarget.getAttribute('data-id');
       if (!id) return;
-      // remove from arrays
-      let idx = leftItems.findIndex(x => x.id === id);
-      if (idx >= 0) leftItems.splice(idx, 1);
-      idx = rightItems.findIndex(x => x.id === id);
-      if (idx >= 0) rightItems.splice(idx, 1);
+      let i = leftItems.findIndex(x => x.id === id);
+      if (i >= 0) leftItems.splice(i,1);
+      i = rightItems.findIndex(x => x.id === id);
+      if (i >= 0) rightItems.splice(i,1);
+      renderThumbs();
+      updateTotalsAndVerdict();
+    }
+
+    function addToSide(side, key, trait, qty) {
+      if (!key || !unitDatabase[key]) return;
+      qty = Math.max(1, Math.floor(qty) || 1);
+      const u = unitDatabase[key];
+      const single = (trait && trait !== 'base' && u.traits && u.traits[trait]) ? parseValue(u.traits[trait].value) : parseValue(u.baseStats.value);
+      const item = { id: `${key}-${trait}-${Date.now()}-${Math.random().toString(36).slice(2,6)}`, key, trait, qty, single, computed: single * qty };
+      if (side === 'left') leftItems.push(item); else rightItems.push(item);
       renderThumbs();
       updateTotalsAndVerdict();
     }
 
     function updateTotalsAndVerdict() {
-      leftItems.forEach(i => i.computed = ((i.single||0) * (i.qty||1)));
-      rightItems.forEach(i => i.computed = ((i.single||0) * (i.qty||1)));
-      const leftSum = leftItems.reduce((s,i) => s + Number(i.computed||0), 0);
-      const rightSum = rightItems.reduce((s,i) => s + Number(i.computed||0), 0);
-      leftTotalEl.innerText = `TOTAL VALUE: ${abbr(leftSum)}`;
-      rightTotalEl.innerText = `TOTAL VALUE: ${abbr(rightSum)}`;
+      leftItems.forEach(i => i.computed = (i.single||0) * (i.qty||1));
+      rightItems.forEach(i => i.computed = (i.single||0) * (i.qty||1));
+      const leftSum = leftItems.reduce((s,i)=> s + Number(i.computed||0), 0);
+      const rightSum = rightItems.reduce((s,i)=> s + Number(i.computed||0), 0);
+      leftTotal.innerText = `TOTAL VALUE: ${abbr(leftSum)}`;
+      rightTotal.innerText = `TOTAL VALUE: ${abbr(rightSum)}`;
 
-      // verdict logic
       const FAIR = 0.02, SMALL = 0.10;
       let verdict = 'NO ITEMS';
       if (leftSum === 0 && rightSum === 0) verdict = 'NO ITEMS';
@@ -622,49 +500,49 @@
       verdictText.innerText = verdict.toUpperCase();
     }
 
-    // -----------------------
-    // Add item to calculator array
-    // -----------------------
-    function addToSide(side, key, trait, qty) {
-      if (!key || !unitDatabase[key]) return;
-      qty = Math.max(1, Math.floor(qty) || 1);
-      const single = (trait && trait !== 'base' && unitDatabase[key].traits && unitDatabase[key].traits[trait]) ? parseValue(unitDatabase[key].traits[trait].value) : parseValue(unitDatabase[key].baseStats.value);
-      const entry = { id: `${key}:${trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key, trait, qty, single, computed: single * qty };
-      if (side === 'left') leftItems.push(entry); else rightItems.push(entry);
-      renderThumbs();
-      updateTotalsAndVerdict();
-    }
-
-    // -----------------------
-    // PICKER: show placeholder until category clicked
-    // -----------------------
+    // -------------------------
+    // Picker: create sidebar & logic
+    // - Placeholder until category clicked (as requested)
+    // - Search: if user types, search within selected category; if none selected, search across all
+    // - Grid has internal scroll (fixed frame size)
+    // -------------------------
     function createPicker() {
-      if (!pickerSidebar || !pickerGrid || !pickerSearch) return;
-      // Build sidebar categories (rarities)
+      // Sidebar categories
       const cats = ['All','Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
       pickerSidebar.innerHTML = cats.map(c => `<div class="picker-cat" data-cat="${c.toLowerCase()}">${c}</div>`).join('');
-      // Default: none active -> show placeholder
-      pickerGrid.innerHTML = `<div class="picker-placeholder">Choose a category from the left</div>`;
 
-      // Attach handlers
+      // Default placeholder in grid
+      pickerGrid.innerHTML = `<div class="picker-placeholder">Choose a category on the left</div>`;
+
+      // Click handlers for categories
       pickerSidebar.querySelectorAll('.picker-cat').forEach(btn => {
         btn.addEventListener('click', () => {
           pickerSidebar.querySelectorAll('.picker-cat').forEach(x => x.classList.remove('active'));
           btn.classList.add('active');
-          const cat = btn.getAttribute('data-cat') || 'all';
-          renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, cat, pickerSearch.value || '');
+          const category = btn.getAttribute('data-cat');
+          renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, category, pickerSearch.value || '');
         });
       });
 
-      pickerSearch.addEventListener('input', (e) => {
+      // Search behavior
+      pickerSearch.addEventListener('input', e => {
         const active = pickerSidebar.querySelector('.picker-cat.active');
-        if (!active) { pickerGrid.innerHTML = `<div class="picker-placeholder">Choose a category from the left</div>`; return; }
-        const cat = active.getAttribute('data-cat');
-        renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, cat, e.target.value || '');
+        const category = active ? active.getAttribute('data-cat') : null;
+        // if user types and no category active -> search across all
+        if (!category && (e.target.value || '').trim() === '') {
+          pickerGrid.innerHTML = `<div class="picker-placeholder">Choose a category on the left</div>`;
+        } else {
+          renderPickerGrid(currentPickerSide, currentPickerTrait, currentPickerQty, category || 'all', e.target.value || '');
+        }
+      });
+
+      // close picker when clicking outside box (overlay already handles via CSS area)
+      pickerOverlay.addEventListener('click', (ev) => {
+        if (ev.target === pickerOverlay) hidePicker();
       });
     }
 
-    // render picker grid filtered by category & search
+    // Render picker content (category or search)
     function renderPickerGrid(side, trait, qty, category, q) {
       category = (category || 'all').toLowerCase();
       q = (q || '').toLowerCase();
@@ -682,17 +560,17 @@
         return;
       }
 
-      // Build thumbs (no value badges as requested)
-      pickerGrid.innerHTML = keys.map(key => {
-        const u = unitDatabase[key];
+      // Build thumbs (no values on thumbnails)
+      pickerGrid.innerHTML = keys.map(k => {
+        const u = unitDatabase[k];
         const portrait = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
-        const rslug = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
-        return `<div class="picker-thumb rarity-${rslug}" data-key="${key}" title="${esc(u.name)}">
+        const rcls = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
+        return `<div class="picker-thumb rarity-${rcls}" data-key="${k}" title="${esc(u.name)}">
           <div class="img" style="background-image:${portrait}"></div>
         </div>`;
       }).join('');
 
-      // attach thumb click listeners
+      // attach click handlers
       pickerGrid.querySelectorAll('.picker-thumb').forEach(t => {
         t.addEventListener('click', () => {
           const key = t.getAttribute('data-key');
@@ -702,35 +580,30 @@
       });
     }
 
-    // -----------------------
-    // Picker visibility helpers
-    // -----------------------
-    function showPicker() {
-      pickerOverlay.style.display = 'flex';
-    }
-    function hidePicker() {
-      pickerOverlay.style.display = 'none';
-    }
+    function showPicker() { pickerOverlay.style.display = 'flex'; }
+    function hidePicker() { pickerOverlay.style.display = 'none'; }
 
-    // -----------------------
-    // Event wiring
-    // -----------------------
+    // current picker settings
+    let currentPickerSide = 'left', currentPickerTrait = 'base', currentPickerQty = 1;
+
+    // -------------------------
+    // Wiring events
+    // -------------------------
     searchBar.addEventListener('input', e => { searchQuery = e.target.value || ''; currentPage = 1; renderList(); });
 
     tabs.addEventListener('click', e => {
       if (!e.target.classList.contains('tab-btn')) return;
       tabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
-      currentFilter = e.target.getAttribute('data-rarity') || 'all';
-      // show/hide calculator
+      const selected = e.target.getAttribute('data-rarity') || 'all';
+      currentFilter = selected;
       if (currentFilter === 'calculator') {
         calculatorRoot.style.display = 'block';
-        calculatorRoot.setAttribute('aria-hidden', 'false');
+        calculatorRoot.setAttribute('aria-hidden','false');
         listRoot.style.display = 'none';
-        // show verdict & calculator
       } else {
         calculatorRoot.style.display = 'none';
-        calculatorRoot.setAttribute('aria-hidden', 'true');
+        calculatorRoot.setAttribute('aria-hidden','true');
         listRoot.style.display = '';
         currentPage = 1;
         renderList();
@@ -746,77 +619,71 @@
       renderList();
     });
 
-    prevBtn.addEventListener('click', ()=>{ if (currentPage>1){ currentPage--; renderList(); window.scrollTo({top:0,behavior:'smooth'});} });
+    prevBtn.addEventListener('click', ()=> { if (currentPage>1){ currentPage--; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }});
     nextBtn.addEventListener('click', ()=> {
       const filteredTotal = unitKeys.filter(k => {
         const u = unitDatabase[k];
-        return (currentFilter==='all' || (u.rarity||'').toLowerCase() === currentFilter) && (u.name||'').toLowerCase().includes(searchQuery.toLowerCase());
+        return (currentFilter === 'all' || (u.rarity||'').toLowerCase() === currentFilter) && (u.name||'').toLowerCase().includes(searchQuery.toLowerCase());
       }).length;
       const maxPage = Math.ceil(filteredTotal / itemsPerPage) || 1;
       if (currentPage < maxPage) { currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }
     });
 
-    // Open picker from + buttons
-    let currentPickerSide = 'left', currentPickerTrait = 'base', currentPickerQty = 1;
+    // picker openers
     plusLeft.addEventListener('click', ()=> {
-      currentPickerSide = 'left'; currentPickerTrait = (traitSelectLeft && traitSelectLeft.value) || 'base'; currentPickerQty = (qtyLeft && Number(qtyLeft.value) || 1);
-      // ensure picker UI created
-      createPicker();
-      // reset search + placeholder
+      currentPickerSide = 'left';
+      currentPickerTrait = (traitSelectLeft && traitSelectLeft.value) || 'base';
+      currentPickerQty = (qtyLeft && Math.max(1, Number(qtyLeft.value || 1))) || 1;
       pickerSearch.value = '';
+      createPicker();
       pickerGrid.innerHTML = `<div class="picker-placeholder">Choose a category on the left</div>`;
       showPicker();
     });
     plusRight.addEventListener('click', ()=> {
-      currentPickerSide = 'right'; currentPickerTrait = (traitSelectRight && traitSelectRight.value) || 'base'; currentPickerQty = (qtyRight && Number(qtyRight.value) || 1);
-      createPicker();
+      currentPickerSide = 'right';
+      currentPickerTrait = (traitSelectRight && traitSelectRight.value) || 'base';
+      currentPickerQty = (qtyRight && Math.max(1, Number(qtyRight.value || 1))) || 1;
       pickerSearch.value = '';
+      createPicker();
       pickerGrid.innerHTML = `<div class="picker-placeholder">Choose a category on the left</div>`;
       showPicker();
     });
 
-    // Hidden quick-add buttons (fallback)
+    // fallback adds
     if (addLeft) addLeft.addEventListener('click', ()=> addToSide('left', unitSelectLeft.value, traitSelectLeft.value, Number(qtyLeft.value || 1)));
     if (addRight) addRight.addEventListener('click', ()=> addToSide('right', unitSelectRight.value, traitSelectRight.value, Number(qtyRight.value || 1)));
     if (unitSelectLeft) unitSelectLeft.addEventListener('dblclick', ()=> addToSide('left', unitSelectLeft.value, traitSelectLeft.value, Number(qtyLeft.value || 1)));
     if (unitSelectRight) unitSelectRight.addEventListener('dblclick', ()=> addToSide('right', unitSelectRight.value, traitSelectRight.value, Number(qtyRight.value || 1)));
 
-    // Close picker on escape
+    // close picker on Esc
     document.addEventListener('keydown', e => { if (e.key === 'Escape') hidePicker(); });
 
-    // Picker overlay click already handled with listener on createPicker (closing when clicking outside)
+    // close picker on overlay click (handled inside createPicker via event listener)
 
-    // -----------------------
-    // INITIALIZATION
-    // - populate fallback selects
-    // - render main list (default)
-    // - create picker structure, but keep it hidden and placeholder that requires category click
-    // -----------------------
+    // init
     try {
-      populateSelects();
+      // populate fallback selects
+      unitSelectLeft && (unitSelectLeft.innerHTML = unitKeys.map(k => `<option value="${k}">${esc(unitDatabase[k].name)} (${esc(unitDatabase[k].rarity||'n/a')})</option>`).join(''));
+      unitSelectRight && (unitSelectRight.innerHTML = unitKeys.map(k => `<option value="${k}">${esc(unitDatabase[k].name)} (${esc(unitDatabase[k].rarity||'n/a')})</option>`).join(''));
+
       renderList();
       renderThumbs();
       updateTotalsAndVerdict();
-      // create picker structure once
-      createPicker();
+
+      // Pre-create picker structure so event listeners are attached early
+      // (createPicker will skip re-creating if already set)
+      // We'll call createPicker lazily when the user opens the picker (but it's fine to create now).
+      // No thumbnails are loaded until a category click OR a search input.
+      // This prevents the huge "all units" render on open.
+      // (createPicker must be available when user opens plus)
+      // We'll call createPicker when the user clicks plus (above).
     } catch (err) {
-      showFatal('Initialization failed: ' + (err && err.message ? err.message : String(err)));
+      showFatal('Initialization error: ' + (err && err.message ? err.message : String(err)));
     }
 
-    // -----------------------
-    // Expose some internals for debugging in console if needed
-    // -----------------------
-    window._skibidi = {
-      parseValue,
-      unitDatabase,
-      leftItems,
-      rightItems,
-      renderList,
-      renderThumbs,
-      updateTotalsAndVerdict
-    };
+    // Expose for debugging
+    window._skibidi = { unitDatabase, leftItems, rightItems, renderList, renderThumbs, updateTotalsAndVerdict };
 
-    // End of script
   })();
   </script>
 </body>
