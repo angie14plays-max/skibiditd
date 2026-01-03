@@ -3,17 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Skibidi TD — Responsive + Traits + Dropdown</title>
+  <title>Skibidi TD — Polished Buttons, Icons, Status Colors, Traits + Soap</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
+    /* ===========================
+       THEME & ICONS (inline SVG data URIs)
+       =========================== */
     :root{
-      --bg:#000;
-      --card:#0f0f0f;
-      --panel:#111316;
-      --box:#141618;
-      --border:#222428;
-      --muted:#9da3a6;
+      --bg:#060606;
+      --card:#0f0f11;
+      --panel:#101214;
+      --muted:#9aa0a5;
       --text:#ffffff;
+      --border:#24262a;
+
       --accent: linear-gradient(90deg,#8b4bff,#ff2d6f);
 
       --g-astral: linear-gradient(90deg,#7f00ff,#00ffd5);
@@ -23,344 +26,295 @@
       --g-exclusive: linear-gradient(90deg,#00d1ff,#4fe0a3);
       --g-mythic: linear-gradient(90deg,#ff6d68,#ffb86b);
       --g-legendary: linear-gradient(90deg,#ffd54a,#ff7a00);
+
+      --value-bg: linear-gradient(90deg,#0b0c0d,#121316);
+      --box-radius:12px;
     }
 
-    *{box-sizing:border-box;font-family:'Montserrat',sans-serif;-webkit-font-smoothing:antialiased}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--text)}
-    body{padding:18px;display:flex;flex-direction:column;align-items:center;gap:16px}
+    /* small inline SVG icons (camera, speaker, tv, toilet, tie, star) */
+    /* encoded with encodeURIComponent so we can embed simple SVG as CSS background */
+    --ic-camera: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='7' width='18' height='12' rx='2' ry='2' fill='%23ffffff'/%3E%3Ccircle cx='12' cy='13' r='2.6' fill='%23000000'/%3E%3Cpath d='M7 7 L9 4 h6 l2 3' stroke='%23000000' stroke-width='0.6' fill='none'/%3E%3C/svg%3E");
+    --ic-speaker: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='6' width='6' height='12' rx='1' ry='1' fill='%23ffffff'/%3E%3Cpath d='M11 8 L17 4 v16 l-6-4' fill='%23ffffff'/%3E%3Ccircle cx='17.5' cy='8' r='1' fill='%23ffffff'/%3E%3C/svg%3E");
+    --ic-tv: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='4' width='20' height='14' rx='1.5' fill='%23ffffff'/%3E%3Crect x='7' y='18' width='10' height='1.8' rx='0.9' fill='%23ffffff'/%3E%3C/svg%3E");
+    --ic-toilet: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='9' rx='7' ry='3' fill='%23ffffff'/%3E%3Crect x='7' y='9' width='10' height='8' rx='2' fill='%23ffffff'/%3E%3C/svg%3E");
+    --ic-tie: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2 L9 8 l3 3 3-3 -3-6z' fill='%23ffffff'/%3E%3Cpath d='M9 11 l6 0 -2 9 -2 2 -2-2 -2-9z' fill='%23ffffff'/%3E%3C/svg%3E");
+    --ic-star: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 15,10 23,10 17,14 19,22 12,17 5,22 7,14 1,10 9,10' fill='%23ffffff'/%3E%3C/svg%3E");
 
-    /* Controls */
-    .controls { width:100%; max-width:1200px; display:flex; flex-direction:column; gap:12px; align-items:center; }
-    #search-bar { width:100%; max-width:1200px; padding:12px 16px; border-radius:14px; background:var(--card); border:2px solid var(--border); color:var(--text); outline:none; font-size:15px; }
+    /* base styles */
+    *{box-sizing:border-box}
+    body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);margin:18px;display:flex;flex-direction:column;align-items:center;gap:18px}
+    a{color:inherit}
 
-    /* Dropdown (desplegable) */
-    .dropdown { position:relative; display:flex; align-items:center; gap:12px; }
-    .dd-toggle { padding:12px 18px; border-radius:12px; background:var(--card); border:2px solid var(--border); color:var(--text); font-weight:900; cursor:pointer; display:flex; gap:8px; align-items:center; }
-    .dd-menu { position:absolute; top:56px; left:0; min-width:320px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02)); border:2px solid var(--border); border-radius:12px; padding:10px; display:none; z-index:50; box-shadow:0 30px 80px rgba(0,0,0,0.7); }
-    .dd-row { display:flex; gap:8px; flex-wrap:wrap; max-width:760px; }
+    /* Search */
+    #search-bar{width:100%;max-width:1200px;padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--border);color:var(--text);outline:none;font-size:15px}
 
-    .dd-item {
-      padding:10px 16px; border-radius:10px; color:var(--text); font-weight:900; cursor:pointer; border:1px solid rgba(255,255,255,0.04);
-      display:inline-block; min-width:86px; text-align:center;
+    /* Top button row: rectangular, full-color gradients, icons at left and right */
+    .top-row { width:100%; max-width:1200px; display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap; }
+    .cat-btn {
+      --pad-x:18px;
+      --pad-y:10px;
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:var(--pad-y) var(--pad-x); border-radius:14px; font-weight:900; text-transform:uppercase; cursor:pointer;
+      color:var(--text); border:1px solid rgba(255,255,255,0.06); min-width:110px; position:relative; overflow:visible;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      transition: transform .08s ease, box-shadow .12s ease;
     }
-    .dd-item[data-rarity="calculator"]{ background:var(--card); color:var(--text); }
-    .dd-item[data-rarity="all"]{ background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)); color:var(--muted); }
-    .dd-item[data-rarity="astral"]{ background:var(--g-astral) }
-    .dd-item[data-rarity="cosmic"]{ background:var(--g-cosmic) }
-    .dd-item[data-rarity="divine"]{ background:var(--g-divine) }
-    .dd-item[data-rarity="godly"]{ background:var(--g-godly) }
-    .dd-item[data-rarity="exclusive"]{ background:var(--g-exclusive) }
-    .dd-item[data-rarity="mythic"]{ background:var(--g-mythic) }
-    .dd-item[data-rarity="legendary"]{ background:var(--g-legendary) }
+    .cat-btn:active { transform:translateY(1px) }
 
-    .dd-item:hover { transform:translateY(-4px); box-shadow:0 12px 36px rgba(0,0,0,0.6); }
+    /* attach icons left and right using ::before / ::after - same icon on both sides */
+    .cat-btn::before, .cat-btn::after {
+      content:''; width:20px; height:20px; display:inline-block; margin:0 8px; background-size:cover; background-position:center center; opacity:0.98;
+    }
 
-    /* Sort */
-    .sort-row { display:flex; gap:10px; }
+    /* Map icons to rarities */
+    .cat-btn[data-rarity="astral"] { background:var(--g-astral); }
+    .cat-btn[data-rarity="astral"]::before, .cat-btn[data-rarity="astral"]::after { background-image: var(--ic-star); }
 
-    /* Main list */
-    .list-root { width:100%; max-width:1200px; display:grid; grid-template-columns: repeat(3, 1fr); gap:22px; padding:12px; border-radius:12px; }
-    .unit-card { position:relative; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02)); border-radius:14px; padding:16px; border:1px solid var(--border); min-height:320px; display:flex; flex-direction:column; gap:10px; justify-content:space-between; }
-    .unit-card > * { position:relative; z-index:2; }
-    .unit-title { font-weight:900; text-transform:uppercase; text-align:center; font-size:16px; margin-bottom:8px; letter-spacing:0.6px; }
+    .cat-btn[data-rarity="cosmic"] { background:var(--g-cosmic); }
+    .cat-btn[data-rarity="cosmic"]::before, .cat-btn[data-rarity="cosmic"]::after { background-image: var(--ic-tv); }
 
-    .portrait-circle { width:120px; height:120px; border-radius:50%; margin:0 auto; display:flex; align-items:center; justify-content:center; position:relative; background:var(--box); border:3px solid rgba(0,0,0,0.6); }
+    .cat-btn[data-rarity="divine"] { background:var(--g-divine); }
+    .cat-btn[data-rarity="divine"]::before, .cat-btn[data-rarity="divine"]::after { background-image: var(--ic-tie); }
+
+    .cat-btn[data-rarity="godly"] { background:var(--g-godly); }
+    .cat-btn[data-rarity="godly"]::before, .cat-btn[data-rarity="godly"]::after { background-image: var(--ic-speaker); }
+
+    .cat-btn[data-rarity="exclusive"] { background:var(--g-exclusive); color:#021; }
+    .cat-btn[data-rarity="exclusive"]::before, .cat-btn[data-rarity="exclusive"]::after { background-image: var(--ic-camera); }
+
+    .cat-btn[data-rarity="mythic"] { background:var(--g-mythic); color:#021; }
+    .cat-btn[data-rarity="mythic"]::before, .cat-btn[data-rarity="mythic"]::after { background-image: var(--ic-toilet); }
+
+    .cat-btn[data-rarity="legendary"] { background:var(--g-legendary); color:#081; }
+    .cat-btn[data-rarity="legendary"]::before, .cat-btn[data-rarity="legendary"]::after { background-image: var(--ic-star); }
+
+    .cat-btn[data-rarity="all"] { background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); color:var(--muted); }
+    .cat-btn[data-rarity="calculator"] { background:var(--card); color:var(--text); }
+
+    .cat-btn.active { box-shadow: 0 14px 50px rgba(0,0,0,0.7), 0 0 40px rgba(255,255,255,0.02) inset; transform:translateY(-3px); outline:2px solid rgba(255,255,255,0.03) }
+
+    /* Main grid (cards) */
+    .list-root { width:100%; max-width:1200px; display:grid; grid-template-columns:repeat(3,1fr); gap:20px; padding:6px; }
+    .unit-card { background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02)); border-radius:14px; padding:18px; border:1px solid var(--border); min-height:320px; display:flex; flex-direction:column; justify-content:space-between; }
+    .unit-title { font-weight:900; text-align:center; text-transform:uppercase; margin-bottom:8px; font-size:16px; letter-spacing:0.6px; }
+
+    .portrait-circle { width:120px; height:120px; border-radius:50%; margin:0 auto; display:flex; align-items:center; justify-content:center; background:var(--box); border:3px solid rgba(0,0,0,0.6); position:relative; }
     .portrait-circle .unit-image { width:110px; height:110px; border-radius:50%; background-size:cover; background-position:center; }
 
-    /* neon halo behind portraits (always visible) */
-    .unit-card.rarity-astral .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-astral); z-index:-1; opacity:0.98; filter:drop-shadow(0 12px 40px rgba(127,0,255,0.22)); }
-    .unit-card.rarity-cosmic .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-cosmic); z-index:-1; opacity:0.98; filter:drop-shadow(0 12px 40px rgba(184,0,230,0.22)); }
-    .unit-card.rarity-divine .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-divine); z-index:-1; opacity:0.98; }
-    .unit-card.rarity-godly .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-godly); z-index:-1; opacity:0.98; }
-    .unit-card.rarity-exclusive .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-exclusive); z-index:-1; opacity:0.98; }
-    .unit-card.rarity-mythic .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-mythic); z-index:-1; opacity:0.98; }
-    .unit-card.rarity-legendary .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-legendary); z-index:-1; opacity:0.98; }
+    /* neon halos - subtle */
+    .unit-card.rarity-astral .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-astral); z-index:-1; opacity:0.96; filter:blur(6px) contrast(1.2); }
+    .unit-card.rarity-cosmic .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-cosmic); z-index:-1; opacity:0.96; filter:blur(6px); }
+    .unit-card.rarity-divine .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-divine); z-index:-1; opacity:0.96; filter:blur(6px); }
+    .unit-card.rarity-godly .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-godly); z-index:-1; opacity:0.96; filter:blur(6px); }
+    .unit-card.rarity-exclusive .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-exclusive); z-index:-1; opacity:0.96; filter:blur(6px); }
+    .unit-card.rarity-mythic .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-mythic); z-index:-1; opacity:0.96; filter:blur(6px); }
+    .unit-card.rarity-legendary .portrait-circle::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:var(--g-legendary); z-index:-1; opacity:0.96; filter:blur(6px); }
 
-    .unit-card.rarity-astral::after { content:''; position:absolute; inset:0; background:var(--g-astral); opacity:0.06; z-index:0; border-radius:12px; }
-    .unit-card.rarity-cosmic::after { content:''; position:absolute; inset:0; background:var(--g-cosmic); opacity:0.06; z-index:0; border-radius:12px; }
-    .unit-card.rarity-divine::after { content:''; position:absolute; inset:0; background:var(--g-divine); opacity:0.06; z-index:0; border-radius:12px; }
-    .unit-card.rarity-godly::after { content:''; position:absolute; inset:0; background:var(--g-godly); opacity:0.06; z-index:0; border-radius:12px; }
-    .unit-card.rarity-exclusive::after { content:''; position:absolute; inset:0; background:var(--g-exclusive); opacity:0.06; z-index:0; border-radius:12px; }
-    .unit-card.rarity-mythic::after { content:''; position:absolute; inset:0; background:var(--g-mythic); opacity:0.06; z-index:0; border-radius:12px; }
-    .unit-card.rarity-legendary::after { content:''; position:absolute; inset:0; background:var(--g-legendary); opacity:0.06; z-index:0; border-radius:12px; }
+    /* Info boxes: Value / Status / Demand — professional colored boxes */
+    .info-row { display:flex; gap:12px; justify-content:center; align-items:center; margin-top:10px; }
+    .info-box { min-width:110px; background:var(--panel); border-radius:10px; padding:10px 12px; text-align:center; border:1px solid var(--border); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+    .info-box .label { display:block; color:var(--muted); font-weight:800; font-size:11px; text-transform:uppercase; }
+    .info-box .value { display:block; font-weight:900; margin-top:4px; }
 
-    .data-table { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; align-items:center; }
-    .data-cell { background:var(--panel); border-radius:10px; border:1px solid var(--border); padding:12px; text-align:center; min-height:64px; display:flex; flex-direction:column; justify-content:center; }
-    .label { color:var(--muted); font-weight:800; font-size:11px; text-transform:uppercase; }
-    .val { font-weight:900; }
+    /* Value neutral box style */
+    .value-box { background: linear-gradient(90deg,#0b0c0d,#121316); color: #fff; }
 
-    /* Badges */
-    .status-badge{ padding:6px 8px; border-radius:10px; font-weight:900; text-transform:uppercase; font-size:12px;}
-    .status-stable{ background: linear-gradient(90deg,#f97316,#ffb86b); color:#1a1000; }
-    .status-high-demand{ background:linear-gradient(90deg,#6d28d9,#a78bfa); color:#fff; }
-    .status-hyped{ background:linear-gradient(90deg,#06b6d4,#7ef0f7); color:#021; }
-    .status-dropping{ background:linear-gradient(90deg,#ef4444,#ff8a8a); color:#200; }
-    .demand-pill{ padding:6px 8px; border-radius:8px; font-weight:900; }
+    /* Status color mapping — use exact colors user expects (callouts from earlier messages):
+       stable = orange, high demand = purple, hyped = purple-blue, dropping = red, etc.
+    */
+    .status-box { padding:6px 10px; border-radius:8px; font-weight:900; display:inline-block; text-transform:uppercase; font-size:12px; }
+    .status-stable { background: linear-gradient(90deg,#f97316,#ffb86b); color:#2a1000; }        /* orange */
+    .status-high-demand { background: linear-gradient(90deg,#7c3aed,#a78bfa); color:#fff; }     /* purple */
+    .status-hyped { background: linear-gradient(90deg,#06b6d4,#7ef0f7); color:#021; }            /* cyan */
+    .status-dropping { background: linear-gradient(90deg,#ef4444,#ff8a8a); color:#200; }        /* red */
+    .status-unstable { background: linear-gradient(90deg,#9d174d,#ff95c9); color:#250; }        /* pink */
+    .status-recovering { background: linear-gradient(90deg,#65a30d,#bef264); color:#032; }      /* green */
+    .status-default { background: linear-gradient(90deg,#6b7280,#9ca3af); color:#fff; }         /* gray */
 
-    /* Calculator */
-    .calculator-root{ width:100%; max-width:1200px; margin:0 auto 12px; display:none; }
-    .calc-row{ display:flex; gap:18px; align-items:flex-start; justify-content:center; }
-    .trade-panel{ width:46%; min-height:300px; border-radius:12px; padding:18px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.01)); border:1px solid var(--border); }
-    .trade-title{ text-align:center; font-weight:900; text-transform:uppercase; margin-bottom:12px; }
-    .plus-btn{ width:64px; height:64px; border-radius:16px; font-size:28px; font-weight:900; cursor:pointer; display:grid; place-items:center; background:var(--accent); border:3px solid rgba(255,255,255,0.06); }
+    /* Demand pill mapping */
+    .demand-pill { padding:6px 8px; border-radius:8px; font-weight:900; display:inline-block; color:#fff; }
+    .demand-low { background: linear-gradient(90deg,#6b7280,#9ca3af); }
+    .demand-mid { background: linear-gradient(90deg,#f97316,#ffb86b); color:#120; }
+    .demand-high { background: linear-gradient(90deg,#16a34a,#6fe89a); color:#012; }
 
-    .items-list{ border-radius:12px; padding:10px; min-height:160px; border:1px solid rgba(255,255,255,0.04); display:grid; grid-template-columns:repeat(auto-fill,76px); gap:8px; background:rgba(0,0,0,0.01); }
-    .calc-thumb{ width:76px; height:76px; border-radius:10px; background:var(--box); border:3px solid rgba(255,255,255,0.04); position:relative; display:flex; align-items:center; justify-content:center; }
-    .calc-thumb .img{ width:100%; height:100%; background-size:cover; background-position:center; border-radius:8px; }
-    .calc-thumb .thumb-remove{ position:absolute; left:6px; top:6px; background:rgba(0,0,0,0.6); color:#fff; border-radius:8px; padding:3px 6px; cursor:pointer; font-weight:900; font-size:12px; }
+    /* Calculator thumb square frames */
+    .calc-thumb { width:76px; height:76px; border-radius:10px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; border:3px solid rgba(255,255,255,0.04); background:var(--box); }
+    .calc-thumb::before { content:''; position:absolute; inset:-6px; border-radius:12px; z-index:-1; opacity:0.98; }
+    .calc-thumb.rarity-astral::before { background:var(--g-astral); }
+    .calc-thumb.rarity-cosmic::before { background:var(--g-cosmic); }
+    .calc-thumb.rarity-divine::before { background:var(--g-divine); }
+    .calc-thumb.rarity-godly::before { background:var(--g-godly); }
+    .calc-thumb.rarity-exclusive::before { background:var(--g-exclusive); }
+    .calc-thumb.rarity-mythic::before { background:var(--g-mythic); }
+    .calc-thumb.rarity-legendary::before { background:var(--g-legendary); }
 
-    /* color frame for calc-thumb */
-    .calc-thumb.rarity-astral::before{ content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-astral); z-index:-1; opacity:0.98; }
-    .calc-thumb.rarity-cosmic::before{ content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-cosmic); z-index:-1; opacity:0.98; }
-    .calc-thumb.rarity-divine::before{ content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-divine); z-index:-1; opacity:0.98; }
-    .calc-thumb.rarity-godly::before{ content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-godly); z-index:-1; opacity:0.98; }
-    .calc-thumb.rarity-exclusive::before{ content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-exclusive); z-index:-1; opacity:0.98; }
-    .calc-thumb.rarity-mythic::before{ content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-mythic); z-index:-1; opacity:0.98; }
-    .calc-thumb.rarity-legendary::before{ content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-legendary); z-index:-1; opacity:0.98; }
+    /* soap badge */
+    .soap-badge { position:absolute; right:6px; top:6px; background:linear-gradient(90deg,#fff7cc,#fff1a8); color:#3b2f00; padding:3px 6px; border-radius:8px; font-weight:900; font-size:11px; z-index:4; box-shadow:0 6px 18px rgba(0,0,0,0.45); }
 
-    /* soap badge for 'clean' trait */
-    .soap-badge { position:absolute; right:6px; top:6px; background:linear-gradient(90deg,#fef3c7,#fff6e0); color:#3b2f00; padding:4px 6px; border-radius:8px; font-weight:900; font-size:11px; z-index:4; box-shadow:0 6px 18px rgba(0,0,0,0.45); }
+    /* picker & trait chooser minimal styles (kept from previous iterations) */
+    .picker-overlay{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.85); z-index:9999; padding:12px; }
+    .picker-box{ width:100%; max-width:1180px; max-height:80vh; border-radius:12px; padding:12px; display:flex; gap:12px; background:linear-gradient(180deg, rgba(255,255,255,0.006), rgba(255,255,255,0.003)); border:2px solid var(--border); }
+    .picker-sidebar{ width:160px; display:flex; flex-direction:column; gap:10px; overflow:auto; padding:6px; }
+    .picker-cat{ padding:10px; border-radius:8px; background:var(--card); border:1px solid var(--border); color:var(--muted); font-weight:900; cursor:pointer; }
+    .picker-cat.active{ outline:2px solid rgba(255,255,255,0.03); color:#fff; }
+    .picker-grid{ flex:1; overflow:auto; display:grid; grid-template-columns: repeat(auto-fill,78px); gap:12px; padding:12px; }
 
-    /* picker modal */
-    .picker-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.85); z-index:9999; padding:12px; }
-    .picker-box { width:100%; max-width:1180px; max-height:80vh; border-radius:12px; padding:12px; display:flex; gap:12px; background:linear-gradient(180deg, rgba(255,255,255,0.006), rgba(255,255,255,0.003)); border:3px solid rgba(255,255,255,0.03); overflow:hidden; }
-    .picker-sidebar { width:160px; display:flex; flex-direction:column; gap:10px; overflow:auto; padding:6px; }
-    .picker-cat { padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); color:var(--muted); font-weight:900; cursor:pointer; text-transform:uppercase; text-align:left; white-space:nowrap; }
-    .picker-cat.active { color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.5) inset; border-color:var(--gold); }
-    .picker-main { flex:1; display:flex; flex-direction:column; gap:10px; padding:6px; }
-    .picker-search input { padding:10px 12px; border-radius:10px; background:var(--box); border:1px solid var(--border); color:var(--text); width:100%; }
-    .picker-grid { flex:1; overflow:auto; padding:12px; display:grid; grid-template-columns:repeat(auto-fill,78px); gap:12px; border-radius:10px; }
+    .trait-overlay{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:10010; }
+    .trait-box{ background:var(--card); padding:12px; border-radius:12px; border:1px solid var(--border); min-width:300px; }
+    .trait-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .trait-btn{ padding:8px 12px; border-radius:10px; background:var(--panel); color:var(--text); font-weight:900; cursor:pointer; border:1px solid var(--border); }
 
-    .picker-thumb { width:78px; height:78px; border-radius:10px; background:var(--box); border:2px solid rgba(255,255,255,0.03); display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; }
-    .picker-thumb .img{ width:100%; height:100%; background-size:cover; background-position:center; border-radius:8px; }
-
-    .picker-thumb.rarity-astral::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-astral); z-index:-1; opacity:0.98; }
-    .picker-thumb.rarity-cosmic::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-cosmic); z-index:-1; opacity:0.98; }
-    .picker-thumb.rarity-divine::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-divine); z-index:-1; opacity:0.98; }
-    .picker-thumb.rarity-godly::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-godly); z-index:-1; opacity:0.98; }
-    .picker-thumb.rarity-exclusive::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-exclusive); z-index:-1; opacity:0.98; }
-    .picker-thumb.rarity-mythic::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-mythic); z-index:-1; opacity:0.98; }
-    .picker-thumb.rarity-legendary::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-legendary); z-index:-1; opacity:0.98; }
-
-    /* trait modal (small) */
-    .trait-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:10010; }
-    .trait-box { background:var(--card); padding:12px; border-radius:12px; border:2px solid var(--border); box-shadow:0 30px 80px rgba(0,0,0,0.6); min-width:320px; max-width:420px; }
-    .trait-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-    .trait-btn { padding:8px 12px; border-radius:10px; background:var(--panel); color:var(--text); font-weight:900; cursor:pointer; border:1px solid var(--border); }
-
-    /* Responsive */
-    @media (max-width:1024px){
-      .list-root{ grid-template-columns:repeat(2,1fr) }
-      .picker-box{ flex-direction:column; max-height:88vh }
-      .picker-sidebar{ width:100%; display:flex; flex-direction:row; gap:8px; overflow:auto }
-      .picker-cat{ flex:0 0 auto }
-    }
-    @media (max-width:600px){
-      .list-root{ grid-template-columns:1fr }
-      .cat-btn{ padding:10px 12px; font-size:13px }
-      .portrait-circle{ width:96px; height:96px }
-      .portrait-circle .unit-image{ width:86px; height:86px }
-      .picker-grid{ grid-template-columns:repeat(auto-fill,72px) }
-      .items-list{ grid-template-columns:repeat(auto-fill,64px); gap:8px }
-      .dd-menu { top:56px; left:0; min-width:92%; }
-    }
+    /* responsive */
+    @media (max-width:1024px){ .list-root{ grid-template-columns:repeat(2,1fr) } .picker-box{ flex-direction:column } .picker-sidebar{ width:100%; flex-direction:row; overflow:auto } }
+    @media (max-width:600px){ .list-root{ grid-template-columns:1fr } .cat-btn{ min-width:84px; padding:10px 12px } .picker-grid{ grid-template-columns:repeat(auto-fill,72px) } }
   </style>
 </head>
 <body>
-  <div id="debug-overlay" role="alert" aria-live="assertive" style="display:none"></div>
+  <!-- Search -->
+  <input id="search-bar" placeholder="Search unit..." aria-label="Search units" />
 
-  <div class="controls">
-    <input id="search-bar" placeholder="Search unit..." aria-label="Search units" />
-
-    <div class="dropdown" id="dropdown">
-      <div class="dd-toggle" id="dd-toggle">Menu ▾</div>
-      <div class="dd-menu" id="dd-menu" role="menu" aria-hidden="true">
-        <div class="dd-row" id="dd-row">
-          <!-- Items added by JS to ensure correct order: Calculator first, then All, then rarities -->
-        </div>
-      </div>
-    </div>
-
-    <div class="sort-row">
-      <button class="sort-btn active" data-sort="default">Default Sort</button>
-      <button class="sort-btn" data-sort="value-desc">High Value</button>
-    </div>
+  <!-- Top buttons (rectangles with icons at sides) -->
+  <div class="top-row" id="top-row">
+    <button class="cat-btn" data-rarity="calculator">Calculator</button>
+    <button class="cat-btn active" data-rarity="all">All</button>
+    <button class="cat-btn" data-rarity="astral">Astral</button>
+    <button class="cat-btn" data-rarity="cosmic">Cosmic</button>
+    <button class="cat-btn" data-rarity="divine">Divine</button>
+    <button class="cat-btn" data-rarity="godly">Godly</button>
+    <button class="cat-btn" data-rarity="exclusive">Exclusive</button>
+    <button class="cat-btn" data-rarity="mythic">Mythic</button>
+    <button class="cat-btn" data-rarity="legendary">Legendary</button>
   </div>
 
-  <!-- Calculator -->
-  <div id="calculator-root" class="calculator-root" aria-hidden="true" style="display:none">
-    <div class="calc-row">
-      <div class="trade-panel" id="left-panel" aria-label="Your value">
-        <div class="trade-title you">YOUR VALUE</div>
-        <div class="plus-wrap"><div class="plus-btn" id="plus-left">+</div></div>
-        <div id="left-items" class="items-list" aria-live="polite"></div>
-        <div class="total-box"><div id="left-total" class="total-value">TOTAL VALUE: 0</div></div>
+  <!-- Sort -->
+  <div style="margin-top:6px;"><button class="sort-btn active" data-sort="default">Default Sort</button> <button class="sort-btn" data-sort="value-desc">High Value</button></div>
+
+  <!-- Calculator (hidden by default) -->
+  <div id="calculator-root" style="display:none;margin-top:10px">
+    <div style="display:flex;gap:18px;flex-wrap:wrap;justify-content:center">
+      <div style="width:46%;min-width:280px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.01));padding:18px;border-radius:12px;border:1px solid #232426">
+        <div style="text-align:center;font-weight:900">YOUR VALUE</div>
+        <div style="display:flex;justify-content:center;margin:12px 0"><button class="plus-btn" id="plus-left">+</button></div>
+        <div id="left-items" style="display:grid;grid-template-columns:repeat(auto-fill,76px);gap:8px;min-height:120px"></div>
+        <div style="text-align:center;margin-top:12px"><span id="left-total" style="padding:8px 12px;border-radius:10px;background:linear-gradient(90deg,#7b00e6,#ff2d6f);color:#000;font-weight:900">TOTAL VALUE: 0</span></div>
       </div>
 
-      <div class="trade-panel" id="right-panel" aria-label="Their value">
-        <div class="trade-title them">THEIR VALUE</div>
-        <div class="plus-wrap"><div class="plus-btn" id="plus-right">+</div></div>
-        <div id="right-items" class="items-list" aria-live="polite"></div>
-        <div class="total-box"><div id="right-total" class="total-value">TOTAL VALUE: 0</div></div>
+      <div style="width:46%;min-width:280px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.01));padding:18px;border-radius:12px;border:1px solid #232426">
+        <div style="text-align:center;font-weight:900">THEIR VALUE</div>
+        <div style="display:flex;justify-content:center;margin:12px 0"><button class="plus-btn" id="plus-right">+</button></div>
+        <div id="right-items" style="display:grid;grid-template-columns:repeat(auto-fill,76px);gap:8px;min-height:120px"></div>
+        <div style="text-align:center;margin-top:12px"><span id="right-total" style="padding:8px 12px;border-radius:10px;background:linear-gradient(90deg,#7b00e6,#ff2d6f);color:#000;font-weight:900">TOTAL VALUE: 0</span></div>
       </div>
     </div>
-
-    <div class="verdict-wrap"><div class="verdict"><div id="verdict-text" class="verdict-text">NO ITEMS</div></div></div>
+    <div style="display:flex;justify-content:center;margin-top:12px"><div class="verdict" style="padding:10px 14px;border-radius:10px;border:1px solid #232426;font-weight:900;color:#6ea0ff" id="verdict-text">NO ITEMS</div></div>
   </div>
 
   <!-- Picker -->
-  <div id="picker-overlay" class="picker-overlay" style="display:none" role="dialog" aria-modal="true">
-    <div class="picker-box">
-      <div id="picker-sidebar" class="picker-sidebar"></div>
+  <div class="picker-overlay" id="picker-overlay" style="display:none">
+    <div class="picker-box" role="dialog" aria-modal="true">
+      <div class="picker-sidebar" id="picker-sidebar"></div>
       <div class="picker-main">
-        <div class="picker-search"><input id="picker-search-input" placeholder="SEARCH UNITS..." aria-label="Picker search" /></div>
+        <div style="margin-bottom:8px"><input id="picker-search-input" placeholder="Search units..." style="width:100%;padding:10px;border-radius:8px;background:#0b0c0d;border:1px solid #222426;color:#fff"/></div>
         <div id="picker-grid" class="picker-grid"></div>
       </div>
     </div>
   </div>
 
   <!-- Trait chooser -->
-  <div id="trait-overlay" class="trait-overlay" style="display:none">
-    <div class="trait-box" role="dialog" aria-modal="true" aria-label="Choose trait">
-      <div style="font-weight:900;font-size:16px">Choose trait / condition</div>
-      <div id="trait-list" class="trait-row"></div>
+  <div class="trait-overlay" id="trait-overlay" style="display:none">
+    <div class="trait-box">
+      <div style="font-weight:900">Choose trait / condition</div>
+      <div id="trait-list" class="trait-row" style="margin-top:10px"></div>
       <div style="text-align:right;margin-top:10px"><button id="trait-cancel" class="trait-btn">Cancel</button></div>
     </div>
   </div>
 
-  <!-- Main list -->
-  <div id="list-root" class="list-root" aria-live="polite"></div>
+  <!-- List grid -->
+  <div id="list-root" class="list-root" style="margin-top:12px"></div>
 
   <!-- Pagination -->
-  <div class="pagination" id="pagination">
-    <button id="prev-btn" class="pagination-btn">Previous</button>
-    <div id="page-info" class="page-info">Page 1 of 1</div>
-    <button id="next-btn" class="pagination-btn">Next</button>
+  <div style="display:flex;gap:12px;justify-content:center;margin-top:12px" id="pagination">
+    <button id="prev-btn" style="padding:8px 12px;border-radius:8px;background:#0b0c0d;border:1px solid #222426;color:#fff">Previous</button>
+    <div id="page-info" style="color:#9aa0a5">Page 1 of 1</div>
+    <button id="next-btn" style="padding:8px 12px;border-radius:8px;background:#0b0c0d;border:1px solid #222426;color:#fff">Next</button>
   </div>
 
+  <!-- data file (unchanged) -->
   <script src="skibidi-td-data.js"></script>
 
   <script>
   (function(){
     'use strict';
-    // basic helpers
+    // helpers
     const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const parseValue = v => {
       if (v === 0) return 0;
       if (!v && v !== 0) return 0;
       let s = String(v).trim().replace(/[\$\€\£\¥\₹]/g,'').replace(/\s+/g,'');
       const m = s.match(/^([\d,]+(?:\.\d+)?)([kKmM])?$/);
-      if (m) {
-        let n = parseFloat(m[1].replace(/,/g,'')) || 0;
-        const su = m[2];
-        if (su) { if (su.toLowerCase()==='k') n *= 1e3; if (su.toLowerCase()==='m') n *= 1e6; }
-        return n;
-      }
-      const f = s.match(/[\d.]+/);
-      return f ? parseFloat(f[0].replace(/,/g,'')) : 0;
+      if (m) { let n = parseFloat(m[1].replace(/,/g,''))||0; const sx = m[2]; if (sx){ if (sx.toLowerCase()==='k') n*=1e3; if (sx.toLowerCase()==='m') n*=1e6;} return n; }
+      const f = s.match(/[\d.]+/); return f ? parseFloat(f[0].replace(/,/g,'')) : 0;
     };
-    const abbr = n => { if (!isFinite(n) || n === 0) return '0'; if (n >= 1e6) return (n/1e6).toFixed(2)+'M+'; if (n >= 1e3) return (n/1e3).toFixed(2)+'K'; return Math.round(n).toLocaleString(); };
+    const abbr = n => { if (!isFinite(n)||n===0) return '0'; if (n>=1e6) return (n/1e6).toFixed(2)+'M+'; if (n>=1e3) return (n/1e3).toFixed(2)+'K'; return Math.round(n).toLocaleString(); };
 
     if (typeof unitDatabase === 'undefined' || !unitDatabase) { alert('unitDatabase missing'); return; }
     const imageProvider = "https://corsproxy.io/?https://drive.google.com/thumbnail?id=";
     const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
+    const LS_KEY = 'skibidi_td_polished_v1';
 
     // state
-    let currentFilter = 'all', searchQuery = '', currentSort = 'default', currentPage = 1;
-    let itemsPerPage = 15;
+    let currentFilter = 'all';
+    let searchQuery = '';
+    let currentSort = 'default';
+    let currentPage = 1;
+    let itemsPerPage = (window.innerWidth <= 900) ? 8 : 15;
     const rarityOrder = { astral:1, cosmic:2, godly:3, divine:4, mythic:5, legendary:6, exclusive:99 };
-    const LS_KEY = 'skibidi_td_traits_final_v1';
+
     let leftItems = [], rightItems = [];
+    let currentPickerSide = 'left';
+    let pendingPickerKey = null;
 
-    // dom refs
-    const ddToggle = document.getElementById('dd-toggle');
-    const ddMenu = document.getElementById('dd-menu');
-    const ddRow = document.getElementById('dd-row');
+    // DOM refs
+    const topButtons = document.querySelectorAll('.cat-btn');
     const listRoot = document.getElementById('list-root');
-    const pagination = document.getElementById('pagination');
-    const pageInfo = document.getElementById('page-info');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
+    const pickerOverlay = document.getElementById('picker-overlay');
+    const pickerSidebar = document.getElementById('picker-sidebar');
+    const pickerGrid = document.getElementById('picker-grid');
+    const pickerSearch = document.getElementById('picker-search-input');
 
-    const calculatorRoot = document.getElementById('calculator-root');
-    const plusLeft = document.getElementById('plus-left');
-    const plusRight = document.getElementById('plus-right');
     const leftItemsEl = document.getElementById('left-items');
     const rightItemsEl = document.getElementById('right-items');
     const leftTotalEl = document.getElementById('left-total');
     const rightTotalEl = document.getElementById('right-total');
     const verdictText = document.getElementById('verdict-text');
 
-    const pickerOverlay = document.getElementById('picker-overlay');
-    const pickerSidebar = document.getElementById('picker-sidebar');
-    const pickerGrid = document.getElementById('picker-grid');
-    const pickerSearch = document.getElementById('picker-search-input');
-
     const traitOverlay = document.getElementById('trait-overlay');
     const traitList = document.getElementById('trait-list');
     const traitCancel = document.getElementById('trait-cancel');
 
-    // build dropdown menu (Calculator first)
-    const menuOrder = [
-      { key:'calculator', label:'Calculator' },
-      { key:'all', label:'All' },
-      { key:'astral', label:'Astral' },
-      { key:'cosmic', label:'Cosmic' },
-      { key:'divine', label:'Divine' },
-      { key:'godly', label:'Godly' },
-      { key:'exclusive', label:'Exclusive' },
-      { key:'mythic', label:'Mythic' },
-      { key:'legendary', label:'Legendary' },
-    ];
-    ddRow.innerHTML = menuOrder.map(it => `<div class="dd-item" data-rarity="${it.key}">${it.label}</div>`).join('');
+    // status/demand helpers (mapping to classes used in CSS)
+    function statusClass(status){
+      if(!status) return 'status-default';
+      const s = String(status).toLowerCase();
+      if (/stable/.test(s)) return 'status-stable';
+      if (/high demand|high-demand|highdemand/.test(s)) return 'status-high-demand';
+      if (/hyped|hype/.test(s)) return 'status-hyped';
+      if (/drop|dropp/.test(s)) return 'status-dropping';
+      if (/unstable/.test(s)) return 'status-unstable';
+      return 'status-default';
+    }
+    function demandClass(d){
+      if(!d) return 'demand-low';
+      const m = String(d).match(/(\d+)/);
+      const v = m?Number(m[1]):0;
+      if (v >= 8) return 'demand-high';
+      if (v >= 4) return 'demand-mid';
+      return 'demand-low';
+    }
 
-    // dropdown toggle
-    ddToggle.addEventListener('click', ()=>{
-      const open = ddMenu.style.display === 'block';
-      ddMenu.style.display = open ? 'none' : 'block';
-      ddMenu.setAttribute('aria-hidden', open ? 'true' : 'false');
-    });
-    // clicking outside closes menu
-    document.addEventListener('click', (e) => {
-      if (!ddToggle.contains(e.target) && !ddMenu.contains(e.target)) {
-        ddMenu.style.display = 'none';
-        ddMenu.setAttribute('aria-hidden','true');
-      }
-    });
-
-    // handle menu clicks
-    ddRow.querySelectorAll('.dd-item').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const sel = btn.getAttribute('data-rarity') || 'all';
-        // close menu
-        ddMenu.style.display = 'none';
-        // set active style on toggle label
-        ddToggle.textContent = btn.textContent + ' ▾';
-        // switch views
-        if (sel === 'calculator') {
-          calculatorRoot.style.display = 'block';
-          listRoot.style.display = 'none';
-          pagination.style.display = 'none';
-        } else {
-          calculatorRoot.style.display = 'none';
-          listRoot.style.display = '';
-          pagination.style.display = 'flex';
-          currentFilter = sel; currentPage = 1; renderList();
-        }
-      });
-    });
-
-    // apply desktop/mobile tuning
-    function isMobile(){ return window.innerWidth <= 900 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
-    function applyDesktopTuning(){ itemsPerPage = 15; }
-    function applyMobileTuning(){ itemsPerPage = 8; }
-    function runTuning(){ if (isMobile()) applyMobileTuning(); else applyDesktopTuning(); currentPage = 1; renderList(); }
-    window.addEventListener('resize', ()=> setTimeout(runTuning, 160));
-    runTuning();
-
-    // render list
+    // Render list cards
     function renderList(){
-      const keys = unitKeys.filter(k=>{
+      const keys = unitKeys.filter(k => {
         const u = unitDatabase[k];
         const r = (u.rarity||'').toLowerCase();
         if (currentFilter !== 'all' && r !== currentFilter) return false;
@@ -378,12 +332,12 @@
 
       const totalPages = Math.max(1, Math.ceil(keys.length / itemsPerPage));
       if (currentPage > totalPages) currentPage = totalPages;
-      const start = (currentPage - 1) * itemsPerPage;
+      const start = (currentPage-1)*itemsPerPage;
       const pageKeys = keys.slice(start, start + itemsPerPage);
 
-      pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-      prevBtn.disabled = currentPage === 1;
-      nextBtn.disabled = currentPage === totalPages;
+      document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+      document.getElementById('prev-btn').disabled = currentPage === 1;
+      document.getElementById('next-btn').disabled = currentPage === totalPages;
 
       listRoot.innerHTML = pageKeys.map(k=>{
         const u = unitDatabase[k];
@@ -391,185 +345,135 @@
         const rcls = (u.rarity||'').toLowerCase().replace(/\s+/g,'-');
         const stcls = statusClass(u.baseStats.status);
         const dmcls = demandClass(u.baseStats.demand);
-        const second = u.secondEdition && String(u.secondEdition).toLowerCase() === 'yes' ? `<div style="color:var(--gold); font-weight:900; font-size:11px; margin-top:6px">2nd Edition</div>` : '';
+        const second = u.secondEdition && String(u.secondEdition).toLowerCase()==='yes' ? `<div style="color:#ffd54a;font-weight:900;margin-top:6px">2nd Edition</div>` : '';
         return `
           <div class="unit-card ${rcls}" data-key="${k}">
-            <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
               <div class="unit-title">${esc(u.name)}</div>
               <div class="portrait-circle ${rcls}">
                 <div class="unit-image" style="background-image:${p}"></div>
               </div>
               ${second}
             </div>
-            <div class="data-table">
-              <div class="data-cell"><div class="label">Value</div><div class="val highlight-gold">${esc(u.baseStats.value)}</div></div>
-              <div class="data-cell"><div class="label">Status</div><div class="val"><span class="status-badge ${stcls}">${esc(u.baseStats.status)}</span></div></div>
-              <div class="data-cell"><div class="label">Demand</div><div class="val"><span class="demand-pill ${dmcls}">${esc(u.baseStats.demand)}</span></div></div>
+
+            <div class="info-row">
+              <div class="info-box value-box"><div class="label">Value</div><div class="value">${esc(u.baseStats.value)}</div></div>
+              <div class="info-box"><div class="label">Status</div><div class="value"><span class="status-badge ${stcls}">${esc(u.baseStats.status)}</span></div></div>
+              <div class="info-box"><div class="label">Demand</div><div class="value"><span class="demand-pill ${dmcls}">${esc(u.baseStats.demand)}</span></div></div>
             </div>
           </div>`; }).join('');
     }
 
-    // status/demand helper (copied small mapping)
-    function statusClass(status){
-      if(!status) return 'status-recovering';
-      const s = String(status).toLowerCase();
-      if (/rising|rise/.test(s)) return 'status-rising';
-      if (/stable/.test(s)) return 'status-stable';
-      if (/dropp|drop/.test(s)) return 'status-dropping';
-      if (/hyped|hype/.test(s)) return 'status-hyped';
-      if (/high demand/.test(s)) return 'status-high-demand';
-      if (/unstable/.test(s)) return 'status-unstable';
-      return 'status-recovering';
-    }
-    function demandClass(d){
-      if(!d) return 'demand-low';
-      const m = String(d).match(/(\d+)/);
-      const v = m ? Number(m[1]) : 0;
-      if (v >= 8) return 'demand-high';
-      if (v >= 4) return 'demand-mid';
-      return 'demand-low';
-    }
-
-    // picker creation
+    // Picker
     function createPicker(){
-      // categories list (no All inside picker)
       const cats = ['Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
       pickerSidebar.innerHTML = cats.map(c=>`<div class="picker-cat" data-cat="${c.toLowerCase()}">${c}</div>`).join('');
-      pickerSearch.value = '';
-
-      // default active astral
+      // default: astral active
       const def = pickerSidebar.querySelector('[data-cat="astral"]'); if(def) def.classList.add('active');
       renderPickerGrid('astral','',1,'astral','');
 
-      // handlers
       pickerSidebar.querySelectorAll('.picker-cat').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
+        btn.addEventListener('click', ()=> {
           pickerSidebar.querySelectorAll('.picker-cat').forEach(x=>x.classList.remove('active'));
           btn.classList.add('active');
-          const cat = btn.getAttribute('data-cat') || 'astral';
-          renderPickerGrid(cat,'',1,cat,pickerSearch.value || '');
+          const cat = btn.getAttribute('data-cat')||'astral';
+          renderPickerGrid(cat,'',1,cat,pickerSearch.value||'');
         });
       });
+
       pickerSearch.removeEventListener('input', onPickerSearch);
       pickerSearch.addEventListener('input', onPickerSearch);
-      pickerOverlay.addEventListener('click', (ev)=> { if(ev.target === pickerOverlay) hidePicker(); });
+      pickerOverlay.addEventListener('click', (ev)=>{ if (ev.target === pickerOverlay) hidePicker(); });
     }
 
     function onPickerSearch(e){
       const active = pickerSidebar.querySelector('.picker-cat.active');
       const cat = active ? active.getAttribute('data-cat') : 'astral';
-      renderPickerGrid(cat,'',1,cat,e.target.value || '');
+      renderPickerGrid(cat,'',1,cat,e.target.value||'');
     }
 
     function renderPickerGrid(side, trait, qty, category, q){
-      category = (category || 'astral').toLowerCase();
-      q = (q || '').toLowerCase();
+      category = (category||'astral').toLowerCase();
+      q = (q||'').toLowerCase();
+
       const keys = unitKeys.filter(k=>{
         const u = unitDatabase[k];
-        if(!u) return false;
+        if (!u) return false;
         if ((u.rarity||'').toLowerCase() !== category) return false;
         if (q && !(u.name||'').toLowerCase().includes(q)) return false;
         return true;
       });
 
       if (!keys.length) { pickerGrid.innerHTML = ''; return; }
-
       pickerGrid.innerHTML = keys.map(k=>{
         const u = unitDatabase[k];
         const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
         const rcls = (u.rarity||'').toLowerCase().replace(/\s+/g,'-');
-        return `<div class="picker-thumb rarity-${rcls}" data-key="${k}" title="${esc(u.name)}"><div class="img" style="background-image:${p}"></div></div>`;
+        return `<div class="picker-thumb rarity-${rcls}" data-key="${k}"><div class="img" style="background-image:${p}"></div></div>`;
       }).join('');
 
-      // clicking a thumb opens trait chooser
       pickerGrid.querySelectorAll('.picker-thumb').forEach(t=>{
         t.removeEventListener('click', onPickerClick);
         t.addEventListener('click', onPickerClick);
       });
     }
 
-    // when click a thumb in picker -> show trait chooser
-    let pendingPickerKey = null;
     function onPickerClick(e){
       const key = e.currentTarget.getAttribute('data-key');
       if (!key) return;
       pendingPickerKey = key;
-      openTraitChooserFor(key);
+      openTraitChooser(key);
     }
 
-    function openTraitChooserFor(key){
+    function openTraitChooser(key){
       traitList.innerHTML = '';
-      // always show Clean and Normal
-      const baseBtns = [
-        { id:'clean', label:'Clean' },
-        { id:'normal', label:'Normal' }
-      ];
-      baseBtns.forEach(b => {
-        const el = document.createElement('button');
-        el.className = 'trait-btn';
-        el.textContent = b.label;
-        el.addEventListener('click', ()=> onTraitChosen(b.id));
-        traitList.appendChild(el);
+      // Clean + Normal
+      const base = [{id:'clean',label:'Clean'},{id:'normal',label:'Normal'}];
+      base.forEach(b=>{
+        const btn = document.createElement('button'); btn.className='trait-btn'; btn.textContent=b.label;
+        btn.addEventListener('click', ()=> onTraitChosen(b.id));
+        traitList.appendChild(btn);
       });
-      // add unit-specific traits (if any)
+      // unit-specific traits
       const u = unitDatabase[key];
       if (u && u.traits) {
-        Object.keys(u.traits).forEach(tr => {
-          const el = document.createElement('button');
-          el.className = 'trait-btn';
-          el.textContent = tr;
-          el.addEventListener('click', ()=> onTraitChosen(tr));
-          traitList.appendChild(el);
+        Object.keys(u.traits).forEach(tr=>{
+          const btn = document.createElement('button'); btn.className='trait-btn'; btn.textContent = tr;
+          btn.addEventListener('click', ()=> onTraitChosen(tr));
+          traitList.appendChild(btn);
         });
       }
-      // show overlay
       traitOverlay.style.display = 'flex';
-      traitCancel.addEventListener('click', onTraitCancel);
+      traitCancel.addEventListener('click', ()=> { traitOverlay.style.display = 'none'; pendingPickerKey = null; }, { once: true });
     }
 
-    function onTraitCancel(){ traitOverlay.style.display = 'none'; pendingPickerKey = null; }
     function onTraitChosen(trait){
       if (!pendingPickerKey) { traitOverlay.style.display='none'; return; }
-      // add to current picker side (default left)
       const side = currentPickerSide || 'left';
       addToSide(side, pendingPickerKey, trait, 1);
-      // if chosen 'clean', set a property on the item so soap is shown (we handle when rendering)
-      // close overlays
       pendingPickerKey = null;
       traitOverlay.style.display = 'none';
       hidePicker();
     }
 
-    function showPicker(){ pickerOverlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
-    function hidePicker(){ pickerOverlay.style.display = 'none'; document.body.style.overflow = ''; }
+    function showPicker(){ pickerOverlay.style.display = 'flex'; document.body.style.overflow='hidden'; }
+    function hidePicker(){ pickerOverlay.style.display = 'none'; document.body.style.overflow=''; }
 
-    // Add to side (includes soap flag when trait == 'clean')
-    function addToSide(side, key, trait, qty){
-      if (!key || !unitDatabase[key]) return;
-      qty = Math.max(1, Math.floor(qty) || 1);
-      const u = unitDatabase[key];
-      const single = (trait && trait !== 'normal' && trait !== 'clean' && u.traits && u.traits[trait]) ? parseValue(u.traits[trait].value) : parseValue(u.baseStats.value);
-      const item = { id:`${key}:${trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key, trait, qty, single, computed: single * qty, clean: trait === 'clean' };
-      if (side === 'left') leftItems.push(item); else rightItems.push(item);
-      persistTrade(); renderThumbs(); updateTotalsAndVerdict();
-    }
-
-    // render calc thumbs and show soap badge for clean items
+    // Calculator add/remove
     function calcThumbHTML(it){
       const u = unitDatabase[it.key] || {};
       const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
       const rcls = (u.rarity||'').toLowerCase().replace(/\s+/g,'-');
-      const soap = it.clean ? `<div class="soap-badge">SOAP</div>` : '';
+      const soap = it.clean ? '<div class="soap-badge">SOAP</div>' : '';
       return `<div class="calc-thumb rarity-${rcls}" data-id="${it.id}" title="${esc(u.name)}">${soap}<div class="img" style="background-image:${p}"></div><div class="thumb-remove" data-id="${it.id}">×</div></div>`;
     }
+
     function renderThumbs(){
       leftItemsEl.innerHTML = leftItems.map(calcThumbHTML).join('');
       rightItemsEl.innerHTML = rightItems.map(calcThumbHTML).join('');
-      document.querySelectorAll('.thumb-remove').forEach(btn=>{
-        btn.removeEventListener('click', onThumbRemove);
-        btn.addEventListener('click', onThumbRemove);
-      });
+      document.querySelectorAll('.thumb-remove').forEach(b=>{ b.removeEventListener('click', onThumbRemove); b.addEventListener('click', onThumbRemove); });
     }
+
     function onThumbRemove(e){
       const id = e.currentTarget.getAttribute('data-id');
       let idx = leftItems.findIndex(x=>x.id===id); if (idx>=0) leftItems.splice(idx,1);
@@ -577,58 +481,90 @@
       persistTrade(); renderThumbs(); updateTotalsAndVerdict();
     }
 
+    function addToSide(side, key, trait, qty){
+      if (!key || !unitDatabase[key]) return;
+      qty = Math.max(1, Math.floor(qty) || 1);
+      const u = unitDatabase[key];
+      const single = (trait && trait !== 'normal' && trait !== 'clean' && u.traits && u.traits[trait]) ? parseValue(u.traits[trait].value) : parseValue(u.baseStats.value);
+      const item = { id:`${key}:${trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key, trait, qty, single, computed: single*qty, clean: trait === 'clean' };
+      if (side === 'left') leftItems.push(item); else rightItems.push(item);
+      persistTrade(); renderThumbs(); updateTotalsAndVerdict();
+    }
+
     function updateTotalsAndVerdict(){
-      leftItems.forEach(i => i.computed = (i.single || 0) * (i.qty || 1));
-      rightItems.forEach(i => i.computed = (i.single || 0) * (i.qty || 1));
-      const leftSum = leftItems.reduce((s,i)=> s + Number(i.computed||0), 0);
-      const rightSum = rightItems.reduce((s,i)=> s + Number(i.computed||0), 0);
+      leftItems.forEach(i=>i.computed=(i.single||0)*(i.qty||1));
+      rightItems.forEach(i=>i.computed=(i.single||0)*(i.qty||1));
+      const leftSum = leftItems.reduce((s,i)=>s+Number(i.computed||0),0);
+      const rightSum = rightItems.reduce((s,i)=>s+Number(i.computed||0),0);
       leftTotalEl.textContent = `TOTAL VALUE: ${abbr(leftSum)}`;
       rightTotalEl.textContent = `TOTAL VALUE: ${abbr(rightSum)}`;
-      const FAIR = 0.02, SMALL = 0.10;
-      let verdict = 'NO ITEMS';
-      if (leftSum === 0 && rightSum === 0) verdict = 'NO ITEMS';
-      else if (Math.abs(leftSum - rightSum) <= Math.max(1, FAIR * Math.max(leftSum, rightSum))) verdict = 'FAIR';
-      else if (leftSum > rightSum) { if (rightSum === 0 || leftSum > rightSum * (1 + SMALL)) verdict = 'OVERPAYING'; else verdict = 'LOSE'; }
-      else { if (leftSum === 0 || rightSum > leftSum * (1 + SMALL)) verdict = 'UNDERPAYING'; else verdict = 'WIN'; }
+      const FAIR=0.02, SMALL=0.10; let verdict='NO ITEMS';
+      if (leftSum===0 && rightSum===0) verdict='NO ITEMS';
+      else if (Math.abs(leftSum-rightSum)<=Math.max(1,FAIR*Math.max(leftSum,rightSum))) verdict='FAIR';
+      else if (leftSum>rightSum) { if (rightSum===0 || leftSum>rightSum*(1+SMALL)) verdict='OVERPAYING'; else verdict='LOSE'; }
+      else { if (leftSum===0 || rightSum>leftSum*(1+SMALL)) verdict='UNDERPAYING'; else verdict='WIN'; }
       verdictText.textContent = verdict.toUpperCase();
     }
 
     // persistence
     function persistTrade(){
-      try { const payload = { left: leftItems.map(i=>({key:i.key,trait:i.trait,qty:i.qty,clean:!!i.clean})), right: rightItems.map(i=>({key:i.key,trait:i.trait,qty:i.qty,clean:!!i.clean})) }; localStorage.setItem(LS_KEY, JSON.stringify(payload)); }
-      catch(e){ console.warn('persist failed', e); }
+      try {
+        const payload = { left: leftItems.map(i=>({key:i.key,trait:i.trait,qty:i.qty,clean:!!i.clean})), right: rightItems.map(i=>({key:i.key,trait:i.trait,qty:i.qty,clean:!!i.clean})) };
+        localStorage.setItem(LS_KEY, JSON.stringify(payload));
+      } catch(e){ console.warn('persist failed', e); }
     }
     function restoreTrade(){
       try {
         const raw = localStorage.getItem(LS_KEY); if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (parsed.left) leftItems = parsed.left.map(it=>{ const single = (it.trait && it.trait!=='normal' && it.trait!=='clean' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0); return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single * Math.max(1,it.qty||1), clean: !!it.clean }; });
-        if (parsed.right) rightItems = parsed.right.map(it=>{ const single = (it.trait && it.trait!=='normal' && it.trait!=='clean' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0); return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single * Math.max(1,it.qty||1), clean: !!it.clean }; });
+        const parsed = JSON.parse(raw); if (!parsed) return;
+        leftItems = (parsed.left||[]).map(it=>{ const single = (it.trait && it.trait!=='normal' && it.trait!=='clean' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0); return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single*(it.qty||1), clean: !!it.clean }; });
+        rightItems = (parsed.right||[]).map(it=>{ const single = (it.trait && it.trait!=='normal' && it.trait!=='clean' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0); return { id:`${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty:Math.max(1,it.qty||1), single, computed: single*(it.qty||1), clean: !!it.clean }; });
       } catch(e){ console.warn('restore failed', e); }
     }
 
-    // picker openers
-    let currentPickerSide = 'left';
-    plusLeft.addEventListener('click', ()=>{ currentPickerSide = 'left'; createPicker(); showPicker(); });
-    plusRight.addEventListener('click', ()=>{ currentPickerSide = 'right'; createPicker(); showPicker(); });
-
-    // pagination, search, sort (simple)
-    prevBtn.addEventListener('click', ()=>{ if (currentPage > 1){ currentPage--; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }});
-    nextBtn.addEventListener('click', ()=>{ const keys = unitKeys.filter(k=> { const u = unitDatabase[k]; const r = (u.rarity||'').toLowerCase(); if (currentFilter !== 'all' && r !== currentFilter) return false; if (searchQuery && !(u.name||'').toLowerCase().includes(searchQuery.toLowerCase())) return false; return true; }); const maxp = Math.ceil(keys.length/itemsPerPage)||1; if (currentPage < maxp){ currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }});
-    document.getElementById('search-bar').addEventListener('input', e=>{ searchQuery = e.target.value || ''; currentPage = 1; renderList(); });
-    document.querySelectorAll('.sort-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{ document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); currentSort = btn.getAttribute('data-sort')||'default'; currentPage = 1; renderList(); });
+    // wiring top buttons
+    document.querySelectorAll('.cat-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const r = btn.getAttribute('data-rarity') || 'all';
+        if (r === 'calculator') {
+          document.getElementById('calculator-root').style.display = 'block';
+          listRoot.style.display = 'none';
+          document.getElementById('pagination').style.display = 'none';
+        } else {
+          document.getElementById('calculator-root').style.display = 'none';
+          listRoot.style.display = '';
+          document.getElementById('pagination').style.display = 'flex';
+          currentFilter = r; currentPage = 1; renderList();
+        }
+      });
     });
 
-    // init
+    // sort buttons
+    document.querySelectorAll('.sort-btn').forEach(b=>{ b.addEventListener('click', ()=>{ document.querySelectorAll('.sort-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); currentSort = b.getAttribute('data-sort') || 'default'; currentPage = 1; renderList(); }); });
+
+    // pagination & search
+    document.getElementById('prev-btn').addEventListener('click', ()=>{ if (currentPage>1) { currentPage--; renderList(); window.scrollTo({top:0,behavior:'smooth'}); } });
+    document.getElementById('next-btn').addEventListener('click', ()=>{ const keys = unitKeys.filter(k=>{ const u = unitDatabase[k]; const r = (u.rarity||'').toLowerCase(); if (currentFilter !== 'all' && r !== currentFilter) return false; if (searchQuery && !(u.name||'').toLowerCase().includes(searchQuery.toLowerCase())) return false; return true; }); const maxp = Math.ceil(keys.length/itemsPerPage) || 1; if (currentPage < maxp) { currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'}); } });
+    document.getElementById('search-bar').addEventListener('input', e => { searchQuery = e.target.value || ''; currentPage = 1; renderList(); });
+
+    // picker openers (calculator + buttons)
+    document.getElementById('plus-left').addEventListener('click', ()=>{ currentPickerSide = 'left'; createPicker(); showPicker(); });
+    document.getElementById('plus-right').addEventListener('click', ()=>{ currentPickerSide = 'right'; createPicker(); showPicker(); });
+
+    function showPicker(){ pickerOverlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+    function hidePicker(){ pickerOverlay.style.display = 'none'; document.body.style.overflow = ''; }
+
+    // initial render
     try {
       restoreTrade();
       renderList();
       renderThumbs();
       updateTotalsAndVerdict();
-    } catch(e){ console.error('init error', e); }
+    } catch(e){ console.error('init', e); }
 
-    // expose API for debugging
+    // expose for debug
     window._skibidi = { unitDatabase, leftItems, rightItems, renderList, renderThumbs, updateTotalsAndVerdict };
 
   })();
