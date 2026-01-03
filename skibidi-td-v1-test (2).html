@@ -139,15 +139,15 @@
     .plus-wrap { display:flex; justify-content:center; margin-bottom:8px; }
     .plus-btn { width:64px; height:64px; border-radius:16px; font-size:28px; font-weight:900; cursor:pointer; display:grid; place-items:center; background:var(--accent-grad); border:3px solid rgba(255,255,255,0.06); }
 
-    .items-list { border-radius:12px; padding:16px; min-height:260px; border:1px solid rgba(255,255,255,0.04); display:grid; grid-template-columns:repeat(auto-fill,86px); gap:12px; background:rgba(0,0,0,0.01); align-items:start; }
-    .calc-thumb { width:86px; height:86px; border-radius:12px; background:var(--box); border:3px solid rgba(255,255,255,0.04); position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
-    .calc-thumb .img { width:86%; height:86%; background-size:cover; background-position:center; border-radius:8px; }
-    .calc-thumb .thumb-remove { position:absolute; left:6px; top:6px; background:rgba(0,0,0,0.6); color:#fff; border-radius:8px; padding:3px 6px; cursor:pointer; font-weight:900; font-size:12px; display:inline-block; }
+    .items-list { border-radius:12px; padding:16px; min-height:260px; border:1px solid rgba(255,255,255,0.04); display:grid; grid-template-columns:repeat(auto-fill,96px); gap:14px; background:rgba(0,0,0,0.01); align-items:start; }
+    .calc-thumb { width:96px; height:96px; border-radius:12px; background:var(--box); border:3px solid rgba(255,255,255,0.04); position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 8px 24px rgba(0,0,0,0.6); cursor:pointer }
+    .calc-thumb .img { width:80%; height:80%; background-size:cover; background-position:center; border-radius:50%; border:3px solid rgba(0,0,0,0.6); box-shadow: var(--neon-glow); }
+    .calc-thumb .thumb-remove { display:none }
 
-    /* qty badge and trait label on calc thumb */
-    .calc-thumb .qty-badge { position:absolute; left:6px; top:6px; background:linear-gradient(90deg,#ffffff20,#00000060); color:#fff; font-weight:900; padding:4px 6px; border-radius:6px; font-size:11px; }
-    .calc-thumb .trait-label { position:absolute; left:6px; bottom:6px; background:linear-gradient(90deg,#000000cc,#00000088); color:#fff; font-weight:900; padding:6px 8px; border-radius:6px; font-size:11px; text-transform:uppercase; }
-    .calc-thumb .demand-pill-mini { position:absolute; right:6px; bottom:6px; padding:6px 8px; border-radius:6px; font-weight:900; font-size:11px; background:linear-gradient(90deg,#ffd54a,#ffb86b); color:#070; border:2px solid rgba(0,0,0,0.3); }
+    /* qty badge on top, trait label lower-left, demand pill below thumb */
+    .calc-thumb .qty-badge { position:absolute; left:8px; top:8px; background:linear-gradient(90deg,#000000cc,#00000088); color:#fff; font-weight:900; padding:6px 8px; border-radius:999px; font-size:12px; min-width:28px; text-align:center; }
+    .calc-thumb .trait-label { position:absolute; left:8px; bottom:8px; background:linear-gradient(90deg,#000000cc,#00000088); color:#fff; font-weight:900; padding:6px 8px; border-radius:8px; font-size:11px; text-transform:uppercase; }
+    .calc-thumb .demand-pill-mini { position:absolute; left:50%; transform:translateX(-50%); bottom:-16px; padding:6px 8px; border-radius:999px; font-weight:900; font-size:11px; background:linear-gradient(90deg,#ffd54a,#ffb86b); color:#070; border:2px solid rgba(0,0,0,0.25); }
 
     /* when small, show unit name under the thumb in list (for accessibility) */
     .items-list .calc-thumb .name-vis { position:absolute; left:50%; transform:translateX(-50%); bottom:-18px; font-size:11px; color:var(--muted); font-weight:800; }
@@ -597,7 +597,7 @@
       const u = unitDatabase[it.key] || {};
       const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
       const rcls = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
-      const qtyHtml = `<div class="qty-badge">QTY:${it.qty || 1}</div>`;
+      const qtyHtml = `<div class="qty-badge">${it.qty || 1}</div>`;
       const traitLabel = (it.trait && it.trait !== 'base') ? `<div class="trait-label">${esc(String(it.trait).toUpperCase())}</div>` : '';
       const demandText = u.baseStats && u.baseStats.demand ? `DEMAND: ${esc(u.baseStats.demand)}` : '';
       const demandHtml = demandText ? `<div class="demand-pill-mini">${demandText}</div>` : '';
@@ -606,13 +606,24 @@
       return `<div class="calc-thumb rarity-${rcls}" data-id="${it.id}" title="${esc(u.name)}"><div class="img" style="background-image:${p}"></div><div class="thumb-remove" data-id="${it.id}">×</div>${qtyHtml}${traitLabel}${demandHtml}${nameVis}</div>`;
     }
 
+    function onCalcThumbClick(e){
+      const el = e.currentTarget;
+      const id = el.getAttribute('data-id');
+      if(!id) return;
+      // remove from left or right arrays
+      let idx = leftItems.findIndex(x => x.id === id);
+      if (idx >= 0) leftItems.splice(idx,1);
+      else { idx = rightItems.findIndex(x => x.id === id); if (idx >= 0) rightItems.splice(idx,1); }
+      persistTrade(); renderThumbs(); updateTotalsAndVerdict();
+    }
+
     function renderThumbs(){
       leftItemsEl.innerHTML = leftItems.map(calcThumbHTML).join('');
       rightItemsEl.innerHTML = rightItems.map(calcThumbHTML).join('');
-      // attach remove handlers
-      document.querySelectorAll('.thumb-remove').forEach(btn=>{
-        btn.removeEventListener('click', onThumbRemove);
-        btn.addEventListener('click', onThumbRemove);
+      // attach click-to-remove handlers on the whole thumb
+      document.querySelectorAll('.calc-thumb').forEach(el=>{
+        el.removeEventListener('click', onCalcThumbClick);
+        el.addEventListener('click', onCalcThumbClick);
       });
       // ensure totals update after rendering
       updateTotalsAndVerdict();
@@ -695,6 +706,12 @@
           listRoot.style.display = 'none';
           pagination.style.display = 'none';
         } else {
+          // switching away from calculator should clear selected items
+          leftItems = [];
+          rightItems = [];
+          persistTrade();
+          renderThumbs();
+          updateTotalsAndVerdict();
           calculatorRoot.style.display = 'none';
           calculatorRoot.setAttribute('aria-hidden', 'true');
           listRoot.style.display = '';
