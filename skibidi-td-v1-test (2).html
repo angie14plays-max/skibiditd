@@ -104,6 +104,13 @@
     if(typeof unitDatabase==='undefined'){ document.getElementById('grid').innerText='unitDatabase missing (place skibidi-td-data.js alongside this file)'; return }
     const rarities = ['All','Second Edition','Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
     const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
+    // trait image ids (Google Drive thumbnails)
+    const traitImages = {
+      'Grandmaster': '1C1TJwQXNqvM0r9g32fq5_j3r6g-B01DF',
+      'Master': '1oaTPE4cr2UyiHDX_nDo41efOyUboWoMV',
+      'Sniper': '1Y4AdKn1XXEKxVMRgzZYANJLbjRuuHobJ',
+      'Superpayday': '1T1DtpHB_cf4xx1ynNjjzOWXzCeC_bAbk'
+    };
     const grid = document.getElementById('grid');
     const rarityRow = document.getElementById('rarityRow');
     const search = document.getElementById('search');
@@ -145,7 +152,14 @@
       let keys = unitKeys.filter(k=>{
         const u=unitDatabase[k];
         if(!u) return false;
-        if(filter.toLowerCase()!=='all' && (u.rarity||'').toLowerCase()!==filter.toLowerCase()) return false;
+        if(filter.toLowerCase()!=='all'){
+          if(filter.toLowerCase() === 'second edition'){
+            // include units flagged as second edition (case-insensitive 'yes')
+            if(!u.secondEdition || String(u.secondEdition).toLowerCase() !== 'yes') return false;
+          } else {
+            if((u.rarity||'').toLowerCase()!==filter.toLowerCase()) return false;
+          }
+        }
         if(q && !(u.name||'').toLowerCase().includes(q)) return false;
         return true;
       });
@@ -175,7 +189,12 @@
         let traitHtml = '';
         if(u.traits && typeof u.traits === 'object'){
           const tkeys = Object.keys(u.traits).slice(0,4); // limit
-          traitHtml = `<div class="trait-col">` + tkeys.map(t=> `<div class="trait-btn" data-unit="${k}" data-trait="${t}" title="${t}"></div>`).join('') + `</div>`;
+          traitHtml = `<div class="trait-col">` + tkeys.map(t=>{
+            const imgId = traitImages[t] || '';
+            const bg = imgId ? `background-image:url('https://corsproxy.io/?https://drive.google.com/thumbnail?id=${imgId}');background-size:cover;background-position:center` : '';
+            const selClass = selectedTraits[k] === t ? ' selected' : '';
+            return `<div class="trait-btn${selClass}" data-unit="${k}" data-trait="${t}" title="${t}" style="${bg}"></div>`;
+          }).join('') + `</div>`;
         }
 
         return `
