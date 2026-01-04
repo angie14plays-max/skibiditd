@@ -37,10 +37,13 @@
     .card::after{content:'';position:absolute;inset:0;border-radius:12px;pointer-events:none;mix-blend-mode:screen;opacity:0.02}
 
     .card-head{display:flex;gap:12px;align-items:center}
+    :root{ --trait-gradient: linear-gradient(90deg,#ff5f6d,#ffc371,#7efc8a,#00d1ff,#7b00e6); }
     .portrait{width:96px;height:96px;border-radius:8px;background:#0a0a0a;border:3px solid rgba(255,255,255,0.04);background-size:cover;background-position:center}
     .portrait.trait-glow{box-shadow:0 12px 60px rgba(123,0,230,0.14), 0 0 30px rgba(255,59,209,0.12) inset; border-color:transparent}
-    .trait-col{display:flex;flex-direction:column;gap:10px;margin-right:8px}
-    .trait-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(90deg,#ff6dff,#7b00e6);border:2px solid rgba(0,0,0,0.4);cursor:pointer;box-shadow:0 8px 20px rgba(123,0,230,0.06);background-size:cover;background-position:center}
+    .trait-col{display:flex;flex-direction:column;gap:10px;height:100%;justify-content:center;align-items:center}
+    .trait-col.left{margin-right:8px}
+    .trait-col.right{margin-left:8px}
+    .trait-btn{width:40px;height:40px;border-radius:50%;background:var(--trait-gradient);border:2px solid rgba(0,0,0,0.4);cursor:pointer;box-shadow:0 8px 20px rgba(123,0,230,0.06);background-size:cover;background-position:center}
     .trait-btn.selected{outline:3px solid rgba(255,255,255,0.06);box-shadow:0 8px 30px rgba(255,59,209,0.12)}
     .se-badge{display:inline-block;padding:6px 10px;border-radius:10px;background:linear-gradient(90deg,#ffd54a,#ff7a00);color:#111;font-weight:900;margin-left:10px;font-size:12px}
     .name{font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--neon2);font-size:13px}
@@ -179,14 +182,25 @@
         return true;
       });
 
+      // sorting: apply to the full keys list before pagination
+      if(currentSort === 'value-desc'){
+        keys.sort((a,b)=> parseValue(unitDatabase[b].baseStats && unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats && unitDatabase[a].baseStats.value));
+      } else if(currentSort === 'rarity'){
+        const order = ['astral','cosmic','divine','godly','exclusive','mythic','legendary'];
+        keys.sort((a,b)=>{
+          const ra = (unitDatabase[a].rarity||'').toLowerCase();
+          const rb = (unitDatabase[b].rarity||'').toLowerCase();
+          const ia = order.indexOf(ra);
+          const ib = order.indexOf(rb);
+          if(ia !== ib) return ia - ib; // lower index first
+          // same rarity: sort by value desc
+          return parseValue(unitDatabase[b].baseStats && unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats && unitDatabase[a].baseStats.value);
+        });
+      }
+
       const total = Math.max(1, Math.ceil(keys.length/perPage));
       if(page>total) page=total;
       const start = (page-1)*perPage; const pageKeys = keys.slice(start,start+perPage);
-
-      // sorting
-      if(currentSort === 'value-desc'){
-        pageKeys.sort((a,b)=> parseValue(unitDatabase[b].baseStats && unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats && unitDatabase[a].baseStats.value));
-      }
 
       grid.innerHTML = pageKeys.map(k=>{
         const u = unitDatabase[k];
@@ -200,13 +214,25 @@
         const displayDemand = traitObj && traitObj.demand ? traitObj.demand : (u.baseStats && u.baseStats.demand ? u.baseStats.demand : '0/10');
         const portraitClass = selTrait !== 'base' ? 'portrait trait-glow' : 'portrait';
 
-        // build trait buttons
-        let traitHtml = '';
+        // build trait buttons: up to 4 traits, 2 on left and 2 on right
+        let leftTraitHtml = '';
+        let rightTraitHtml = '';
         if(u.traits && typeof u.traits === 'object'){
           const tkeys = Object.keys(u.traits).slice(0,4); // limit
-          traitHtml = `<div class="trait-col">` + tkeys.map(t=>{
+          const left = tkeys.slice(0,2);
+          const right = tkeys.slice(2,4);
+          const gradient = 'linear-gradient(90deg,#ff5f6d,#ffc371,#7efc8a,#00d1ff,#7b00e6)';
+
+          leftTraitHtml = `<div class="trait-col left">` + left.map(t=>{
             const imgId = traitImages[t] || traitImagesLower[String(t).toLowerCase()] || '';
-            const bg = imgId ? `background-image:url('https://corsproxy.io/?https://drive.google.com/thumbnail?id=${imgId}');background-size:cover;background-position:center` : '';
+            const bg = imgId ? `background-image:url('https://corsproxy.io/?https://drive.google.com/thumbnail?id=${imgId}'), ${gradient};background-size:cover,cover;background-position:center,center` : '';
+            const selClass = selectedTraits[k] === t ? ' selected' : '';
+            return `<div class="trait-btn${selClass}" data-unit="${k}" data-trait="${t}" title="${t}" style="${bg}"></div>`;
+          }).join('') + `</div>`;
+
+          rightTraitHtml = `<div class="trait-col right">` + right.map(t=>{
+            const imgId = traitImages[t] || traitImagesLower[String(t).toLowerCase()] || '';
+            const bg = imgId ? `background-image:url('https://corsproxy.io/?https://drive.google.com/thumbnail?id=${imgId}'), ${gradient};background-size:cover,cover;background-position:center,center` : '';
             const selClass = selectedTraits[k] === t ? ' selected' : '';
             return `<div class="trait-btn${selClass}" data-unit="${k}" data-trait="${t}" title="${t}" style="${bg}"></div>`;
           }).join('') + `</div>`;
@@ -215,8 +241,9 @@
         return `
           <div class="card ${rarityClass}" data-key="${k}">
             <div class="card-head">
-              ${traitHtml}
+              ${leftTraitHtml}
               <div class="${portraitClass}" style="background-image:${portrait}"></div>
+              ${rightTraitHtml}
               <div style="flex:1">
                 <div style="display:flex;align-items:center;gap:8px">
                   <div class="name">${(u.name||'Unnamed').toUpperCase()}</div>
