@@ -6,7 +6,15 @@
   <title>Skibidi Tower Defense Official Value list</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
   <style>
-    :root{ --bg:#050405; --panel:#070607; --card:#0b0b0b; --muted:#cfc9d6; --neon1:#b300ff; --neon2:#ff3bd1; --accent:#7b00e6; }
+    :root{ --bg:#050405; --panel:#070607; --card:#0b0b0b; --muted:#cfc9d6; --neon1:#b300ff; --neon2:#ff3bd1; --accent:#7b00e6;
+      --g-astral: linear-gradient(135deg,#7f00ff,#00ffd5);
+      --g-cosmic: linear-gradient(135deg,#b800e6,#6cedf0);
+      --g-divine: linear-gradient(135deg,#ff00c8,#2248ff);
+      --g-godly: linear-gradient(135deg,#7b00e6,#6367ff);
+      --g-exclusive: linear-gradient(135deg,#00d1ff,#4fe0a3);
+      --g-mythic: linear-gradient(135deg,#ff6d68,#ffb86b);
+      --g-legendary: linear-gradient(135deg,#ffd54a,#ff7a00);
+    }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:#fff;font-family:Montserrat,system-ui,Arial,Helvetica,sans-serif;padding:28px;display:flex;flex-direction:column;align-items:center}
 
@@ -29,10 +37,10 @@
     .card::after{content:'';position:absolute;inset:0;border-radius:12px;pointer-events:none;mix-blend-mode:screen;opacity:0.02}
 
     .card-head{display:flex;gap:12px;align-items:center}
-    .portrait{width:88px;height:88px;border-radius:6px;background:#0a0a0a;border:3px solid rgba(255,255,255,0.04);background-size:cover;background-position:center}
-    .portrait.trait-glow{box-shadow:0 8px 40px rgba(255,59,209,0.12), 0 0 18px rgba(123,0,230,0.08) inset; border-color:transparent}
-    .trait-col{display:flex;flex-direction:column;gap:8px;margin-right:6px}
-    .trait-btn{width:28px;height:28px;border-radius:50%;background:linear-gradient(90deg,#ff6dff,#7b00e6);border:2px solid rgba(0,0,0,0.4);cursor:pointer;box-shadow:0 8px 20px rgba(123,0,230,0.06);}
+    .portrait{width:96px;height:96px;border-radius:8px;background:#0a0a0a;border:3px solid rgba(255,255,255,0.04);background-size:cover;background-position:center}
+    .portrait.trait-glow{box-shadow:0 12px 60px rgba(123,0,230,0.14), 0 0 30px rgba(255,59,209,0.12) inset; border-color:transparent}
+    .trait-col{display:flex;flex-direction:column;gap:10px;margin-right:8px}
+    .trait-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(90deg,#ff6dff,#7b00e6);border:2px solid rgba(0,0,0,0.4);cursor:pointer;box-shadow:0 8px 20px rgba(123,0,230,0.06);background-size:cover;background-position:center}
     .trait-btn.selected{outline:3px solid rgba(255,255,255,0.06);box-shadow:0 8px 30px rgba(255,59,209,0.12)}
     .name{font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--neon2);font-size:13px}
 
@@ -44,7 +52,7 @@
     .status-badge{display:inline-block;padding:6px 8px;border-radius:8px;font-weight:900;text-transform:uppercase}
     .status-rising{background:linear-gradient(90deg,#7efc8a,#22c55e);color:#021}
     .status-unstable{background:linear-gradient(90deg,#ff6d68,#ffb86b);color:#111}
-    .demand-pill{padding:6px 8px;border-radius:8px;font-weight:900;background:linear-gradient(90deg,#ff6dff,#7b00e6);color:#fff}
+    .demand-pill{padding:6px 8px;border-radius:8px;font-weight:900; background:linear-gradient(90deg,#ff6dff,#7b00e6);color:#fff}
 
     .pagination{display:flex;gap:8px;align-items:center;margin:18px 0}
     .page-btn{padding:8px 10px;border-radius:8px;background:transparent;border:2px solid rgba(255,255,255,0.04);color:var(--muted);font-weight:900;cursor:pointer}
@@ -57,6 +65,15 @@
     .card.rarity-exclusive{box-shadow:0 6px 30px rgba(0,209,255,0.06);border-color:rgba(0,209,255,0.18)}
     .card.rarity-mythic{box-shadow:0 6px 30px rgba(255,106,104,0.06);border-color:rgba(255,106,104,0.18)}
     .card.rarity-legendary{box-shadow:0 6px 30px rgba(255,213,74,0.06);border-color:rgba(255,213,74,0.18)}
+
+    /* stronger rarity background tint */
+    .card.rarity-astral::after{background:var(--g-astral);opacity:0.06}
+    .card.rarity-cosmic::after{background:var(--g-cosmic);opacity:0.06}
+    .card.rarity-divine::after{background:var(--g-divine);opacity:0.06}
+    .card.rarity-godly::after{background:var(--g-godly);opacity:0.06}
+    .card.rarity-exclusive::after{background:var(--g-exclusive);opacity:0.06}
+    .card.rarity-mythic::after{background:var(--g-mythic);opacity:0.06}
+    .card.rarity-legendary::after{background:var(--g-legendary);opacity:0.06}
 
     @media (max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}.search{min-width:160px}}
     @media (max-width:600px){.grid{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start}.controls{width:100%;justify-content:space-between}}
@@ -111,6 +128,8 @@
       'Sniper': '1Y4AdKn1XXEKxVMRgzZYANJLbjRuuHobJ',
       'Superpayday': '1T1DtpHB_cf4xx1ynNjjzOWXzCeC_bAbk'
     };
+    // lowercase lookup for robustness
+    const traitImagesLower = Object.keys(traitImages).reduce((acc,k)=>{ acc[k.toLowerCase()]=traitImages[k]; return acc },{});
     const grid = document.getElementById('grid');
     const rarityRow = document.getElementById('rarityRow');
     const search = document.getElementById('search');
@@ -190,7 +209,7 @@
         if(u.traits && typeof u.traits === 'object'){
           const tkeys = Object.keys(u.traits).slice(0,4); // limit
           traitHtml = `<div class="trait-col">` + tkeys.map(t=>{
-            const imgId = traitImages[t] || '';
+            const imgId = traitImages[t] || traitImagesLower[String(t).toLowerCase()] || '';
             const bg = imgId ? `background-image:url('https://corsproxy.io/?https://drive.google.com/thumbnail?id=${imgId}');background-size:cover;background-position:center` : '';
             const selClass = selectedTraits[k] === t ? ' selected' : '';
             return `<div class="trait-btn${selClass}" data-unit="${k}" data-trait="${t}" title="${t}" style="${bg}"></div>`;
