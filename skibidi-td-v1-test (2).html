@@ -102,6 +102,23 @@
     .unit-card.rarity-mythic::after { content:""; position:absolute; inset:0; background:var(--g-mythic); opacity:0.06; z-index:0; border-radius:12px; }
     .unit-card.rarity-legendary::after { content:""; position:absolute; inset:0; background:var(--g-legendary); opacity:0.06; z-index:0; border-radius:12px; }
 
+    /* trait badges and rainbow gradient */
+    :root{ --trait-gradient: linear-gradient(90deg,#ff5f6d,#ffc371,#7efc8a,#00d1ff,#7b00e6); }
+    .trait-col { position:absolute; top:36%; transform:translateY(-50%); display:flex; flex-direction:column; gap:10px; z-index:3; }
+    .trait-col.left { left:8px; align-items:flex-start; }
+    .trait-col.right { right:8px; align-items:flex-end; }
+    .trait-btn { width:44px; height:44px; border-radius:50%; background:var(--trait-gradient); border:3px solid rgba(0,0,0,0.5); box-shadow:0 8px 26px rgba(0,0,0,0.45); background-size:cover; background-position:center; cursor:pointer; }
+    .trait-btn.selected { outline:3px solid rgba(255,255,255,0.06); }
+
+    /* colored border per rarity */
+    .unit-card.rarity-astral { border-color: rgba(127,0,255,0.28); box-shadow: 0 8px 30px rgba(127,0,255,0.06); }
+    .unit-card.rarity-cosmic { border-color: rgba(184,0,230,0.28); box-shadow: 0 8px 30px rgba(184,0,230,0.06); }
+    .unit-card.rarity-divine { border-color: rgba(255,0,200,0.28); box-shadow: 0 8px 30px rgba(255,0,200,0.06); }
+    .unit-card.rarity-godly { border-color: rgba(123,0,230,0.28); box-shadow: 0 8px 30px rgba(123,0,230,0.06); }
+    .unit-card.rarity-exclusive { border-color: rgba(0,209,255,0.28); box-shadow: 0 8px 30px rgba(0,209,255,0.06); }
+    .unit-card.rarity-mythic { border-color: rgba(255,106,104,0.28); box-shadow: 0 8px 30px rgba(255,106,104,0.06); }
+    .unit-card.rarity-legendary { border-color: rgba(255,213,74,0.28); box-shadow: 0 8px 30px rgba(255,213,74,0.06); }
+
     .data-table { display:grid; grid-template-columns: repeat(3,1fr); gap:10px; align-items:center; }
     .data-cell { background:var(--panel); border-radius:10px; border:1px solid var(--border); padding:10px; text-align:center; min-height:64px; display:flex; flex-direction:column; justify-content:center; }
     .label { color:var(--muted); font-weight:800; font-size:11px; text-transform:uppercase; }
@@ -362,6 +379,9 @@
     const itemsPerPage = 15;
     const rarityOrder = { astral:1, cosmic:2, godly:3, divine:4, mythic:5, legendary:6, exclusive:99 };
 
+    // small selected trait state for visuals
+    const selectedTraits = {};
+
     // calculator arrays, restored from storage
     let leftItems = [], rightItems = [];
 
@@ -394,6 +414,11 @@
       if (v >= 8) return 'demand-high';
       if (v >= 4) return 'demand-mid';
       return 'demand-low';
+    }
+
+    function prettifyTrait(t){
+      if(!t) return 'Base';
+      return String(t).replace(/([A-Z])/g, ' $1').replace(/[_\-]/g,' ').replace(/^\s*/, '').replace(/\s+/g,' ').replace(/(^|\s)\S/g, l => l.toUpperCase());
     }
 
     // Render main list
@@ -433,8 +458,21 @@
         const stClass = statusClass(u.baseStats.status);
         const dmClass = demandClass(u.baseStats.demand);
         const second = u.secondEdition && String(u.secondEdition).toLowerCase() === 'yes' ? `<div style="color:var(--gold);font-weight:800;font-size:11px;margin-top:6px">2nd Edition</div>` : '';
+
+        // build trait buttons: up to 4 traits, 2 left and 2 right
+        let leftTraitHtml = '';
+        let rightTraitHtml = '';
+        if (u.traits && typeof u.traits === 'object'){
+          const tkeys = Object.keys(u.traits).slice(0,4);
+          const left = tkeys.slice(0,2);
+          const right = tkeys.slice(2,4);
+          leftTraitHtml = `<div class="trait-col left">` + left.map(t=>{ const title = esc(prettifyTrait(t)); return `<div class="trait-btn" data-unit="${k}" data-trait="${t}" title="${title}"></div>`; }).join('') + `</div>`;
+          rightTraitHtml = `<div class="trait-col right">` + right.map(t=>{ const title = esc(prettifyTrait(t)); return `<div class="trait-btn" data-unit="${k}" data-trait="${t}" title="${title}"></div>`; }).join('') + `</div>`;
+        }
+
         return `
           <div class="unit-card ${rcls}" data-unit="${k}">
+            ${leftTraitHtml}
             <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
               <div class="unit-title">${esc(u.name)}</div>
               <div class="portrait-circle ${rcls}">
@@ -442,15 +480,16 @@
               </div>
               ${second}
             </div>
+            ${rightTraitHtml}
 
             <div class="data-table">
               <div class="data-cell">
-                <div class="label">Value</div>
-                <div class="val highlight-gold">${esc(u.baseStats.value)}</div>
-              </div>
-              <div class="data-cell">
                 <div class="label">Status</div>
                 <div class="val"><span class="status-badge ${stClass}">${esc(u.baseStats.status)}</span></div>
+              </div>
+              <div class="data-cell">
+                <div class="label">Value</div>
+                <div class="val highlight-gold">${esc(u.baseStats.value)}</div>
               </div>
               <div class="data-cell">
                 <div class="label">Demand</div>
@@ -459,6 +498,26 @@
             </div>
           </div>`;
       }).join('');
+
+      // attach simple trait click handlers for visual selection
+      document.querySelectorAll('.trait-btn').forEach(btn => {
+        btn.removeEventListener('click', onTraitBtnClick);
+        btn.addEventListener('click', onTraitBtnClick);
+      });
+    }
+
+    function onTraitBtnClick(e){
+      e.stopPropagation();
+      const btn = e.currentTarget;
+      const unit = btn.getAttribute('data-unit');
+      const trait = btn.getAttribute('data-trait');
+      if(!unit) return;
+      // toggle selected trait for visuals
+      const card = btn.closest('.unit-card');
+      if(!card) return;
+      card.querySelectorAll('.trait-btn').forEach(x=>x.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedTraits[unit] = trait;
     }
 
     function applyTintForFilter(filter){
@@ -524,11 +583,9 @@
         const u = unitDatabase[k];
         const p = u.unitId ? `url('${imageProvider}${u.unitId}')` : '';
         const rcls = (u.rarity || '').toLowerCase().replace(/\s+/g,'-');
-        // NOTE: no dragging; clicking will add and auto-close
         return `<div class="picker-thumb rarity-${rcls}" data-key="${k}" title="${esc(u.name)}"><div class="img" style="background-image:${p}"></div></div>`;
       }).join('');
 
-      // click handlers: add and close picker
       pickerGrid.querySelectorAll('.picker-thumb').forEach(t => {
         t.removeEventListener('click', onPickerClick);
         t.addEventListener('click', onPickerClick);
@@ -541,18 +598,10 @@
       showQtyModal(key);
     }
 
-    function prettifyTrait(t){
-      if(!t) return 'Base';
-      // camelCase or snake_case -> Title Case
-      return String(t).replace(/([A-Z])/g, ' $1').replace(/[_\-]/g,' ').replace(/^\s*/, '').replace(/\s+/g,' ').replace(/(^|\s)\S/g, l => l.toUpperCase());
-    }
-
     function showQtyModal(unitKey){
       if(!unitKey || !unitDatabase[unitKey]) return;
-      // ensure underlying picker is hidden so only this modal shows
       hidePicker();
       const u = unitDatabase[unitKey];
-      // populate qty and trait options
       qtyInput.value = '1';
       traitList.innerHTML = '';
       const opts = ['base'];
@@ -576,14 +625,12 @@
         traitList.appendChild(label);
       });
 
-      // attach add handler (capture unitKey)
       qtyAddBtn.onclick = function(){
         const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
         const selected = traitList.querySelector('input[type="radio"]:checked');
         const traitKey = selected ? selected.value : 'base';
         const side = currentPickerSide || 'left';
         addToSide(side, unitKey, traitKey, qty);
-        // keep calculator visible and hide main list/pagination
         calculatorRoot.style.display = 'block';
         listRoot.style.display = 'none';
         pagination.style.display = 'none';
@@ -623,11 +670,7 @@
     function renderThumbs(){
       leftItemsEl.innerHTML = leftItems.map(calcThumbHTML).join('');
       rightItemsEl.innerHTML = rightItems.map(calcThumbHTML).join('');
-      // attach remove handlers
-      document.querySelectorAll('.thumb-remove').forEach(btn=>{
-        btn.removeEventListener('click', onThumbRemove);
-        btn.addEventListener('click', onThumbRemove);
-      });
+      document.querySelectorAll('.thumb-remove').forEach(btn=>{ btn.removeEventListener('click', onThumbRemove); btn.addEventListener('click', onThumbRemove); });
     }
 
     function onThumbRemove(e){
@@ -668,37 +711,13 @@
       else { if (leftSum === 0 || rightSum > leftSum * (1 + SMALL)) verdict = 'UNDERPAYING'; else verdict = 'WIN'; }
       const vtext = verdict.toUpperCase();
       verdictText.innerText = vtext;
-      // color mapping
-      const cmap = {
-        'LOSE':'#ff1f1f', 'OVERPAYING':'#ff7a3a', 'UNDERPAYING':'#ff7a3a', 'WIN':'#22c55e', 'FAIR':'#a855f7', 'NO ITEMS':'#9ca3af'
-      };
+      const cmap = { 'LOSE':'#ff1f1f', 'OVERPAYING':'#ff7a3a', 'UNDERPAYING':'#ff7a3a', 'WIN':'#22c55e', 'FAIR':'#a855f7', 'NO ITEMS':'#9ca3af' };
       verdictText.style.color = cmap[vtext] || '#9ca3af';
     }
 
     // persistence
-    function persistTrade(){
-      try {
-        const payload = { left: leftItems.map(i => ({ key:i.key, trait:i.trait, qty:i.qty })), right: rightItems.map(i => ({ key:i.key, trait:i.trait, qty:i.qty })) };
-        localStorage.setItem(LS_KEY, JSON.stringify(payload));
-      } catch (err) { console.warn('persistTrade failed', err); }
-    }
-    function restoreTrade(){
-      try {
-        const raw = localStorage.getItem(LS_KEY);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.left && parsed.right) {
-          leftItems = parsed.left.map(it => {
-            const single = (it.trait && it.trait !== 'base' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0);
-            return { id: `${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty: Math.max(1, it.qty||1), single, computed: single * Math.max(1, it.qty||1) };
-          });
-          rightItems = parsed.right.map(it => {
-            const single = (it.trait && it.trait !== 'base' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0);
-            return { id: `${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty: Math.max(1, it.qty||1), single, computed: single * Math.max(1, it.qty||1) };
-          });
-        }
-      } catch (err) { console.warn('restoreTrade failed', err); }
-    }
+    function persistTrade(){ try { const payload = { left: leftItems.map(i => ({ key:i.key, trait:i.trait, qty:i.qty })), right: rightItems.map(i => ({ key:i.key, trait:i.trait, qty:i.qty })) }; localStorage.setItem(LS_KEY, JSON.stringify(payload)); } catch (err) { console.warn('persistTrade failed', err); } }
+    function restoreTrade(){ try { const raw = localStorage.getItem(LS_KEY); if (!raw) return; const parsed = JSON.parse(raw); if (parsed && parsed.left && parsed.right) { leftItems = parsed.left.map(it => { const single = (it.trait && it.trait !== 'base' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0); return { id: `${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty: Math.max(1, it.qty||1), single, computed: single * Math.max(1, it.qty||1) }; }); rightItems = parsed.right.map(it => { const single = (it.trait && it.trait !== 'base' && unitDatabase[it.key] && unitDatabase[it.key].traits && unitDatabase[it.key].traits[it.trait]) ? parseValue(unitDatabase[it.key].traits[it.trait].value) : parseValue((unitDatabase[it.key] && unitDatabase[it.key].baseStats && unitDatabase[it.key].baseStats.value) || 0); return { id: `${it.key}:${it.trait}:${Date.now()}:${Math.random().toString(36).slice(2,6)}`, key:it.key, trait:it.trait, qty: Math.max(1, it.qty||1), single, computed: single * Math.max(1, it.qty||1) }; }); } } catch (err) { console.warn('restoreTrade failed', err); } }
 
     // top category button wiring (single row)
     catButtons.forEach(btn => {
@@ -707,7 +726,6 @@
         btn.classList.add('active');
         const rval = btn.getAttribute('data-rarity') || 'all';
         if (rval === 'calculator') {
-          // show calculator, hide list & pagination and hide top controls
           calculatorRoot.style.display = 'block';
           calculatorRoot.setAttribute('aria-hidden', 'false');
           listRoot.style.display = 'none';
@@ -718,7 +736,6 @@
           if (sortRow) sortRow.style.display = 'none';
           const goMain = document.getElementById('go-main-btn'); if (goMain) goMain.style.display = 'inline-block';
         } else {
-          // restore main view and show top controls
           calculatorRoot.style.display = 'none';
           calculatorRoot.setAttribute('aria-hidden', 'true');
           listRoot.style.display = '';
@@ -747,17 +764,7 @@
 
     // pagination wiring
     prevBtn.addEventListener('click', ()=>{ if (currentPage>1){ currentPage--; renderList(); window.scrollTo({top:0,behavior:'smooth'}); } });
-    nextBtn.addEventListener('click', ()=> {
-      const keys = unitKeys.filter(k => {
-        const u = unitDatabase[k];
-        const r = (u.rarity || '').toLowerCase();
-        if (currentFilter !== 'all' && r !== currentFilter) return false;
-        if (searchQuery && !(u.name||'').toLowerCase().includes(searchQuery.toLowerCase())) return false;
-        return true;
-      });
-      const maxPage = Math.ceil(keys.length / itemsPerPage) || 1;
-      if (currentPage < maxPage) { currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }
-    });
+    nextBtn.addEventListener('click', ()=> { const keys = unitKeys.filter(k => { const u = unitDatabase[k]; const r = (u.rarity || '').toLowerCase(); if (currentFilter !== 'all' && r !== currentFilter) return false; if (searchQuery && !(u.name||'').toLowerCase().includes(searchQuery.toLowerCase())) return false; return true; }); const maxPage = Math.ceil(keys.length / itemsPerPage) || 1; if (currentPage < maxPage) { currentPage++; renderList(); window.scrollTo({top:0,behavior:'smooth'}); } });
 
     // search bar
     document.getElementById('search-bar').addEventListener('input', (e)=>{ searchQuery = e.target.value || ''; currentPage = 1; renderList(); });
@@ -770,7 +777,6 @@
     // go main page button behavior (also used to restore controls)
     if (goMainBtn) {
       goMainBtn.addEventListener('click', ()=>{
-        // restore main list view
         calculatorRoot.style.display = 'none';
         calculatorRoot.setAttribute('aria-hidden', 'true');
         listRoot.style.display = '';
@@ -779,14 +785,11 @@
         const sortRow = document.querySelector('.sort-row');
         if (topButtons) topButtons.style.display = '';
         if (sortRow) sortRow.style.display = '';
-        // mark 'all' as active
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         const allBtn = document.querySelector('.cat-btn[data-rarity="all"]'); if (allBtn) allBtn.classList.add('active');
         if (goMainBtn) goMainBtn.style.display = 'none';
       });
     }
-
-    // phone & modal: ensure scrolling inside picker - we've set CSS max-height and overflow.
 
     // initialization
     try {
