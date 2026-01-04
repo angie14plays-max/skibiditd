@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FNaF TD Style — Value List (uses skibidi data)</title>
+  <title>Skibidi Tower Defense Official Value list</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
   <style>
     :root{ --bg:#050405; --panel:#070607; --card:#0b0b0b; --muted:#cfc9d6; --neon1:#b300ff; --neon2:#ff3bd1; --accent:#7b00e6; }
@@ -11,10 +11,14 @@
     body{margin:0;background:var(--bg);color:#fff;font-family:Montserrat,system-ui,Arial,Helvetica,sans-serif;padding:28px;display:flex;flex-direction:column;align-items:center}
 
     .header{width:100%;max-width:1200px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-    .site-title{font-weight:900;letter-spacing:4px;color:var(--neon2);font-size:20px}
+    .site-title{font-weight:900;letter-spacing:4px;color:var(--neon2);font-size:20px;text-shadow:0 4px 24px rgba(255,59,209,0.12);}
+    .neon-title{background:linear-gradient(90deg,var(--neon1),var(--neon2));-webkit-background-clip:text;background-clip:text;color:transparent}
 
     .controls{display:flex;gap:12px;align-items:center}
     .search{background:transparent;border:2px solid rgba(255,255,255,0.04);padding:10px 14px;border-radius:8px;color:var(--muted);min-width:320px}
+    .sort-row{display:flex;gap:8px;align-items:center;margin-left:8px}
+    .sort-btn{padding:8px 10px;border-radius:8px;background:transparent;border:2px solid rgba(255,255,255,0.04);color:var(--muted);font-weight:900;cursor:pointer}
+    .sort-btn.active{border-color:var(--neon1);color:var(--neon2);box-shadow:0 6px 20px rgba(123,0,230,0.08)}
 
     .rarity-row{display:flex;gap:8px;margin:18px 0;flex-wrap:wrap}
     .rar-btn{padding:10px 12px;border-radius:8px;background:transparent;border:2px solid rgba(255,255,255,0.04);color:var(--muted);font-weight:900;cursor:pointer}
@@ -26,6 +30,10 @@
 
     .card-head{display:flex;gap:12px;align-items:center}
     .portrait{width:88px;height:88px;border-radius:6px;background:#0a0a0a;border:3px solid rgba(255,255,255,0.04);background-size:cover;background-position:center}
+    .portrait.trait-glow{box-shadow:0 8px 40px rgba(255,59,209,0.12), 0 0 18px rgba(123,0,230,0.08) inset; border-color:transparent}
+    .trait-col{display:flex;flex-direction:column;gap:8px;margin-right:6px}
+    .trait-btn{width:28px;height:28px;border-radius:50%;background:linear-gradient(90deg,#ff6dff,#7b00e6);border:2px solid rgba(0,0,0,0.4);cursor:pointer;box-shadow:0 8px 20px rgba(123,0,230,0.06);}
+    .trait-btn.selected{outline:3px solid rgba(255,255,255,0.06);box-shadow:0 8px 30px rgba(255,59,209,0.12)}
     .name{font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--neon2);font-size:13px}
 
     .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
@@ -56,13 +64,37 @@
 </head>
 <body>
   <div class="header">
-    <div class="site-title">APEX / VALUE LIST — NEON</div>
+    <div class="site-title neon-title">Skibidi Tower Defense Official Value list</div>
     <div class="controls">
       <input id="search" class="search" placeholder="Search units..." />
+      <div class="sort-row">
+        <button class="sort-btn active" data-sort="rarity" id="sort-rarity">Rarity</button>
+        <button class="sort-btn" data-sort="value-desc" id="sort-value">Value ↓</button>
+        <button class="sort-btn" id="open-calculator">Calculator</button>
+      </div>
     </div>
   </div>
 
   <div class="rarity-row" id="rarityRow"></div>
+  <!-- Calculator (hidden by default) -->
+  <div id="calculator-root" style="width:100%;max-width:1200px;margin-top:18px;display:none">
+    <div style="display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-weight:900">Calculator</div>
+      <div><button class="sort-btn" id="calc-close">Close</button></div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <div style="flex:1;padding:12px;background:rgba(0,0,0,0.16);border-radius:8px">
+        <div style="font-weight:900;margin-bottom:8px">Your Value</div>
+        <div id="left-items" style="min-height:120px;display:flex;gap:8px;flex-wrap:wrap"></div>
+        <div id="left-total" style="margin-top:8px;font-weight:900">Total: 0</div>
+      </div>
+      <div style="flex:1;padding:12px;background:rgba(0,0,0,0.16);border-radius:8px">
+        <div style="font-weight:900;margin-bottom:8px">Their Value</div>
+        <div id="right-items" style="min-height:120px;display:flex;gap:8px;flex-wrap:wrap"></div>
+        <div id="right-total" style="margin-top:8px;font-weight:900">Total: 0</div>
+      </div>
+    </div>
+  </div>
   <div class="grid" id="grid"></div>
   <div class="pagination" id="pagination"></div>
 
@@ -70,14 +102,23 @@
   <script>
   (function(){
     if(typeof unitDatabase==='undefined'){ document.getElementById('grid').innerText='unitDatabase missing (place skibidi-td-data.js alongside this file)'; return }
-    const rarities = ['All','Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
+    const rarities = ['All','Second Edition','Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
     const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
     const grid = document.getElementById('grid');
     const rarityRow = document.getElementById('rarityRow');
     const search = document.getElementById('search');
     const pagination = document.getElementById('pagination');
+    const calcRoot = document.getElementById('calculator-root');
+    const openCalcBtn = document.getElementById('open-calculator');
+    const calcCloseBtn = document.getElementById('calc-close');
+
+    // calculator state
+    let leftCalc = [], rightCalc = [];
+    // selected trait per unit (keeps view choice)
+    const selectedTraits = {};
 
     let filter='All'; let q=''; let page=1; const perPage=9;
+    let currentSort = 'rarity';
 
     function makeRarityButtons(){ rarityRow.innerHTML = rarities.map(r=>`<button class="rar-btn" data-r="${r.toLowerCase()}">${r}</button>`).join('');
       rarityRow.querySelectorAll('.rar-btn').forEach(b=>{ b.addEventListener('click', ()=>{ rarityRow.querySelectorAll('.rar-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); filter=b.innerText; page=1; render(); }) });
@@ -85,7 +126,17 @@
       const all = rarityRow.querySelector('[data-r="all"]'); if(all) all.classList.add('active');
     }
 
+    // sort button wiring
+    document.getElementById('sort-rarity').addEventListener('click', function(){ document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); currentSort='rarity'; render(); });
+    document.getElementById('sort-value').addEventListener('click', function(){ document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); currentSort='value-desc'; render(); });
+
+    // calculator open/close
+    if(openCalcBtn) openCalcBtn.addEventListener('click', ()=>{ calcRoot.style.display='block'; document.querySelector('.rarity-row').style.display='none'; document.querySelector('.header').style.display='none'; render(); });
+    if(calcCloseBtn) calcCloseBtn.addEventListener('click', ()=>{ calcRoot.style.display='none'; document.querySelector('.rarity-row').style.display='flex'; document.querySelector('.header').style.display='flex'; render(); });
+
     function parseValue(v){ if(!v && v!==0) return 0; const s=String(v).replace(/[\$\,\s]/g,''); const m=s.match(/(\d+(?:\.\d+)?)([kKmM])?/); if(m){let n=parseFloat(m[1]); const u=m[2]; if(u){ if(u.toLowerCase()==='k') n*=1e3; if(u.toLowerCase()==='m') n*=1e6;} return n} const f=s.match(/\d+(?:\.\d+)?/); return f?parseFloat(f[0]):0 }
+
+    function abbr(n){ if(!isFinite(n)||n===0) return '0'; if(n>=1e6) return (n/1e6).toFixed(2)+'M'; if(n>=1e3) return (n/1e3).toFixed(2)+'K'; return Math.round(n).toLocaleString(); }
 
     function demandClass(d){ if(!d) return 'Low'; const m=String(d).match(/(\d+)/); const v=m?Number(m[1]):0; if(v>=8) return 'High'; if(v>=4) return 'Mid'; return 'Low' }
 
@@ -103,17 +154,35 @@
       if(page>total) page=total;
       const start = (page-1)*perPage; const pageKeys = keys.slice(start,start+perPage);
 
+      // sorting
+      if(currentSort === 'value-desc'){
+        pageKeys.sort((a,b)=> parseValue(unitDatabase[b].baseStats && unitDatabase[b].baseStats.value) - parseValue(unitDatabase[a].baseStats && unitDatabase[a].baseStats.value));
+      }
+
       grid.innerHTML = pageKeys.map(k=>{
         const u = unitDatabase[k];
         const portrait = u.unitId ? `url('https://corsproxy.io/?https://drive.google.com/thumbnail?id=${u.unitId}')` : '';
         const rarityClass = 'rarity-'+((u.rarity||'') .toLowerCase().replace(/\s+/g,'-'));
-        const val = u.baseStats && u.baseStats.value ? u.baseStats.value : '0';
-        const status = u.baseStats && u.baseStats.status ? u.baseStats.status : 'Unknown';
-        const demand = u.baseStats && u.baseStats.demand ? u.baseStats.demand : '0/10';
+        // trait selection: if a trait is selected for this unit, use it
+        const selTrait = selectedTraits[k] || 'base';
+        const traitObj = (selTrait !== 'base' && u.traits && u.traits[selTrait]) ? u.traits[selTrait] : null;
+        const displayVal = traitObj && traitObj.value ? traitObj.value : (u.baseStats && u.baseStats.value ? u.baseStats.value : '0');
+        const displayStatus = traitObj && traitObj.status ? traitObj.status : (u.baseStats && u.baseStats.status ? u.baseStats.status : 'Unknown');
+        const displayDemand = traitObj && traitObj.demand ? traitObj.demand : (u.baseStats && u.baseStats.demand ? u.baseStats.demand : '0/10');
+        const portraitClass = selTrait !== 'base' ? 'portrait trait-glow' : 'portrait';
+
+        // build trait buttons
+        let traitHtml = '';
+        if(u.traits && typeof u.traits === 'object'){
+          const tkeys = Object.keys(u.traits).slice(0,4); // limit
+          traitHtml = `<div class="trait-col">` + tkeys.map(t=> `<div class="trait-btn" data-unit="${k}" data-trait="${t}" title="${t}"></div>`).join('') + `</div>`;
+        }
+
         return `
-          <div class="card ${rarityClass}">
+          <div class="card ${rarityClass}" data-key="${k}">
             <div class="card-head">
-              <div class="portrait" style="background-image:${portrait}"></div>
+              ${traitHtml}
+              <div class="${portraitClass}" style="background-image:${portrait}"></div>
               <div style="flex:1">
                 <div class="name">${(u.name||'Unnamed').toUpperCase()}</div>
               </div>
@@ -121,20 +190,32 @@
             <div class="info-grid">
               <div class="info-cell">
                 <div class="label">Value</div>
-                <div class="value">${String(val)}</div>
+                <div class="value">${String(displayVal)}</div>
               </div>
               <div class="info-cell">
                 <div class="label">Demand</div>
-                <div class="value"><span class="demand-pill">${String(demand)}</span></div>
+                <div class="value"><span class="demand-pill">${String(displayDemand)}</span></div>
               </div>
               <div class="info-cell" style="grid-column:1 / -1">
                 <div class="label">Status</div>
-                <div style="margin-top:8px"><span class="status-badge ${status.toLowerCase().includes('unstable')? 'status-unstable':'status-rising'}">${String(status)}</span></div>
+                <div style="margin-top:8px"><span class="status-badge ${displayStatus.toLowerCase().includes('unstable')? 'status-unstable':'status-rising'}">${String(displayStatus)}</span></div>
               </div>
             </div>
           </div>
         `
       }).join('') || '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px">No units found</div>';
+
+      // attach trait button handlers
+      document.querySelectorAll('.trait-btn').forEach(btn => {
+        btn.removeEventListener('click', onTraitClick);
+        btn.addEventListener('click', onTraitClick);
+      });
+
+      // card click behaviour: in calculator mode clicking adds to calc
+      document.querySelectorAll('.card').forEach(c => {
+        c.removeEventListener('click', onCardClick);
+        c.addEventListener('click', onCardClick);
+      });
 
       // pagination
       renderPagination(total);
@@ -148,6 +229,54 @@
       pagination.innerHTML = html;
       document.getElementById('prev').onclick = ()=>{ if(page>1){ page--; render() } };
       document.getElementById('next').onclick = ()=>{ if(page<total){ page++; render() } };
+    }
+
+    // trait click handler
+    function onTraitClick(e){
+      e.stopPropagation();
+      const btn = e.currentTarget;
+      const unit = btn.getAttribute('data-unit');
+      const trait = btn.getAttribute('data-trait');
+      if(!unit) return;
+      if(selectedTraits[unit] === trait) selectedTraits[unit] = 'base'; else selectedTraits[unit] = trait;
+      render();
+    }
+
+    // card click - adds to calculator when open
+    function onCardClick(e){
+      const card = e.currentTarget;
+      const key = card.getAttribute('data-key');
+      if(!key) return;
+      if(calcRoot && calcRoot.style.display === 'block'){
+        const side = (prompt('Add to which side? L or R','L')||'L').toUpperCase().startsWith('R') ? 'right' : 'left';
+        const qty = Math.max(1, parseInt(prompt('Quantity','1')||'1',10));
+        const trait = selectedTraits[key] || 'base';
+        addToCalc(side,key,qty,trait);
+      }
+    }
+
+    function addToCalc(side,key,qty,trait){
+      const u = unitDatabase[key]; if(!u) return;
+      const traitObj = (trait && trait !== 'base' && u.traits && u.traits[trait]) ? u.traits[trait] : null;
+      const single = parseValue( traitObj && traitObj.value ? traitObj.value : (u.baseStats && u.baseStats.value ? u.baseStats.value : 0) );
+      const item = { id: key+':'+trait+':'+Date.now(), key, trait, qty:qty||1, single, computed: single * (qty||1) };
+      if(side === 'left') leftCalc.push(item); else rightCalc.push(item);
+      renderCalculator();
+    }
+
+    function renderCalculator(){
+      const leftEl = document.getElementById('left-items');
+      const rightEl = document.getElementById('right-items');
+      leftEl.innerHTML = leftCalc.map(it=>`<div style="padding:6px 8px;background:var(--card);border-radius:8px;font-weight:900" data-id="${it.id}">${(unitDatabase[it.key] && unitDatabase[it.key].name)||it.key} x${it.qty}</div>`).join('');
+      rightEl.innerHTML = rightCalc.map(it=>`<div style="padding:6px 8px;background:var(--card);border-radius:8px;font-weight:900" data-id="${it.id}">${(unitDatabase[it.key] && unitDatabase[it.key].name)||it.key} x${it.qty}</div>`).join('');
+      const lsum = leftCalc.reduce((s,i)=>s+(i.computed||0),0);
+      const rsum = rightCalc.reduce((s,i)=>s+(i.computed||0),0);
+      document.getElementById('left-total').innerText = 'Total: '+(lsum?abbr(lsum):'0');
+      document.getElementById('right-total').innerText = 'Total: '+(rsum?abbr(rsum):'0');
+
+      // attach remove handlers
+      document.querySelectorAll('#left-items [data-id]').forEach(el=>{ el.onclick = ()=>{ const id=el.getAttribute('data-id'); leftCalc = leftCalc.filter(x=>x.id!==id); renderCalculator(); }; });
+      document.querySelectorAll('#right-items [data-id]').forEach(el=>{ el.onclick = ()=>{ const id=el.getAttribute('data-id'); rightCalc = rightCalc.filter(x=>x.id!==id); renderCalculator(); }; });
     }
 
     // init
