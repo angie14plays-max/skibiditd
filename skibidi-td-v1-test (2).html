@@ -42,6 +42,7 @@
     .trait-col{display:flex;flex-direction:column;gap:10px;margin-right:8px}
     .trait-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(90deg,#ff6dff,#7b00e6);border:2px solid rgba(0,0,0,0.4);cursor:pointer;box-shadow:0 8px 20px rgba(123,0,230,0.06);background-size:cover;background-position:center}
     .trait-btn.selected{outline:3px solid rgba(255,255,255,0.06);box-shadow:0 8px 30px rgba(255,59,209,0.12)}
+    .se-badge{display:inline-block;padding:6px 10px;border-radius:10px;background:linear-gradient(90deg,#ffd54a,#ff7a00);color:#111;font-weight:900;margin-left:10px;font-size:12px}
     .name{font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--neon2);font-size:13px}
 
     .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
@@ -119,7 +120,7 @@
   <script>
   (function(){
     if(typeof unitDatabase==='undefined'){ document.getElementById('grid').innerText='unitDatabase missing (place skibidi-td-data.js alongside this file)'; return }
-    const rarities = ['All','Second Edition','Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
+    const rarities = ['All','Astral','Cosmic','Divine','Godly','Exclusive','Mythic','Legendary'];
     const unitKeys = Object.keys(unitDatabase).sort((a,b)=> (unitDatabase[a].name||'').localeCompare(unitDatabase[b].name||''));
     // trait image ids (Google Drive thumbnails)
     const traitImages = {
@@ -172,12 +173,7 @@
         const u=unitDatabase[k];
         if(!u) return false;
         if(filter.toLowerCase()!=='all'){
-          if(filter.toLowerCase() === 'second edition'){
-            // include units flagged as second edition (case-insensitive 'yes')
-            if(!u.secondEdition || String(u.secondEdition).toLowerCase() !== 'yes') return false;
-          } else {
-            if((u.rarity||'').toLowerCase()!==filter.toLowerCase()) return false;
-          }
+          if((u.rarity||'').toLowerCase()!==filter.toLowerCase()) return false;
         }
         if(q && !(u.name||'').toLowerCase().includes(q)) return false;
         return true;
@@ -222,7 +218,10 @@
               ${traitHtml}
               <div class="${portraitClass}" style="background-image:${portrait}"></div>
               <div style="flex:1">
-                <div class="name">${(u.name||'Unnamed').toUpperCase()}</div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="name">${(u.name||'Unnamed').toUpperCase()}</div>
+                  ${ (u.secondEdition && String(u.secondEdition).toLowerCase() === 'yes') ? '<div class="se-badge">2ND</div>' : '' }
+                </div>
               </div>
             </div>
             <div class="info-grid">
