@@ -136,6 +136,8 @@
     .calc-row { display:flex; gap:18px; align-items:flex-start; justify-content:center; }
     .trade-panel { width:46%; min-height:300px; border-radius:12px; padding:18px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.01)); border:1px solid var(--border); }
     .trade-title { text-align:center; font-weight:900; text-transform:uppercase; margin-bottom:12px; }
+    .trade-title.you { color:#ff1f1f; font-size:20px; }
+    .trade-title.them { color:#6ea0ff; font-size:20px; }
     .plus-wrap { display:flex; justify-content:center; margin-bottom:8px; }
     .plus-btn { width:64px; height:64px; border-radius:16px; font-size:28px; font-weight:900; cursor:pointer; display:grid; place-items:center; background:var(--accent-grad); border:3px solid rgba(255,255,255,0.06); }
 
@@ -157,8 +159,8 @@
     .total-value { padding:10px 16px; border-radius:10px; font-weight:900; color:#000; background: linear-gradient(90deg,#7b00e6,#ff2d6f); }
 
     .verdict-wrap { display:flex; justify-content:center; margin-top:12px; }
-    .verdict { padding:12px 18px; border-radius:12px; background:transparent; border:1px solid rgba(255,255,255,0.03); }
-    .verdict-text { font-weight:900; font-size:28px; color:#6ea0ff; text-transform:uppercase; }
+    .verdict { padding:18px 24px; border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02)); border:3px solid rgba(255,255,255,0.03); }
+    .verdict-text { font-weight:900; font-size:32px; text-transform:uppercase; letter-spacing:2px; }
 
     /* Picker modal - fixed frame with internal scroll. Defaults to Astral. Clicking a thumb will add and close the picker */
     .picker-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.85); z-index:9999; padding:12px; }
@@ -181,6 +183,15 @@
     .picker-thumb.rarity-exclusive::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-exclusive); z-index:-1; opacity:0.95; }
     .picker-thumb.rarity-mythic::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-mythic); z-index:-1; opacity:0.95; }
     .picker-thumb.rarity-legendary::after { content:''; position:absolute; inset:-6px; border-radius:12px; background:var(--g-legendary); z-index:-1; opacity:0.95; }
+
+    /* Quantity modal specific styling */
+    .qty-box { max-width:420px; border-radius:14px; padding:18px; background:linear-gradient(180deg, rgba(255,255,255,0.006), rgba(0,0,0,0.01)); border:3px solid rgba(255,255,255,0.03); }
+    .qty-input { padding:12px 14px; border-radius:10px; background:var(--box); border:2px solid var(--border); color:var(--text); font-size:18px; text-align:center; width:100%; }
+    .trait-options { display:flex; flex-wrap:wrap; gap:10px; margin-top:6px; }
+    .trait-label { padding:8px 12px; border-radius:12px; border:2px solid rgba(255,255,255,0.04); cursor:pointer; font-weight:900; text-transform:uppercase; background:var(--card); color:var(--muted); }
+    .trait-label input[type="radio"]{ display:none; }
+    .trait-label.selected { border-color:var(--gold); color:#fff; box-shadow:0 12px 40px rgba(123,0,230,0.12); }
+    #qty-add { background:linear-gradient(90deg,#7b00e6,#ff2d6f); color:white; border:0; }
 
     /* responsive layout: mobile-friendly */
     @media (max-width:1024px){
@@ -256,6 +267,26 @@
     </div>
   </div>
 
+  <!-- Quantity & Trait modal -->
+  <div id="qty-overlay" class="picker-overlay" style="display:none" role="dialog" aria-modal="true">
+    <div class="picker-box qty-box" role="document" aria-label="Enter quantity and trait">
+      <div style="flex:1; display:flex; flex-direction:column; gap:12px; padding:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-weight:900; font-size:20px; text-transform:uppercase; letter-spacing:1px;">Enter Quantity</div>
+          <button id="qty-close" style="background:transparent;border:none;color:var(--muted);font-weight:900;cursor:pointer;font-size:20px">×</button>
+        </div>
+
+        <input id="qty-input" class="qty-input" value="1" inputmode="numeric" pattern="[0-9]*" />
+
+        <div id="trait-list" class="trait-options"></div>
+
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <button id="qty-add" class="cat-btn" style="min-width:160px; background:transparent; border:2px solid transparent;">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Main list -->
   <div id="list-root" class="list-root" aria-live="polite"></div>
 
@@ -307,6 +338,13 @@
     const pickerSidebar = document.getElementById('picker-sidebar');
     const pickerGrid = document.getElementById('picker-grid');
     const pickerSearch = document.getElementById('picker-search-input');
+
+    // quantity modal refs
+    const qtyOverlay = document.getElementById('qty-overlay');
+    const qtyInput = document.getElementById('qty-input');
+    const traitList = document.getElementById('trait-list');
+    const qtyAddBtn = document.getElementById('qty-add');
+    const qtyCloseBtn = document.getElementById('qty-close');
 
     // state
     let currentFilter = 'all';
@@ -492,11 +530,59 @@
     function onPickerClick(e){
       const key = e.currentTarget.getAttribute('data-key');
       if (!key) return;
-      // add to currently selected side (default to left)
-      const side = currentPickerSide || 'left';
-      addToSide(side, key, 'base', 1);
-      hidePicker();
+      showQtyModal(key);
     }
+
+    function prettifyTrait(t){
+      if(!t) return 'Base';
+      // camelCase or snake_case -> Title Case
+      return String(t).replace(/([A-Z])/g, ' $1').replace(/[_\-]/g,' ').replace(/^\s*/, '').replace(/\s+/g,' ').replace(/(^|\s)\S/g, l => l.toUpperCase());
+    }
+
+    function showQtyModal(unitKey){
+      if(!unitKey || !unitDatabase[unitKey]) return;
+      const u = unitDatabase[unitKey];
+      // populate qty and trait options
+      qtyInput.value = '1';
+      traitList.innerHTML = '';
+      const opts = ['base'];
+      if (u.traits && typeof u.traits === 'object') opts.push(...Object.keys(u.traits));
+      opts.forEach((tk, idx) => {
+        const id = `trait_${Math.random().toString(36).slice(2,8)}`;
+        const label = document.createElement('label');
+        label.className = 'trait-label' + (idx===0 ? ' selected' : '');
+        label.setAttribute('data-trait', tk);
+        label.setAttribute('for', id);
+        label.innerText = prettifyTrait(tk === 'base' ? 'Base' : tk);
+        const radio = document.createElement('input');
+        radio.type = 'radio'; radio.name = 'trait_radio'; radio.id = id; radio.value = tk; if(idx===0) radio.checked = true;
+        radio.style.display = 'none';
+        label.prepend(radio);
+        label.addEventListener('click', ()=>{
+          traitList.querySelectorAll('.trait-label').forEach(x => x.classList.remove('selected'));
+          label.classList.add('selected');
+          radio.checked = true;
+        });
+        traitList.appendChild(label);
+      });
+
+      // attach add handler (capture unitKey)
+      qtyAddBtn.onclick = function(){
+        const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
+        const selected = traitList.querySelector('input[type="radio"]:checked');
+        const traitKey = selected ? selected.value : 'base';
+        const side = currentPickerSide || 'left';
+        addToSide(side, unitKey, traitKey, qty);
+        hideQtyModal(); hidePicker();
+      };
+
+      qtyCloseBtn.onclick = hideQtyModal;
+      qtyOverlay.addEventListener('click', function(ev){ if(ev.target === qtyOverlay) hideQtyModal(); });
+
+      qtyOverlay.style.display = 'flex'; document.body.style.overflow = 'hidden';
+    }
+
+    function hideQtyModal(){ qtyOverlay.style.display = 'none'; document.body.style.overflow = ''; }
 
     function showPicker(){ pickerOverlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
     function hidePicker(){ pickerOverlay.style.display = 'none'; document.body.style.overflow = ''; }
@@ -555,7 +641,13 @@
       else if (Math.abs(leftSum - rightSum) <= Math.max(1, FAIR * Math.max(leftSum, rightSum))) verdict = 'FAIR';
       else if (leftSum > rightSum) { if (rightSum === 0 || leftSum > rightSum * (1 + SMALL)) verdict = 'OVERPAYING'; else verdict = 'LOSE'; }
       else { if (leftSum === 0 || rightSum > leftSum * (1 + SMALL)) verdict = 'UNDERPAYING'; else verdict = 'WIN'; }
-      verdictText.innerText = verdict.toUpperCase();
+      const vtext = verdict.toUpperCase();
+      verdictText.innerText = vtext;
+      // color mapping
+      const cmap = {
+        'LOSE':'#ff1f1f', 'OVERPAYING':'#ff7a3a', 'UNDERPAYING':'#ff7a3a', 'WIN':'#22c55e', 'FAIR':'#a855f7', 'NO ITEMS':'#9ca3af'
+      };
+      verdictText.style.color = cmap[vtext] || '#9ca3af';
     }
 
     // persistence
